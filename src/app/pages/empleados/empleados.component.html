@@ -1,0 +1,67 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Empleados</h1>
+      <p class="breadcrumb">Inicio / Empleados</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="registrar()">
+      <mat-icon>person_add</mat-icon> Registrar usuario
+    </button>
+  </div>
+
+  <div class="card">
+
+    <div class="toolbar">
+      <span class="record-count">{{ usuarios.length }} usuario(s)</span>
+      <button mat-icon-button title="Recargar" (click)="cargarUsuarios()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <div *ngIf="loading" class="loading-row">
+      <mat-icon class="spin-icon">sync</mat-icon>
+      <span>Cargando usuarios...</span>
+    </div>
+
+    <table mat-table [dataSource]="usuarios" class="data-table" *ngIf="!loading">
+
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef>Nombre completo</th>
+        <td mat-cell *matCellDef="let row">{{ row.nombre }} {{ row.apellido }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="username">
+        <th mat-header-cell *matHeaderCellDef>Username</th>
+        <td mat-cell *matCellDef="let row">{{ row.username }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef>Email</th>
+        <td mat-cell *matCellDef="let row">{{ row.email }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="telefono">
+        <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+        <td mat-cell *matCellDef="let row">{{ row.telefono || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button title="Editar"><mat-icon>edit</mat-icon></button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell no-data" [attr.colspan]="columns.length">
+          No hay usuarios registrados.
+        </td>
+      </tr>
+    </table>
+
+  </div>
+
+</div>

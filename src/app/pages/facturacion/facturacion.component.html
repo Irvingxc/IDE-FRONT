@@ -1,0 +1,185 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Nueva Factura</h1>
+      <p class="breadcrumb">Inicio / Facturar</p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="onLimpiar()">
+        <mat-icon>refresh</mat-icon> Limpiar
+      </button>
+      <button mat-raised-button color="primary" (click)="onGuardar()">
+        <mat-icon>save</mat-icon> Guardar factura
+      </button>
+    </div>
+  </div>
+
+  <div class="factura-wrapper">
+
+    <!-- ═══ DATOS DEL EMISOR ═══ -->
+    <mat-card class="seccion-card">
+      <mat-card-header>
+        <mat-card-title>Datos del emisor</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="emisor-grid">
+          <div class="emisor-main">
+            <p class="empresa-nombre">{{ emisor.nombre }}</p>
+            <p><strong>RTN:</strong> {{ emisor.rtn }}</p>
+            <p><strong>Dirección:</strong> {{ emisor.direccion }}</p>
+            <p><strong>Teléfono:</strong> {{ emisor.telefono }}</p>
+          </div>
+          <div class="factura-numero-box">
+            <span class="factura-label">N° FACTURA</span>
+            <span class="factura-numero">{{ emisor.numeroFactura }}</span>
+          </div>
+        </div>
+
+        <mat-divider class="my-divider"></mat-divider>
+
+        <div class="cai-grid">
+          <div>
+            <span class="cai-label">CAI</span>
+            <span class="cai-value">{{ emisor.cai }}</span>
+          </div>
+          <div>
+            <span class="cai-label">Rango autorizado</span>
+            <span class="cai-value">{{ emisor.rangoDesde }} al {{ emisor.rangoHasta }}</span>
+          </div>
+          <div>
+            <span class="cai-label">Fecha límite de emisión</span>
+            <span class="cai-value">{{ emisor.fechaLimiteEmision }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ═══ DATOS DEL CLIENTE ═══ -->
+    <mat-card class="seccion-card" [formGroup]="form">
+      <mat-card-header>
+        <mat-card-title>Datos del receptor</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="receptor-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre / Razón social</mat-label>
+            <input matInput formControlName="nombreCliente" placeholder="Nombre del cliente">
+            <mat-error>Campo requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>RTN del cliente</mat-label>
+            <input matInput formControlName="rtnCliente" placeholder="0000-0000-000000">
+            <mat-hint>Opcional para personas naturales</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de emisión</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="fechaEmision">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ═══ DETALLE ═══ -->
+    <mat-card class="seccion-card">
+      <mat-card-header>
+        <mat-card-title>Detalle de la factura</mat-card-title>
+        <div class="card-header-action">
+          <button mat-stroked-button color="primary" (click)="addItem()">
+            <mat-icon>add</mat-icon> Agregar ítem
+          </button>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="items" class="items-table">
+
+          <ng-container matColumnDef="concepto">
+            <th mat-header-cell *matHeaderCellDef>Concepto</th>
+            <td mat-cell *matCellDef="let item">
+              <input class="inline-input" [(ngModel)]="item.concepto" placeholder="Descripción del servicio">
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="cantidad">
+            <th mat-header-cell *matHeaderCellDef>Cant.</th>
+            <td mat-cell *matCellDef="let item">
+              <input class="inline-input number-input" type="number" min="1" [(ngModel)]="item.cantidad">
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="precio">
+            <th mat-header-cell *matHeaderCellDef>Precio unitario</th>
+            <td mat-cell *matCellDef="let item">
+              <input class="inline-input number-input" type="number" min="0" step="0.01" [(ngModel)]="item.precioUnitario">
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="exento">
+            <th mat-header-cell *matHeaderCellDef>Exento ISV</th>
+            <td mat-cell *matCellDef="let item">
+              <mat-checkbox [(ngModel)]="item.exento" color="primary"></mat-checkbox>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="total">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+            <td mat-cell *matCellDef="let item" class="text-right">
+              L {{ totalItem(item) | number:'1.2-2' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let item; let i = index">
+              <button mat-icon-button color="warn" (click)="removeItem(i)" [disabled]="items.length === 1">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="itemsColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: itemsColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ═══ TOTALES ═══ -->
+    <mat-card class="seccion-card totales-card">
+      <mat-card-content>
+        <div class="totales-grid">
+
+          <div class="sar-notice">
+            <mat-icon>info_outline</mat-icon>
+            <span>La factura es un beneficio de todos, <strong>exígala</strong></span>
+          </div>
+
+          <div class="totales-tabla">
+            <div class="total-row">
+              <span>Importe exento de ISV</span>
+              <span>L {{ subtotalExento | number:'1.2-2' }}</span>
+            </div>
+            <div class="total-row">
+              <span>Importe gravado (15%)</span>
+              <span>L {{ subtotalGravado | number:'1.2-2' }}</span>
+            </div>
+            <div class="total-row">
+              <span>ISV (15%)</span>
+              <span>L {{ isv | number:'1.2-2' }}</span>
+            </div>
+            <mat-divider></mat-divider>
+            <div class="total-row total-final">
+              <span>TOTAL A PAGAR</span>
+              <span>L {{ totalPagar | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+</div>

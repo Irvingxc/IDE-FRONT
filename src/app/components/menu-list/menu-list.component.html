@@ -1,0 +1,50 @@
+<mat-nav-list>
+
+  <ng-container *ngIf="!isAuthorized">
+    <a mat-list-item (click)="closeMenu()" routerLink="auth/login">
+      <mat-icon>login</mat-icon>
+      <span class="navegacion-list-label">Iniciar sesión</span>
+    </a>
+  </ng-container>
+
+  <ng-container *ngIf="isAuthorized">
+    <a mat-list-item (click)="closeMenu()" routerLink="/">
+      <mat-icon>home</mat-icon>
+      <span class="navegacion-list-label">Inicio</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/estudiantes">
+      <mat-icon>people</mat-icon>
+      <span class="navegacion-list-label">Estudiantes</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/matriculas">
+      <mat-icon>school</mat-icon>
+      <span class="navegacion-list-label">Matrículas</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/facturacion">
+      <mat-icon>receipt_long</mat-icon>
+      <span class="navegacion-list-label">Facturación SAR</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/asistencias">
+      <mat-icon>fact_check</mat-icon>
+      <span class="navegacion-list-label">Asistencias</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/calificaciones">
+      <mat-icon>grade</mat-icon>
+      <span class="navegacion-list-label">Calificaciones</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/empleados">
+      <mat-icon>badge</mat-icon>
+      <span class="navegacion-list-label">Empleados</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/reportes">
+      <mat-icon>bar_chart</mat-icon>
+      <span class="navegacion-list-label">Reportes</span>
+    </a>
+    <mat-divider></mat-divider>
+    <a mat-list-item (click)="onSignOut(); closeMenu()">
+      <mat-icon>logout</mat-icon>
+      <span class="navegacion-list-label">Cerrar sesión</span>
+    </a>
+  </ng-container>
+
+</mat-nav-list>

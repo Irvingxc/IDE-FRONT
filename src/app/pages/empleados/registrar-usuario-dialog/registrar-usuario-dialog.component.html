@@ -1,0 +1,61 @@
+<h2 mat-dialog-title>Registrar usuario</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre *</mat-label>
+      <input matInput formControlName="nombre">
+      <mat-error>Requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Apellido *</mat-label>
+      <input matInput formControlName="apellido">
+      <mat-error>Requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Username *</mat-label>
+      <input matInput formControlName="username">
+      <mat-error>Requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono *</mat-label>
+      <input matInput formControlName="telefono">
+      <mat-error>Requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Correo electrónico *</mat-label>
+      <input matInput formControlName="email" type="email">
+      <mat-error *ngIf="form.get('email')?.hasError('required')">Requerido</mat-error>
+      <mat-error *ngIf="form.get('email')?.hasError('email')">Correo inválido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Contraseña *</mat-label>
+      <input matInput formControlName="password" type="password">
+      <mat-hint>Mínimo 7 caracteres</mat-hint>
+      <mat-error *ngIf="form.get('password')?.hasError('required')">Requerido</mat-error>
+      <mat-error *ngIf="form.get('password')?.hasError('minlength')">Mínimo 7 caracteres</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Confirmar contraseña *</mat-label>
+      <input matInput formControlName="confirmarPassword" type="password">
+      <mat-error *ngIf="form.hasError('noCoinciden')">Las contraseñas no coinciden</mat-error>
+      <mat-error *ngIf="form.get('confirmarPassword')?.hasError('required')">Requerido</mat-error>
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button [mat-dialog-close]="false">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="guardando">
+    <mat-icon>person_add</mat-icon>
+    {{ guardando ? 'Guardando...' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

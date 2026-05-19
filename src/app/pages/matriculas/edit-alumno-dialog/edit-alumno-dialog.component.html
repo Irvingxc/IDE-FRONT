@@ -1,0 +1,160 @@
+<h2 mat-dialog-title>Editar alumno — {{ data.nombreCompleto }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form-grid">
+
+    <p class="section-label">Nombre</p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nombres *</mat-label>
+      <input matInput formControlName="primerNombre">
+      <mat-error>Requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Apellidos</mat-label>
+      <input matInput formControlName="primerApellido">
+    </mat-form-field>
+
+    <p class="section-label full-width">Padre / Tutor</p>
+
+    <!-- Tutor actual -->
+    <div class="tutor-actual full-width">
+      <span class="tutor-label">Actual:</span>
+      <span class="tutor-nombre">{{ clienteSeleccionado ? clienteSeleccionado.nombreCompleto : data.nombreTutor }}</span>
+      <span class="tutor-id">ID: {{ clienteSeleccionado ? clienteSeleccionado.id : '—' }}</span>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="search-row full-width">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar nuevo tutor</mat-label>
+        <input matInput [(ngModel)]="searchCliente" [ngModelOptions]="{standalone: true}"
+               (keyup.enter)="buscarCliente()" placeholder="Nombre o identidad">
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="buscarCliente()" [disabled]="buscandoCliente">
+        {{ buscandoCliente ? 'Buscando...' : 'Buscar' }}
+      </button>
+    </div>
+
+    <!-- Resultados -->
+    <ng-container *ngIf="clienteResultados.length > 0">
+      <table mat-table [dataSource]="clienteResultados" class="full-width resultados-table">
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let c">{{ c.nombreCompleto }}</td>
+        </ng-container>
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef>ID</th>
+          <td mat-cell *matCellDef="let c">{{ c.id }}</td>
+        </ng-container>
+        <ng-container matColumnDef="accion">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let c">
+            <button mat-stroked-button color="primary" (click)="seleccionarCliente(c)">Seleccionar</button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="['nombre','id','accion']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['nombre','id','accion']"></tr>
+      </table>
+    </ng-container>
+
+    <p class="section-label full-width">Matrícula</p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Grado *</mat-label>
+      <mat-select formControlName="grado">
+        <mat-option *ngFor="let g of grados" [value]="g">{{ g }}</mat-option>
+      </mat-select>
+      <mat-error>Requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Estado</mat-label>
+      <mat-select formControlName="estado">
+        <mat-option *ngFor="let e of estados" [value]="e">{{ e }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Valor matrícula (L.) *</mat-label>
+      <input matInput formControlName="valorMatricula" type="number" min="0">
+      <mat-error>Requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Valor mensualidad (L.) *</mat-label>
+      <input matInput formControlName="valorMensualidad" type="number" min="0">
+      <mat-error>Requerido</mat-error>
+    </mat-form-field>
+
+    <p class="section-label full-width">Datos personales</p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo de identificación</mat-label>
+      <mat-select formControlName="tipoIdentificacion">
+        <mat-option *ngFor="let t of tiposId" [value]="t">{{ t }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Sexo</mat-label>
+      <mat-select formControlName="sexo">
+        <mat-option *ngFor="let s of sexos" [value]="s">{{ s }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de nacimiento</mat-label>
+      <input matInput [matDatepicker]="dp" formControlName="fechaNacimiento">
+      <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+      <mat-datepicker #dp></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nacionalidad</mat-label>
+      <mat-select formControlName="nacionalidad">
+        <mat-option *ngFor="let n of nacionalidades" [value]="n">{{ n }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Departamento</mat-label>
+      <mat-select formControlName="departamento">
+        <mat-option *ngFor="let d of departamentos" [value]="d">{{ d }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Municipio</mat-label>
+      <input matInput formControlName="municipio">
+    </mat-form-field>
+
+    <p class="section-label full-width">Contacto</p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="telefono">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Correo electrónico</mat-label>
+      <input matInput formControlName="correoElectronico" type="email">
+      <mat-error>Correo inválido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Dirección</mat-label>
+      <textarea matInput formControlName="direccion" rows="2"></textarea>
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cancelar()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="guardando">
+    <mat-icon>save</mat-icon> {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+  </button>
+</mat-dialog-actions>

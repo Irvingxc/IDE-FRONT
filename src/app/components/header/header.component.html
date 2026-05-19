@@ -1,0 +1,38 @@
+<div class="app-header">
+
+  <div class="header-top">
+    <div class="brand">
+      <button mat-icon-button class="menu-btn" (click)="onMenuToggleDispatch()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <a routerLink="/" class="brand-link">
+        <div class="brand-logo">
+          <mat-icon>school</mat-icon>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">IDE</span>
+          <span class="brand-subtitle">Ethics, science and technology</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="header-right">
+      <ng-container *ngIf="!isAuthorized">
+        <a routerLink="auth/login" class="auth-link">Login</a>
+      </ng-container>
+      <div class="user-avatar" *ngIf="isAuthorized" (click)="onSignOut()" title="Cerrar sesión">
+        {{ user ? (user.nombre.charAt(0)) + (user.apellido.charAt(0)) : 'AD' }}
+      </div>
+    </div>
+  </div>
+
+  <nav class="header-nav" *ngIf="isAuthorized">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Inicio</a>
+    <a routerLink="/matriculas" routerLinkActive="active">Estudiantes</a>
+    <a routerLink="/facturacion" routerLinkActive="active">Facturación</a>
+    <a routerLink="/academico" routerLinkActive="active">Académico</a>
+    <a routerLink="/empleados" routerLinkActive="active">Empleados</a>
+    <a routerLink="/reportes" routerLinkActive="active">Reportes</a>
+  </nav>
+
+</div>

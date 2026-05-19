@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>
+  <mat-icon>family_restroom</mat-icon>
+  Alumnos de {{ cliente.nombreCompleto }}
+</h2>
+
+<mat-dialog-content>
+
+  <div *ngIf="cargando" class="loading-row">
+    <mat-icon class="spin-icon">sync</mat-icon>
+    <span>Cargando...</span>
+  </div>
+
+  <ng-container *ngIf="!cargando">
+    <div *ngIf="alumnos.length === 0" class="sin-hijos">
+      <mat-icon>person_off</mat-icon>
+      <span>Este cliente no tiene alumnos matriculados.</span>
+    </div>
+
+    <table mat-table [dataSource]="alumnos" class="hijos-table" *ngIf="alumnos.length > 0">
+
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef>Nombre</th>
+        <td mat-cell *matCellDef="let row">{{ row.nombreCompleto }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="grado">
+        <th mat-header-cell *matHeaderCellDef>Grado</th>
+        <td mat-cell *matCellDef="let row">{{ row.grado || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="badge" [ngClass]="row.estado?.toLowerCase()">{{ row.estado }}</span>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+    </table>
+  </ng-container>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cerrar()">Cerrar</button>
+</mat-dialog-actions>

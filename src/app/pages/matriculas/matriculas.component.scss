@@ -1,0 +1,103 @@
+$guinda: #6B0F1A;
+$gold:   #C9A227;
+$cream:  #FAF6F0;
+
+.page-container {
+  padding: 28px 32px;
+  background: $cream;
+  min-height: calc(100vh - 112px);
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  h1 { margin: 0; font-size: 24px; font-weight: 700; color: $guinda; }
+  .breadcrumb { margin: 4px 0 0; font-size: 13px; color: #999; }
+}
+
+mat-tab-group {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(107,15,26,0.08);
+  overflow: hidden;
+}
+
+.tab-icon {
+  margin-right: 6px;
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+.tab-content { padding: 20px; }
+
+.tab-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+
+  .record-count { font-size: 13px; color: #888; }
+}
+
+.data-table {
+  width: 100%;
+
+  th.mat-header-cell { font-weight: 700; color: $guinda; font-size: 13px; }
+  td.mat-cell { font-size: 14px; color: #333; }
+  tr.mat-row:hover { background: rgba(201,162,39,0.05); }
+}
+
+.filtros-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+
+  .filtro-field    { flex: 1; min-width: 200px; }
+  .filtro-field-md { width: 220px; }
+  .filtro-field-sm { width: 140px; }
+}
+
+.no-data-row td {
+  padding: 24px;
+  color: #999;
+  font-size: 14px;
+  text-align: center;
+}
+
+.loading-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px;
+  color: #888;
+  font-size: 14px;
+
+  .spin-icon {
+    color: $guinda;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+mat-paginator {
+  border-top: 1px solid #f0e9e0;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.activo   { background: rgba(201,162,39,0.15); color: #8B6914; }
+  &.inactivo { background: rgba(107,15,26,0.10);  color: $guinda; }
+}

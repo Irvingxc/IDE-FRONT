@@ -1,0 +1,101 @@
+<h2 mat-dialog-title>Editar cliente — ID {{ data.id }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form-grid">
+
+    <p class="section-label">Nombre</p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nombres *</mat-label>
+      <input matInput formControlName="primerNombre">
+      <mat-error>Requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Apellidos</mat-label>
+      <input matInput formControlName="primerApellido">
+    </mat-form-field>
+
+    <p class="section-label full-width">Identificación</p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo de identificación</mat-label>
+      <mat-select formControlName="tipoIdentificacion">
+        <mat-option *ngFor="let t of tiposId" [value]="t">{{ t }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Número de identidad</mat-label>
+      <input matInput formControlName="identidad"
+             [appIdentidadMask]="form.get('tipoIdentificacion')?.value || ''"
+             [placeholder]="form.get('tipoIdentificacion')?.value === 'Pasaporte' ? 'Ej: A1234567' : '0000-0000-00000'">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>RTN</mat-label>
+      <input matInput formControlName="rtn">
+    </mat-form-field>
+
+    <p class="section-label full-width">Datos personales</p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Sexo</mat-label>
+      <mat-select formControlName="sexo">
+        <mat-option *ngFor="let s of sexos" [value]="s">{{ s }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de nacimiento</mat-label>
+      <input matInput [matDatepicker]="dp" formControlName="fechaNacimiento">
+      <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+      <mat-datepicker #dp></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nacionalidad</mat-label>
+      <mat-select formControlName="nacionalidad">
+        <mat-option *ngFor="let n of nacionalidades" [value]="n">{{ n }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Departamento</mat-label>
+      <mat-select formControlName="departamento">
+        <mat-option *ngFor="let d of departamentos" [value]="d">{{ d }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Municipio</mat-label>
+      <input matInput formControlName="municipio">
+    </mat-form-field>
+
+    <p class="section-label full-width">Contacto</p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="telefono">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Correo electrónico</mat-label>
+      <input matInput formControlName="correoElectronico" type="email">
+      <mat-error>Correo inválido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Dirección</mat-label>
+      <textarea matInput formControlName="direccion" rows="2"></textarea>
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cancelar()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="guardando">
+    <mat-icon>save</mat-icon> {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,217 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Matrículas</h1>
+      <p class="breadcrumb">Inicio / Matrículas</p>
+    </div>
+    <button mat-raised-button color="primary" routerLink="nueva">
+      <mat-icon>add</mat-icon> Nueva matrícula
+    </button>
+  </div>
+
+  <mat-tab-group animationDuration="200ms">
+
+    <!-- TAB ALUMNOS -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">people</mat-icon>
+        Alumnos
+      </ng-template>
+
+      <div class="tab-content">
+
+        <!-- Filtros -->
+        <div class="filtros-row">
+          <mat-form-field appearance="outline" class="filtro-field">
+            <mat-label>Buscar por nombre</mat-label>
+            <input matInput [(ngModel)]="filtroNombre" (keyup.enter)="buscarAlumnos()" placeholder="Nombre o apellido">
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-md">
+            <mat-label>Grado</mat-label>
+            <mat-select [(ngModel)]="filtroGrado" (selectionChange)="buscarAlumnos()">
+              <mat-option value="">Todos</mat-option>
+              <mat-option *ngFor="let g of grados" [value]="g">{{ g }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Estado</mat-label>
+            <mat-select [(ngModel)]="filtroEstado">
+              <mat-option value="">Todos</mat-option>
+              <mat-option value="Activo">Activo</mat-option>
+              <mat-option value="Inactivo">Inactivo</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" (click)="buscarAlumnos()">
+            <mat-icon>search</mat-icon> Buscar
+          </button>
+          <button mat-stroked-button (click)="limpiarFiltros()" *ngIf="filtroNombre || filtroGrado || filtroEstado">
+            <mat-icon>clear</mat-icon> Limpiar
+          </button>
+        </div>
+
+        <div class="tab-toolbar">
+          <span class="record-count">{{ totalAlumnos }} registros</span>
+          <button mat-raised-button color="primary" routerLink="nueva">
+            <mat-icon>add</mat-icon> Nueva matrícula
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="alumnosLoading" class="loading-row">
+          <mat-icon class="spin-icon">sync</mat-icon>
+          <span>Cargando alumnos...</span>
+        </div>
+
+        <table mat-table [dataSource]="alumnos" class="data-table" *ngIf="!alumnosLoading">
+
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Nombre completo</th>
+            <td mat-cell *matCellDef="let row">{{ row.nombreCompleto }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="grado">
+            <th mat-header-cell *matHeaderCellDef>Grado</th>
+            <td mat-cell *matCellDef="let row">{{ row.grado || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="badge" [ngClass]="row.estado?.toLowerCase()">{{ row.estado }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="tutor">
+            <th mat-header-cell *matHeaderCellDef>Tutor</th>
+            <td mat-cell *matCellDef="let row">{{ row.nombreTutor || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button title="Editar" (click)="editarAlumno(row)"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button color="warn" title="Inactivar"
+                *ngIf="row.estado === 'Activo'"
+                (click)="inactivarAlumno(row)">
+                <mat-icon>block</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="alumnosColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: alumnosColumns;"></tr>
+          <tr class="mat-row no-data-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="alumnosColumns.length">
+              <span>No hay alumnos registrados.</span>
+            </td>
+          </tr>
+        </table>
+
+        <mat-paginator
+          [length]="totalAlumnos"
+          [pageSize]="ALUMNOS_PAGE_SIZE"
+          [pageIndex]="paginaAlumnos - 1"
+          [hidePageSize]="true"
+          (page)="onPageAlumnos($event)"
+          *ngIf="!alumnosLoading && totalAlumnos > 0">
+        </mat-paginator>
+
+      </div>
+    </mat-tab>
+
+    <!-- TAB CLIENTES -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">contacts</mat-icon>
+        Clientes
+      </ng-template>
+
+      <div class="tab-content">
+
+        <div class="filtros-row">
+          <mat-form-field appearance="outline" class="filtro-field">
+            <mat-label>Buscar por nombre</mat-label>
+            <input matInput [(ngModel)]="filtroNombreCliente" (keyup.enter)="buscarClientes()" placeholder="Nombre o apellido">
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" (click)="buscarClientes()">
+            <mat-icon>search</mat-icon> Buscar
+          </button>
+          <button mat-stroked-button (click)="limpiarFiltrosClientes()" *ngIf="filtroNombreCliente">
+            <mat-icon>clear</mat-icon> Limpiar
+          </button>
+        </div>
+
+        <div class="tab-toolbar">
+          <span class="record-count">{{ totalClientes }} registros</span>
+        </div>
+
+        <!-- Loading spinner -->
+        <div *ngIf="clientesLoading" class="loading-row">
+          <mat-icon class="spin-icon">sync</mat-icon>
+          <span>Cargando clientes...</span>
+        </div>
+
+        <table mat-table [dataSource]="clientes" class="data-table" *ngIf="!clientesLoading">
+
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>#</th>
+            <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Nombre completo</th>
+            <td mat-cell *matCellDef="let row">{{ row.nombreCompleto }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="telefono">
+            <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+            <td mat-cell *matCellDef="let row">{{ row.telefono || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>Email</th>
+            <td mat-cell *matCellDef="let row">{{ row.correoElectronico || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button title="Ver hijos" (click)="verHijos(row)">
+                <mat-icon>family_restroom</mat-icon>
+              </button>
+              <button mat-icon-button title="Editar" (click)="editarCliente(row)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="clientesColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: clientesColumns;"></tr>
+          <tr class="mat-row no-data-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="clientesColumns.length">
+              <span>No hay clientes registrados.</span>
+            </td>
+          </tr>
+        </table>
+
+        <mat-paginator
+          [length]="totalClientes"
+          [pageSize]="PAGE_SIZE"
+          [pageIndex]="paginaActual - 1"
+          [hidePageSize]="true"
+          (page)="onPageChange($event)"
+          *ngIf="!clientesLoading && totalClientes > 0">
+        </mat-paginator>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+
+</div>

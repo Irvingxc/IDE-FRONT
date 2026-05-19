@@ -1,0 +1,151 @@
+$guinda: #6B0F1A;
+$gold:   #C9A227;
+$cream:  #FAF6F0;
+
+.page-container {
+  padding: 28px 32px;
+  background: $cream;
+  min-height: calc(100vh - 112px);
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  h1 { margin: 0; font-size: 24px; font-weight: 700; color: $guinda; }
+  .breadcrumb { margin: 4px 0 0; font-size: 13px; color: #999; }
+  .header-actions { display: flex; gap: 10px; }
+}
+
+.factura-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.seccion-card {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(107,15,26,0.08) !important;
+  border-top: 3px solid $gold !important;
+
+  mat-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+
+    mat-card-title { font-size: 15px; font-weight: 700; color: $guinda; margin: 0; }
+    .card-header-action { margin-left: auto; }
+  }
+}
+
+/* Emisor */
+.emisor-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+
+  .empresa-nombre { font-size: 17px; font-weight: 700; color: $guinda; margin: 0 0 6px; }
+  p { margin: 3px 0; font-size: 13px; color: #555; }
+}
+
+.factura-numero-box {
+  text-align: right;
+  flex-shrink: 0;
+
+  .factura-label { display: block; font-size: 11px; color: #999; letter-spacing: 1px; }
+  .factura-numero { display: block; font-size: 18px; font-weight: 700; color: $gold; }
+}
+
+.my-divider { margin: 16px 0; }
+
+.cai-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  @media (max-width: 700px) { grid-template-columns: 1fr; }
+
+  .cai-label { display: block; font-size: 10px; font-weight: 700; color: $gold; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
+  .cai-value { font-size: 13px; color: #333; font-family: monospace; }
+}
+
+/* Receptor */
+.receptor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 700px) { grid-template-columns: 1fr; }
+}
+
+/* Items table */
+.items-table {
+  width: 100%;
+  margin-top: 8px;
+
+  th.mat-header-cell { font-weight: 700; color: $guinda; font-size: 13px; }
+  .text-right { text-align: right; }
+  tr.mat-row:hover { background: rgba(201,162,39,0.05); }
+}
+
+.inline-input {
+  border: none;
+  border-bottom: 1px solid #ddd;
+  outline: none;
+  padding: 4px 2px;
+  font-size: 14px;
+  background: transparent;
+  width: 100%;
+
+  &:focus { border-bottom-color: $guinda; }
+}
+
+.number-input { width: 80px; text-align: right; }
+
+/* Totales */
+.totales-card {
+  .totales-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+
+    @media (max-width: 700px) { flex-direction: column; }
+  }
+}
+
+.sar-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #888;
+  font-size: 13px;
+  font-style: italic;
+
+  mat-icon { color: $gold; font-size: 20px; }
+}
+
+.totales-tabla {
+  min-width: 320px;
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+    color: #555;
+  }
+
+  mat-divider { margin: 8px 0; }
+
+  .total-final {
+    font-size: 18px;
+    font-weight: 700;
+    color: $guinda;
+    padding-top: 10px;
+  }
+}

@@ -1,0 +1,126 @@
+$guinda:     #6B0F1A;
+$guinda-dark: #4A0A12;
+$gold:        #C9A227;
+
+.app-header {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  background: $guinda;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .menu-btn {
+    color: #fff;
+    margin-right: 4px;
+  }
+
+  .brand-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .brand-logo {
+    width: 40px;
+    height: 40px;
+    background: $gold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 3px rgba(201,162,39,0.3);
+
+    mat-icon { color: $guinda-dark; font-size: 22px; }
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: $gold;
+      letter-spacing: 2px;
+    }
+
+    .brand-subtitle {
+      font-size: 10px;
+      color: rgba(255,255,255,0.75);
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .auth-link {
+    color: $gold;
+    text-decoration: none;
+    font-size: 14px;
+
+    &:hover { text-decoration: underline; }
+  }
+
+  .user-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: $gold;
+    color: $guinda-dark;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    text-transform: uppercase;
+    border: 2px solid rgba(255,255,255,0.3);
+
+    &:hover { opacity: 0.85; }
+  }
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: #fff;
+  border-bottom: 2px solid #EDE0D0;
+  overflow-x: auto;
+
+  a {
+    display: inline-block;
+    padding: 12px 18px;
+    font-size: 14px;
+    color: #666;
+    text-decoration: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+
+    &:hover { color: $guinda; }
+    &.active { color: $guinda; border-bottom-color: $gold; font-weight: 700; }
+  }
+}
+

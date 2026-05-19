@@ -1,0 +1,34 @@
+<div class="dashboard">
+
+  <div class="welcome-header">
+    <h1>Bienvenido, Administrador</h1>
+    <p class="date-info">{{ currentDate }} · Año escolar {{ schoolYear }}</p>
+  </div>
+
+  <div class="stats-grid">
+    <mat-card class="stat-card" *ngFor="let stat of stats">
+      <div class="stat-icon-wrap">
+        <mat-icon>{{ stat.icon }}</mat-icon>
+      </div>
+      <div class="stat-body">
+        <span class="stat-label">{{ stat.label }}</span>
+        <span class="stat-value" [class.loading]="loadingStats">{{ stat.value }}</span>
+        <span class="stat-sub">{{ stat.sub }}</span>
+      </div>
+    </mat-card>
+  </div>
+
+  <h2 class="section-title">MÓDULOS DEL SISTEMA</h2>
+
+  <div class="modules-grid">
+    <mat-card class="module-card" *ngFor="let mod of modules" [routerLink]="mod.route">
+      <div class="module-icon-wrap" [style.background]="mod.color + '22'">
+        <mat-icon [style.color]="mod.color">{{ mod.icon }}</mat-icon>
+      </div>
+      <span class="module-title">{{ mod.title }}</span>
+      <span class="module-subtitle">{{ mod.subtitle }}</span>
+      <span class="module-badge" [ngClass]="mod.status.toLowerCase()">{{ mod.status }}</span>
+    </mat-card>
+  </div>
+
+</div>

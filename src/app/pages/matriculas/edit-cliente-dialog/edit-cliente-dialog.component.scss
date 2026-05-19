@@ -1,0 +1,27 @@
+$guinda: #6B0F1A;
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 16px;
+  padding-top: 8px;
+  min-width: 580px;
+
+  @media (max-width: 640px) { grid-template-columns: 1fr; min-width: unset; }
+
+  .full-width { grid-column: 1 / -1; }
+}
+
+.section-label {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: $guinda;
+  margin: 8px 0 0;
+}
+
+mat-dialog-content { max-height: 72vh; }
+
+input[matInput] { text-transform: uppercase; }
