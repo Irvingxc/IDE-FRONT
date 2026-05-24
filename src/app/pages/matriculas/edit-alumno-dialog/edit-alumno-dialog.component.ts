@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AlumnoResponse, AlumnoService } from '@app/services/alumno/alumno.service';
 import { ClienteService, ClienteResponse } from '@app/services/cliente/cliente.service';
+import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.service';
 import { NotificationService } from '@app/services';
 
 @Component({
@@ -14,6 +15,8 @@ export class EditAlumnoDialogComponent implements OnInit {
 
   form!: FormGroup;
   guardando = false;
+  fotoBase64: string | null = null;
+  private fotoManual = false;
 
   // Búsqueda de cliente
   searchCliente = '';
@@ -34,13 +37,7 @@ export class EditAlumnoDialogComponent implements OnInit {
     'Islas de la Bahía', 'La Paz', 'Lempira', 'Ocotepeque', 'Olancho',
     'Santa Bárbara', 'Valle', 'Yoro'
   ];
-  grados = [
-    'Primer Grado Pre-Basica', 'Segundo Grado Pre-Basica', 'Tercer Grado Pre-Basica',
-    'Primer Grado Basica', 'Segundo Grado Basica', 'Tercer Grado Basica',
-    'Cuarto Grado Basica', 'Quinto Grado Basica', 'Sexto Grado Basica',
-    'Septimo Grado Basica', 'Octavo Grado Basica', 'Noveno Grado Basica',
-    'Decimo', 'Undecimo',
-  ];
+  grados: GradoDto[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -48,17 +45,23 @@ export class EditAlumnoDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: AlumnoResponse,
     private alumnoService: AlumnoService,
     private clienteService: ClienteService,
+    private catalogoService: CatalogoService,
     private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
+    this.catalogoService.getGrados().subscribe({ next: (data) => this.grados = data ?? [] });
+    this.alumnoService.getFoto(this.data.identidad).subscribe({
+      next: ({ foto }) => { if (!this.fotoManual) this.fotoBase64 = foto ?? null; }
+    });
+
     this.form = this.fb.group({
       primerNombre:       [this.data.nombres         || '', Validators.required],
       segundoNombre:      [this.data.segundoNombre   || ''],
       primerApellido:     [this.data.apellidos       || ''],
       segundoApellido:    [this.data.segundoApellido || ''],
       tipoIdentificacion: [this.data.tipoIdentificacion],
-      grado:              [this.data.grado,            Validators.required],
+      idGrado:            [this.data.idGrado,          Validators.required],
       estado:             [this.data.estado],
       valorMatricula:     [this.data.valorMatricula,   [Validators.required, Validators.min(0)]],
       valorMensualidad:   [this.data.valorMensualidad, [Validators.required, Validators.min(0)]],
@@ -72,6 +75,15 @@ export class EditAlumnoDialogComponent implements OnInit {
       telefono:           [this.data.telefono],
       correoElectronico:  [this.data.correoElectronico, Validators.email],
     });
+  }
+
+  onFotoSeleccionada(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.fotoManual = true;
+    const reader = new FileReader();
+    reader.onload = () => { this.fotoBase64 = reader.result as string; };
+    reader.readAsDataURL(file);
   }
 
   buscarCliente(): void {
@@ -105,7 +117,7 @@ export class EditAlumnoDialogComponent implements OnInit {
       primerApellido:     up(f.primerApellido),
       segundoApellido:    up(f.segundoApellido),
       cliente:            this.clienteSeleccionado?.id ?? undefined,
-      grado:              f.grado               || undefined,
+      idGrado:            f.idGrado             ?? undefined,
       estado:             f.estado              || undefined,
       valorMatricula:     f.valorMatricula      ?? undefined,
       valorMensualidad:   f.valorMensualidad    ?? undefined,
@@ -119,6 +131,7 @@ export class EditAlumnoDialogComponent implements OnInit {
       telefono:           f.telefono            || undefined,
       correoElectronico:  f.correoElectronico   || undefined,
       direccion:          up(f.direccion),
+      foto:               this.fotoBase64       ?? undefined,
     }).subscribe({
       next: () => {
         this.notification.success('Alumno actualizado correctamente');

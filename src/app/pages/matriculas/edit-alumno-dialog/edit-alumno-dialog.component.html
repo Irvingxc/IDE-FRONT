@@ -64,8 +64,8 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Grado *</mat-label>
-      <mat-select formControlName="grado">
-        <mat-option *ngFor="let g of grados" [value]="g">{{ g }}</mat-option>
+      <mat-select formControlName="idGrado">
+        <mat-option *ngFor="let g of grados" [value]="g.idGrado">{{ g.gradoNombre }}</mat-option>
       </mat-select>
       <mat-error>Requerido</mat-error>
     </mat-form-field>
@@ -88,6 +88,18 @@
       <input matInput formControlName="valorMensualidad" type="number" min="0">
       <mat-error>Requerido</mat-error>
     </mat-form-field>
+
+    <div class="full-width foto-upload-row">
+      <img *ngIf="fotoBase64" [src]="fotoBase64" class="foto-preview" alt="Foto alumno">
+      <div *ngIf="!fotoBase64" class="foto-placeholder">
+        <mat-icon>person</mat-icon>
+      </div>
+      <label class="foto-btn">
+        <mat-icon>photo_camera</mat-icon>
+        {{ fotoBase64 ? 'Cambiar foto' : 'Agregar foto' }}
+        <input type="file" accept="image/*" (change)="onFotoSeleccionada($event)" hidden>
+      </label>
+    </div>
 
     <p class="section-label full-width">Datos personales</p>
 

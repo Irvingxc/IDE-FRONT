@@ -1,0 +1,69 @@
+<h2 mat-dialog-title>Gestión de roles</h2>
+
+<mat-dialog-content>
+
+  <!-- Nuevo rol -->
+  <div class="add-row">
+    <mat-form-field appearance="outline" class="input-nuevo">
+      <mat-label>Nuevo rol</mat-label>
+      <input matInput [(ngModel)]="nuevoRol" placeholder="Ej: Tesorero"
+             (keyup.enter)="agregar()">
+    </mat-form-field>
+    <button mat-raised-button color="primary" (click)="agregar()" [disabled]="!nuevoRol.trim()">
+      <mat-icon>add</mat-icon> Agregar
+    </button>
+  </div>
+
+  <!-- Lista de roles -->
+  <div *ngIf="cargando" class="loading">Cargando...</div>
+
+  <table mat-table [dataSource]="roles" class="roles-table" *ngIf="!cargando">
+
+    <ng-container matColumnDef="nombre">
+      <th mat-header-cell *matHeaderCellDef>Nombre del rol</th>
+      <td mat-cell *matCellDef="let rol">
+        <ng-container *ngIf="editandoRol !== rol">{{ rol }}</ng-container>
+        <mat-form-field appearance="outline" class="input-editar" *ngIf="editandoRol === rol">
+          <input matInput [(ngModel)]="nombreEditado" (keyup.enter)="guardarEdicion(rol)"
+                 (keyup.escape)="cancelarEdicion()">
+        </mat-form-field>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="acciones">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let rol">
+        <ng-container *ngIf="editandoRol !== rol">
+          <button mat-icon-button matTooltip="Permisos / Módulos" color="primary" (click)="verPermisos(rol)">
+            <mat-icon>shield</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Renombrar" (click)="iniciarEdicion(rol)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Eliminar" color="warn" (click)="eliminar(rol)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </ng-container>
+        <ng-container *ngIf="editandoRol === rol">
+          <button mat-icon-button matTooltip="Guardar" color="primary" (click)="guardarEdicion(rol)">
+            <mat-icon>check</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Cancelar" (click)="cancelarEdicion()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </ng-container>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="['nombre','acciones']"></tr>
+    <tr mat-row *matRowDef="let row; columns: ['nombre','acciones'];"></tr>
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell no-data" colspan="2">No hay roles registrados.</td>
+    </tr>
+  </table>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

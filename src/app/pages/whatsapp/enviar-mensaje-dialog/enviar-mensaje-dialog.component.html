@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;color:#25D366;margin-right:8px">chat</mat-icon>
+  Enviar mensaje masivo
+</h2>
+
+<mat-dialog-content>
+
+  <div class="destinatarios-info">
+    <mat-icon>group</mat-icon>
+    <span>Se enviará a <strong>{{ totalDestinatarios }}</strong> cliente(s) con teléfono registrado</span>
+  </div>
+
+  <mat-form-field appearance="outline" class="mensaje-field">
+    <mat-label>Mensaje</mat-label>
+    <textarea matInput [(ngModel)]="mensaje" rows="6"
+      placeholder="Escribe el mensaje que deseas enviar..."
+      [disabled]="enviando || enviado">
+    </textarea>
+    <mat-hint align="end">{{ mensaje.length }} caracteres</mat-hint>
+  </mat-form-field>
+
+  <div *ngIf="enviando" class="progreso-container">
+    <mat-progress-bar mode="determinate" [value]="progreso" color="primary"></mat-progress-bar>
+    <span class="progreso-label">Enviando... {{ progreso }}%</span>
+  </div>
+
+  <div *ngIf="enviado" class="enviado-msg">
+    <mat-icon>check_circle</mat-icon>
+    <span>Mensajes enviados correctamente</span>
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cerrar()" [disabled]="enviando">Cancelar</button>
+  <button mat-raised-button color="primary"
+    (click)="enviar()"
+    [disabled]="!mensaje.trim() || enviando || enviado">
+    <mat-icon>send</mat-icon> Enviar
+  </button>
+</mat-dialog-actions>

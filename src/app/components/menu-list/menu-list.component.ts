@@ -7,17 +7,15 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 })
 export class MenuListComponent implements OnInit {
   @Output() menuToggle = new EventEmitter<void>();
-
-  @Input() isAuthorized !: boolean | null;
-
+  @Input() isAuthorized!: boolean | null;
+  @Input() modulos: string[] | null | undefined;
   @Output() signOut = new EventEmitter<void>();
 
-  constructor() { }
+  constructor() {}
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
-  closeMenu() : void {
+  closeMenu(): void {
     this.menuToggle.emit();
   }
 
@@ -25,5 +23,8 @@ export class MenuListComponent implements OnInit {
     this.signOut.emit();
   }
 
-
+  tieneModulo(modulo: string): boolean {
+    if (!this.modulos) return true;
+    return this.modulos.includes(modulo);
+  }
 }

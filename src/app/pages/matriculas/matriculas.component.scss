@@ -98,6 +98,9 @@ mat-paginator {
   font-size: 12px;
   font-weight: 600;
 
-  &.activo   { background: rgba(201,162,39,0.15); color: #8B6914; }
-  &.inactivo { background: rgba(107,15,26,0.10);  color: $guinda; }
+  &.activo    { background: rgba(201,162,39,0.15); color: #8B6914; }
+  &.inactivo  { background: rgba(107,15,26,0.10);  color: $guinda; }
+  &.descuento { background: rgba(25,118,210,0.12); color: #1565C0; }
 }
+
+.text-muted { color: #bbb; font-size: 14px; }

@@ -74,10 +74,24 @@
 
     <p class="section-label full-width">Contacto</p>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Teléfono</mat-label>
-      <input matInput formControlName="telefono">
-    </mat-form-field>
+    <div class="telefono-row">
+      <mat-form-field appearance="outline" class="pais-field">
+        <mat-label>País</mat-label>
+        <mat-select formControlName="paisTelefono">
+          <mat-option *ngFor="let p of paises" [value]="p.codigo">
+            {{ p.nombre }} {{ p.codigo }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="telefono-field">
+        <mat-label>Teléfono</mat-label>
+        <input matInput formControlName="telefono"
+               [appTelefonoMask]="paisSeleccionado.formato"
+               [placeholder]="paisSeleccionado.placeholder">
+        <mat-hint>{{ paisSeleccionado.codigo }}</mat-hint>
+      </mat-form-field>
+    </div>
 
     <mat-form-field appearance="outline">
       <mat-label>Correo electrónico</mat-label>

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '@src/environments/environment';
 
 export interface AlumnoResponse {
+  codigo:             number;
   identidad:          string;
   tipoIdentificacion: string;
   nombreCompleto:     string;
@@ -11,7 +12,9 @@ export interface AlumnoResponse {
   segundoNombre:      string;
   apellidos:          string;
   segundoApellido:    string;
+  idGrado:            number | null;
   grado:              string;
+  foto:               string | null;
   estado:             string;
   valorMatricula:     number;
   valorMensualidad:   number;
@@ -27,6 +30,8 @@ export interface AlumnoResponse {
   correoElectronico:  string;
   nombreTutor:        string;
   telefonoTutor:      string;
+  descuento:          number | null;
+  motivoDescuento:    string | null;
   totalRegistros:     number;
   totalPaginas:       number;
 }
@@ -39,11 +44,12 @@ export interface GuardarAlumnoDto {
   primerApellido:     string;
   segundoApellido?:   string;
   cliente:            number;
-  grado:              string;
-  valorMatricula:     number;
-  valorMensualidad:   number;
-  fechaMatricula?:    string | null;
-  estado?:            string;
+  idGrado:            number;
+  valorMatricula?:    number;
+  valorMensualidad?:  number;
+  fechaMatricula?:      string | null;
+  fechaInicioClases?:   string | null;
+  estado?:              string;
   nacionalidad?:      string;
   sexo?:              string;
   fechaNacimiento?:   string | null;
@@ -53,6 +59,9 @@ export interface GuardarAlumnoDto {
   direccion?:         string;
   telefono?:          string;
   correoElectronico?: string;
+  descuento?:         number;
+  motivoDescuento?:   string;
+  foto?:              string;
 }
 
 export interface ActualizarAlumnoDto {
@@ -63,7 +72,7 @@ export interface ActualizarAlumnoDto {
   primerApellido?:     string;
   segundoApellido?:    string;
   cliente?:            number;
-  grado?:              string;
+  idGrado?:            number;
   valorMatricula?:     number;
   valorMensualidad?:   number;
   estado?:             string;
@@ -76,6 +85,7 @@ export interface ActualizarAlumnoDto {
   direccion?:          string;
   telefono?:           string;
   correoElectronico?:  string;
+  foto?:               string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -86,7 +96,7 @@ export class AlumnoService {
     pagina             = 1,
     registrosPorPagina = 10,
     nombre             = '',
-    grado              = '',
+    idGrado?:          number,
     estado             = '',
     idCliente?:        number
   ): Observable<AlumnoResponse[]> {
@@ -94,9 +104,9 @@ export class AlumnoService {
       .set('pagina', pagina)
       .set('registrosPorPagina', registrosPorPagina);
 
-    if (nombre.trim())   params = params.set('nombre',     nombre.trim());
-    if (grado.trim())    params = params.set('grado',      grado.trim());
-    if (estado.trim())   params = params.set('estado',     estado.trim());
+    if (nombre.trim())     params = params.set('nombre',   nombre.trim());
+    if (idGrado != null)   params = params.set('idGrado',  idGrado);
+    if (estado.trim())     params = params.set('estado',   estado.trim());
     if (idCliente != null) params = params.set('idCliente', idCliente);
 
     return this.http.get<AlumnoResponse[]>(`${environment.url}api/Alumno/lista`, { params });
@@ -112,5 +122,13 @@ export class AlumnoService {
 
   cambiarEstado(identidad: string, estado: string): Observable<void> {
     return this.http.patch<void>(`${environment.url}api/alumno/${identidad}/estado`, { estado });
+  }
+
+  getFoto(identidad: string): Observable<{ foto: string | null }> {
+    return this.http.get<{ foto: string | null }>(`${environment.url}api/alumno/${identidad}/foto`);
+  }
+
+  actualizarDescuento(identidad: string, descuento: number, motivoDescuento: string | null): Observable<void> {
+    return this.http.patch<void>(`${environment.url}api/alumno/${identidad}/descuento`, { descuento, motivoDescuento });
   }
 }

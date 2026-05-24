@@ -20,9 +20,16 @@
       <ng-container *ngIf="!isAuthorized">
         <a routerLink="auth/login" class="auth-link">Login</a>
       </ng-container>
-      <div class="user-avatar" *ngIf="isAuthorized" (click)="onSignOut()" title="Cerrar sesión">
-        {{ user ? (user.nombre.charAt(0)) + (user.apellido.charAt(0)) : 'AD' }}
-      </div>
+      <ng-container *ngIf="isAuthorized">
+        <div class="user-info">
+          <div class="user-avatar" (click)="onSignOut()" title="Cerrar sesión">
+            {{ user ? (user.nombre.charAt(0)) + (user.apellido.charAt(0)) : 'AD' }}
+          </div>
+          <span class="sucursal-badge" *ngIf="user?.sucursalNombre">
+            <mat-icon>store</mat-icon>{{ user?.sucursalNombre }}
+          </span>
+        </div>
+      </ng-container>
     </div>
   </div>
 

@@ -31,9 +31,9 @@
 
           <mat-form-field appearance="outline" class="filtro-field-md">
             <mat-label>Grado</mat-label>
-            <mat-select [(ngModel)]="filtroGrado" (selectionChange)="buscarAlumnos()">
-              <mat-option value="">Todos</mat-option>
-              <mat-option *ngFor="let g of grados" [value]="g">{{ g }}</mat-option>
+            <mat-select [(ngModel)]="filtroIdGrado" (selectionChange)="buscarAlumnos()">
+              <mat-option [value]="null">Todos</mat-option>
+              <mat-option *ngFor="let g of grados" [value]="g.idGrado">{{ g.gradoNombre }}</mat-option>
             </mat-select>
           </mat-form-field>
 
@@ -49,7 +49,7 @@
           <button mat-raised-button color="primary" (click)="buscarAlumnos()">
             <mat-icon>search</mat-icon> Buscar
           </button>
-          <button mat-stroked-button (click)="limpiarFiltros()" *ngIf="filtroNombre || filtroGrado || filtroEstado">
+          <button mat-stroked-button (click)="limpiarFiltros()" *ngIf="filtroNombre || filtroIdGrado || filtroEstado">
             <mat-icon>clear</mat-icon> Limpiar
           </button>
         </div>
@@ -86,6 +86,16 @@
             </td>
           </ng-container>
 
+          <ng-container matColumnDef="descuento">
+            <th mat-header-cell *matHeaderCellDef>Descuento</th>
+            <td mat-cell *matCellDef="let row">
+              <span *ngIf="row.descuento && row.descuento > 0" class="badge descuento" [title]="row.motivoDescuento || ''">
+                {{ row.descuento | number:'1.0-1' }}%
+              </span>
+              <span *ngIf="!row.descuento || row.descuento === 0" class="text-muted">—</span>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="tutor">
             <th mat-header-cell *matHeaderCellDef>Tutor</th>
             <td mat-cell *matCellDef="let row">{{ row.nombreTutor || '—' }}</td>
@@ -95,6 +105,12 @@
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let row">
               <button mat-icon-button title="Editar" (click)="editarAlumno(row)"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button color="accent" title="Descuento mensual" (click)="registrarDescuento(row)">
+                <mat-icon>money_off</mat-icon>
+              </button>
+              <button mat-icon-button title="Generar carnet" (click)="generarCarnet(row)" style="color:#1565c0">
+                <mat-icon>badge</mat-icon>
+              </button>
               <button mat-icon-button color="warn" title="Inactivar"
                 *ngIf="row.estado === 'Activo'"
                 (click)="inactivarAlumno(row)">
@@ -188,6 +204,9 @@
               </button>
               <button mat-icon-button title="Editar" (click)="editarCliente(row)">
                 <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="primary" title="Generar contrato" (click)="generarContrato(row)">
+                <mat-icon>description</mat-icon>
               </button>
             </td>
           </ng-container>

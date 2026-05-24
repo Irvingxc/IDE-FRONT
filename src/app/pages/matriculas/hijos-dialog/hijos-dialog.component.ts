@@ -21,7 +21,7 @@ export class HijosDialogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.alumnoService.getAlumnos(1, 100, '', '', '', this.cliente.id).subscribe({
+    this.alumnoService.getAlumnos(1, 100, '', undefined, '', this.cliente.id).subscribe({
       next: (data) => { this.alumnos = data ?? []; this.cargando = false; },
       error: ()     => { this.cargando = false; }
     });

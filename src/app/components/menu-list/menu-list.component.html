@@ -12,33 +12,45 @@
       <mat-icon>home</mat-icon>
       <span class="navegacion-list-label">Inicio</span>
     </a>
-    <a mat-list-item (click)="closeMenu()" routerLink="/estudiantes">
-      <mat-icon>people</mat-icon>
-      <span class="navegacion-list-label">Estudiantes</span>
-    </a>
-    <a mat-list-item (click)="closeMenu()" routerLink="/matriculas">
+    <a mat-list-item (click)="closeMenu()" routerLink="/matriculas" *ngIf="tieneModulo('MATRICULAS')">
       <mat-icon>school</mat-icon>
       <span class="navegacion-list-label">Matrículas</span>
     </a>
-    <a mat-list-item (click)="closeMenu()" routerLink="/facturacion">
+    <a mat-list-item (click)="closeMenu()" routerLink="/facturacion" *ngIf="tieneModulo('PAGOS')">
       <mat-icon>receipt_long</mat-icon>
       <span class="navegacion-list-label">Facturación SAR</span>
     </a>
-    <a mat-list-item (click)="closeMenu()" routerLink="/asistencias">
-      <mat-icon>fact_check</mat-icon>
-      <span class="navegacion-list-label">Asistencias</span>
+    <a mat-list-item (click)="closeMenu()" routerLink="/cxc" *ngIf="tieneModulo('CXC')">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <span class="navegacion-list-label">Cuentas por Cobrar</span>
     </a>
-    <a mat-list-item (click)="closeMenu()" routerLink="/calificaciones">
-      <mat-icon>grade</mat-icon>
-      <span class="navegacion-list-label">Calificaciones</span>
+    <a mat-list-item (click)="closeMenu()" routerLink="/inventario" *ngIf="tieneModulo('INVENTARIO')">
+      <mat-icon>inventory_2</mat-icon>
+      <span class="navegacion-list-label">Inventario</span>
     </a>
-    <a mat-list-item (click)="closeMenu()" routerLink="/empleados">
+    <a mat-list-item (click)="closeMenu()" routerLink="/compras" *ngIf="tieneModulo('ENTRADAS')">
+      <mat-icon>shopping_cart</mat-icon>
+      <span class="navegacion-list-label">Compras / Entradas</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/empleados" *ngIf="tieneModulo('EMPLEADOS')">
       <mat-icon>badge</mat-icon>
       <span class="navegacion-list-label">Empleados</span>
     </a>
-    <a mat-list-item (click)="closeMenu()" routerLink="/reportes">
+    <a mat-list-item (click)="closeMenu()" routerLink="/catalogo" *ngIf="tieneModulo('EMPLEADOS')">
+      <mat-icon>price_change</mat-icon>
+      <span class="navegacion-list-label">Catálogo de Precios</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/whatsapp" *ngIf="tieneModulo('WHATSAPP')">
+      <mat-icon>chat</mat-icon>
+      <span class="navegacion-list-label">WhatsApp</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/reportes" *ngIf="tieneModulo('REPORTES')">
       <mat-icon>bar_chart</mat-icon>
       <span class="navegacion-list-label">Reportes</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/bitacora" *ngIf="tieneModulo('BITACORA')">
+      <mat-icon>history</mat-icon>
+      <span class="navegacion-list-label">Bitácora</span>
     </a>
     <mat-divider></mat-divider>
     <a mat-list-item (click)="onSignOut(); closeMenu()">

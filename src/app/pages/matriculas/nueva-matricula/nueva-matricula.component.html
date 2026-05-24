@@ -117,9 +117,23 @@
                   <mat-label>Número de identificación *</mat-label>
                   <input matInput formControlName="identificacion"
                          [appIdentidadMask]="padreForm.get('tipoIdentificacion')?.value || ''"
-                         [placeholder]="padreForm.get('tipoIdentificacion')?.value === 'Pasaporte' ? 'Ej: A1234567' : '0000-0000-00000'">
+                         [placeholder]="padreForm.get('tipoIdentificacion')?.value === 'Pasaporte' ? 'Ej: A1234567' : '0000-0000-00000'"
+                         (blur)="validarIdentidadExistente()">
+                  <mat-icon matSuffix *ngIf="validandoIdentidad" class="spin-icon">sync</mat-icon>
                   <mat-error>Requerido</mat-error>
                 </mat-form-field>
+              </div>
+
+              <!-- Alerta cliente existente -->
+              <div *ngIf="clienteExistente" class="cliente-existente-alert">
+                <mat-icon>warning</mat-icon>
+                <div class="alerta-texto">
+                  <strong>Ya existe un cliente con esta identidad:</strong>
+                  <span>{{ clienteExistente.nombreCompleto }}</span>
+                </div>
+                <button mat-stroked-button color="primary" (click)="usarClienteExistente()">
+                  <mat-icon>how_to_reg</mat-icon> Usar este cliente
+                </button>
               </div>
 
               <p class="section-label">Nombre completo</p>
@@ -204,10 +218,23 @@
 
               <p class="section-label">Contacto y fiscal</p>
               <div class="form-grid">
-                <mat-form-field appearance="outline">
-                  <mat-label>Teléfono</mat-label>
-                  <input matInput formControlName="telefono">
-                </mat-form-field>
+                <div class="telefono-row">
+                  <mat-form-field appearance="outline" class="pais-field">
+                    <mat-label>País</mat-label>
+                    <mat-select formControlName="paisTelefono">
+                      <mat-option *ngFor="let p of paises" [value]="p.codigo">
+                        {{ p.nombre }} {{ p.codigo }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="telefono-field">
+                    <mat-label>Teléfono</mat-label>
+                    <input matInput formControlName="telefono"
+                           [appTelefonoMask]="paisPadreSeleccionado.formato"
+                           [placeholder]="paisPadreSeleccionado.placeholder">
+                    <mat-hint>{{ paisPadreSeleccionado.codigo }}</mat-hint>
+                  </mat-form-field>
+                </div>
 
                 <mat-form-field appearance="outline">
                   <mat-label>Correo electrónico</mat-label>
@@ -254,23 +281,45 @@
           <div class="form-grid">
             <mat-form-field appearance="outline">
               <mat-label>Grado *</mat-label>
-              <mat-select formControlName="grado">
-                <mat-option *ngFor="let g of grados" [value]="g">{{ g }}</mat-option>
+              <mat-select formControlName="idGrado">
+                <mat-option *ngFor="let g of grados" [value]="g.idGrado">{{ g.gradoNombre }}</mat-option>
               </mat-select>
               <mat-error>Requerido</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Valor matrícula (L.) *</mat-label>
-              <input matInput formControlName="valorMatricula" type="number" min="0">
+              <mat-label>Fecha inicio de clases *</mat-label>
+              <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicioClases">
+              <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+              <mat-datepicker #pickerInicio></mat-datepicker>
               <mat-error>Requerido</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Valor mensualidad (L.) *</mat-label>
-              <input matInput formControlName="valorMensualidad" type="number" min="0">
-              <mat-error>Requerido</mat-error>
+              <mat-label>Descuento mensual (%)</mat-label>
+              <input matInput formControlName="descuento" type="number" min="0" max="100" step="1" placeholder="0">
+              <span matSuffix>%</span>
             </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Motivo del descuento</mat-label>
+              <input matInput formControlName="motivoDescuento">
+            </mat-form-field>
+          </div>
+
+          <p class="section-label">Foto del alumno</p>
+          <div class="form-grid">
+            <div class="foto-upload">
+              <img *ngIf="fotoBase64" [src]="fotoBase64" class="foto-preview" alt="Foto alumno">
+              <div *ngIf="!fotoBase64" class="foto-placeholder-new">
+                <mat-icon>person</mat-icon>
+              </div>
+              <label class="foto-label">
+                <mat-icon>photo_camera</mat-icon>
+                <span>{{ fotoBase64 ? 'Cambiar foto' : 'Seleccionar foto' }}</span>
+                <input type="file" accept="image/*" (change)="onFotoSeleccionada($event)" hidden>
+              </label>
+            </div>
           </div>
 
           <p class="section-label">Identificación</p>

@@ -4,6 +4,9 @@ import { MatStepper } from '@angular/material/stepper';
 import { Router } from '@angular/router';
 import { ClienteService, ClienteResponse, GuardarClienteDto } from '@app/services/cliente/cliente.service';
 import { AlumnoService, GuardarAlumnoDto } from '@app/services/alumno/alumno.service';
+import { MatriculaService, GuardarMatriculaDto } from '@app/services/matricula/matricula.service';
+import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.service';
+import { PAISES_TELEFONO, PaisTelefono } from '../telefono-mask.directive';
 import { NotificationService } from '@app/services';
 
 @Component({
@@ -24,12 +27,21 @@ export class NuevaMatriculaComponent implements OnInit {
   mostrarFormPadre = false;
   guardando = false;
 
+  // ── Validación identidad duplicada ──
+  validandoIdentidad = false;
+  clienteExistente: ClienteResponse | null = null;
+
+  // ── Foto alumno ──
+  fotoBase64: string | null = null;
+
   // ── Formularios ──
   padreForm!: FormGroup;
   alumnoForm!: FormGroup;
 
   // ── Opciones de dropdowns ──
+  paises: PaisTelefono[] = PAISES_TELEFONO;
   tiposId = ['DNI / Identidad', 'Pasaporte'];
+  grados: GradoDto[] = [];
 
   nacionalidades = [
     'Hondureño/a', 'Guatemalteco/a', 'Salvadoreño/a', 'Nicaragüense',
@@ -79,23 +91,19 @@ export class NuevaMatriculaComponent implements OnInit {
     this.alumnoForm.get('municipio')?.setValue('');
   }
 
-  grados = [
-    'Primer Grado Pre-Basica', 'Segundo Grado Pre-Basica', 'Tercer Grado Pre-Basica',
-    'Primer Grado Basica', 'Segundo Grado Basica', 'Tercer Grado Basica',
-    'Cuarto Grado Basica', 'Quinto Grado Basica', 'Sexto Grado Basica',
-    'Septimo Grado Basica', 'Octavo Grado Basica', 'Noveno Grado Basica',
-    'Decimo', 'Undecimo',
-  ];
-
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private clienteService: ClienteService,
     private alumnoService: AlumnoService,
+    private matriculaService: MatriculaService,
+    private catalogoService: CatalogoService,
     private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
+    this.catalogoService.getGrados().subscribe({ next: (data) => this.grados = data ?? [] });
+
     this.padreForm = this.fb.group({
       tipoIdentificacion: ['', Validators.required],
       identificacion:     ['', Validators.required],
@@ -110,6 +118,7 @@ export class NuevaMatriculaComponent implements OnInit {
       departamento:       ['', Validators.required],
       municipio:          ['', Validators.required],
       direccion:          [''],
+      paisTelefono:       ['+504'],
       telefono:           [''],
       correoElectronico:  ['', Validators.email],
       rtn:                ['', Validators.pattern(/^\d{4}-\d{4}-\d{6}$/)],
@@ -122,9 +131,10 @@ export class NuevaMatriculaComponent implements OnInit {
       segundoNombre:      [''],
       apellidos:          ['', Validators.required],
       segundoApellido:    [''],
-      grado:              ['', Validators.required],
-      valorMatricula:     [null, [Validators.required, Validators.min(0)]],
-      valorMensualidad:   [null, [Validators.required, Validators.min(0)]],
+      idGrado:            [null, Validators.required],
+      fechaInicioClases:  [null, Validators.required],
+      descuento:          [null, Validators.min(0)],
+      motivoDescuento:    [''],
       nacionalidad:       [''],
       sexo:               [''],
       fechaNacimiento:    [null],
@@ -137,9 +147,22 @@ export class NuevaMatriculaComponent implements OnInit {
     });
   }
 
+  get paisPadreSeleccionado(): PaisTelefono {
+    const codigo = this.padreForm?.get('paisTelefono')?.value ?? '+504';
+    return this.paises.find(p => p.codigo === codigo) ?? this.paises[0];
+  }
+
   get padreValido(): boolean {
     return this.padreSeleccionado !== null ||
            (this.mostrarFormPadre && this.padreForm.valid);
+  }
+
+  onFotoSeleccionada(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => { this.fotoBase64 = reader.result as string; };
+    reader.readAsDataURL(file);
   }
 
   buscarPadre(): void {
@@ -179,6 +202,31 @@ export class NuevaMatriculaComponent implements OnInit {
     this.mostrarFormPadre = true;
     this.padreResultados = [];
     this.buscado = false;
+    this.clienteExistente = null;
+  }
+
+  validarIdentidadExistente(): void {
+    const identidad = this.padreForm.get('identificacion')?.value?.trim();
+    if (!identidad) { this.clienteExistente = null; return; }
+
+    this.validandoIdentidad = true;
+    this.clienteExistente = null;
+
+    this.clienteService.buscarPorIdentidad(identidad).subscribe({
+      next: (cliente) => {
+        this.clienteExistente = cliente;
+        this.validandoIdentidad = false;
+      },
+      error: () => { this.validandoIdentidad = false; }
+    });
+  }
+
+  usarClienteExistente(): void {
+    if (this.clienteExistente) {
+      this.seleccionarPadre(this.clienteExistente);
+      this.mostrarFormPadre = false;
+      this.clienteExistente = null;
+    }
   }
 
   continuarAAlumno(): void {
@@ -200,41 +248,64 @@ export class NuevaMatriculaComponent implements OnInit {
       this.enviarAlumno(this.padreSeleccionado.id);
     } else {
       const f = this.padreForm.value;
+      const a = this.alumnoForm.value;
       const up = (v: string) => v ? v.toUpperCase() : undefined;
 
-      const dto: GuardarClienteDto = {
-        tipoIdentificacion: f.tipoIdentificacion,
-        identidad:          f.identificacion,
-        primerNombre:       up(f.primerNombre)!,
-        segundoNombre:      up(f.segundoNombre),
-        primerApellido:     up(f.primerApellido)!,
-        segundoApellido:    up(f.segundoApellido),
-        nacionalidad:       f.nacionalidad,
-        sexo:               f.sexo,
-        fechaNacimiento:    f.fechaNacimiento
-                              ? new Date(f.fechaNacimiento).toISOString().split('T')[0]
-                              : null,
-        lugarNacimiento:    up(f.lugarNacimiento),
-        departamento:       f.departamento,
-        municipio:          f.municipio,
-        direccion:          up(f.direccion),
-        telefono:           f.telefono,
-        correoElectronico:  f.correoElectronico || undefined,
-        rtn:                f.rtn               || undefined,
+      const dto: GuardarMatriculaDto = {
+        // Cliente
+        tipoIdentificacionCliente: f.tipoIdentificacion,
+        identidadCliente:          f.identificacion,
+        primerNombreCliente:       up(f.primerNombre)!,
+        segundoNombreCliente:      up(f.segundoNombre),
+        primerApellidoCliente:     up(f.primerApellido)!,
+        segundoApellidoCliente:    up(f.segundoApellido),
+        nacionalidadCliente:       f.nacionalidad,
+        sexoCliente:               f.sexo,
+        fechaNacimientoCliente:    f.fechaNacimiento
+                                     ? new Date(f.fechaNacimiento).toISOString().split('T')[0]
+                                     : null,
+        lugarNacimientoCliente:    up(f.lugarNacimiento),
+        departamentoCliente:       f.departamento,
+        municipioCliente:          f.municipio,
+        direccionCliente:          up(f.direccion),
+        telefonoCliente:           f.telefono ? `${f.paisTelefono} ${f.telefono}` : '',
+        correoElectronicoCliente:  f.correoElectronico || undefined,
+        rtnCliente:                f.rtn               || undefined,
+
+        // Alumno
+        identidadAlumno:           a.identidad,
+        tipoIdentificacionAlumno:  a.tipoIdentificacion || undefined,
+        primerNombreAlumno:        up(a.nombres)!,
+        segundoNombreAlumno:       up(a.segundoNombre),
+        primerApellidoAlumno:      up(a.apellidos)!,
+        segundoApellidoAlumno:     up(a.segundoApellido),
+        idGrado:                   a.idGrado,
+        fechaInicioClases:         a.fechaInicioClases
+                                     ? new Date(a.fechaInicioClases).toISOString().split('T')[0]
+                                     : null,
+        nacionalidadAlumno:        a.nacionalidad       || undefined,
+        sexoAlumno:                a.sexo               || undefined,
+        fechaNacimientoAlumno:     a.fechaNacimiento
+                                     ? new Date(a.fechaNacimiento).toISOString().split('T')[0]
+                                     : null,
+        lugarNacimientoAlumno:     a.lugarNacimiento    || undefined,
+        departamentoAlumno:        a.departamento       || undefined,
+        municipioAlumno:           a.municipio          || undefined,
+        direccionAlumno:           a.direccion          || undefined,
+        telefonoAlumno:            a.telefono           || undefined,
+        correoElectronicoAlumno:   a.correoElectronico  || undefined,
+        descuento:                 a.descuento          ?? undefined,
+        motivoDescuento:           a.motivoDescuento    || undefined,
+        foto:                      this.fotoBase64      ?? undefined,
       };
 
-      this.clienteService.guardarCliente(dto).subscribe({
-        next: (res) => {
-          const idCliente = res?.idCliente;
-          if (!idCliente) {
-            this.notification.error('No se obtuvo el ID del cliente registrado');
-            this.guardando = false;
-            return;
-          }
-          this.enviarAlumno(idCliente);
+      this.matriculaService.guardarMatricula(dto).subscribe({
+        next: () => {
+          this.notification.success('Matrícula registrada correctamente');
+          this.router.navigate(['/matriculas']);
         },
         error: () => {
-          this.notification.error('Error al registrar el padre/tutor');
+          this.notification.error('Error al registrar la matrícula. No se guardaron datos.');
           this.guardando = false;
         }
       });
@@ -253,9 +324,13 @@ export class NuevaMatriculaComponent implements OnInit {
       segundoApellido:    up(a.segundoApellido),
       cliente:            idCliente,
       estado:             'Activo',
-      grado:              a.grado,
-      valorMatricula:     a.valorMatricula,
-      valorMensualidad:   a.valorMensualidad,
+      idGrado:            a.idGrado,
+      fechaInicioClases:  a.fechaInicioClases
+                            ? new Date(a.fechaInicioClases).toISOString().split('T')[0]
+                            : null,
+      descuento:          a.descuento          ?? undefined,
+      motivoDescuento:    a.motivoDescuento    || undefined,
+      foto:               this.fotoBase64      ?? undefined,
       nacionalidad:       a.nacionalidad       || undefined,
       sexo:               a.sexo               || undefined,
       fechaNacimiento:    a.fechaNacimiento

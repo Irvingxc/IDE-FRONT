@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;margin-right:8px">shield</mat-icon>
+  Permisos — {{ rolNombre }}
+</h2>
+
+<mat-dialog-content>
+
+  <div *ngIf="cargando" class="loading">Cargando módulos...</div>
+
+  <ng-container *ngIf="!cargando">
+    <div class="select-all-row">
+      <mat-checkbox
+        [checked]="todosSeleccionados"
+        [indeterminate]="algunoSeleccionado"
+        (change)="toggleTodos($event.checked)">
+        Seleccionar todos
+      </mat-checkbox>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="modulos-list">
+      <div class="modulo-row" *ngFor="let m of modulos">
+        <mat-checkbox
+          [checked]="m.seleccionado"
+          (change)="toggleModulo(m, $event.checked)">
+          <div class="modulo-info">
+            <mat-icon class="modulo-icon">{{ m.icono }}</mat-icon>
+            <span class="modulo-nombre">{{ m.nombre }}</span>
+            <span class="modulo-clave">{{ m.clave }}</span>
+          </div>
+        </mat-checkbox>
+      </div>
+    </div>
+  </ng-container>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button [mat-dialog-close]="false">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="guardando || cargando">
+    <mat-icon>save</mat-icon>
+    {{ guardando ? 'Guardando...' : 'Guardar permisos' }}
+  </button>
+</mat-dialog-actions>

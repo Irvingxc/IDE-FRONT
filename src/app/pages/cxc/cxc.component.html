@@ -1,0 +1,140 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Cuentas por Cobrar</h1>
+      <p class="breadcrumb">Inicio / CXC</p>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button color="accent"
+              [matMenuTriggerFor]="menuAnios"
+              [disabled]="generando">
+        <mat-spinner *ngIf="generando" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+        <mat-icon *ngIf="!generando">auto_awesome</mat-icon>
+        {{ generando ? 'Generando...' : 'Generar CXC' }}
+        <mat-icon *ngIf="!generando">arrow_drop_down</mat-icon>
+      </button>
+
+      <mat-menu #menuAnios="matMenu">
+        <button mat-menu-item
+                *ngFor="let a of aniosDisponibles"
+                [disabled]="aniosGenerados.has(a)"
+                (click)="generarCxc(a)">
+          <mat-icon>{{ aniosGenerados.has(a) ? 'check_circle' : 'add_circle_outline' }}</mat-icon>
+          <span>{{ a }}</span>
+          <span *ngIf="aniosGenerados.has(a)" style="margin-left:8px;font-size:11px;color:#888">(ya generado)</span>
+        </button>
+      </mat-menu>
+      <div class="leyenda">
+        <span class="badge badge-rojo">Más de 3 cuotas pendientes</span>
+        <span class="badge badge-amarillo">1–3 cuotas pendientes</span>
+        <span class="badge badge-verde">Al día</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-row">
+    <mat-form-field appearance="outline" class="filtro-nombre">
+      <mat-label>Buscar alumno</mat-label>
+      <input matInput [(ngModel)]="filtroNombre" (keyup.enter)="cargar()" placeholder="Nombre o apellido">
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filtro-anio">
+      <mat-label>Año</mat-label>
+      <input matInput type="number" [(ngModel)]="anio" (change)="cargar()">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filtro-estado">
+      <mat-label>Estado</mat-label>
+      <mat-select [(ngModel)]="filtroEstado" (selectionChange)="cargar()">
+        <mat-option value="">Todos</mat-option>
+        <mat-option value="Pendiente">Con pendientes</mat-option>
+        <mat-option value="AlDia">Al día</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="cargar()">
+      <mat-icon>search</mat-icon> Buscar
+    </button>
+    <button mat-stroked-button (click)="limpiar()" *ngIf="filtroNombre || filtroEstado">
+      <mat-icon>clear</mat-icon> Limpiar
+    </button>
+  </div>
+
+  <div class="hint-row">
+    <mat-icon>touch_app</mat-icon>
+    <span>Doble clic en un alumno para ver su estado de cuenta completo</span>
+    <span class="total-global" *ngIf="datos.length > 0">
+      Total pendiente: <strong>{{ formatLps(totalPendienteGlobal) }}</strong>
+    </span>
+  </div>
+
+  <!-- Spinner -->
+  <div class="spinner-wrap" *ngIf="cargando">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-wrapper" *ngIf="!cargando">
+    <table mat-table [dataSource]="datos" class="mat-elevation-z1">
+
+      <!-- Alumno -->
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef>Alumno</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="nombre-cell">{{ row.nombreCompleto }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Grado -->
+      <ng-container matColumnDef="grado">
+        <th mat-header-cell *matHeaderCellDef>Grado</th>
+        <td mat-cell *matCellDef="let row">{{ row.gradoNombre }}</td>
+      </ng-container>
+
+      <!-- Cuotas -->
+      <ng-container matColumnDef="cuotasPendientes">
+        <th mat-header-cell *matHeaderCellDef>Cuotas</th>
+        <td mat-cell *matCellDef="let row">
+          <span [class]="row.cuotasPendientes > 3 ? 'count-rojo'
+                       : row.cuotasPendientes > 0  ? 'count-amarillo'
+                       : 'count-verde'">
+            {{ row.cuotasPendientes }} pendiente(s) / {{ row.cuotasPagadas }} pagada(s)
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Total pendiente -->
+      <ng-container matColumnDef="totalPendiente">
+        <th mat-header-cell *matHeaderCellDef>Total Pendiente</th>
+        <td mat-cell *matCellDef="let row" class="monto-cell monto-pendiente">
+          {{ formatLps(row.totalPendiente) }}
+        </td>
+      </ng-container>
+
+      <!-- Total pagado -->
+      <ng-container matColumnDef="totalPagado">
+        <th mat-header-cell *matHeaderCellDef>Total Pagado</th>
+        <td mat-cell *matCellDef="let row" class="monto-cell monto-pagado">
+          {{ formatLps(row.totalPagado) }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"
+          [class]="rowClass(row)"
+          class="clickable-row"
+          (dblclick)="abrirEstadoCuenta(row)"
+          matTooltip="Doble clic para ver estado de cuenta">
+      </tr>
+    </table>
+
+    <div class="empty-state" *ngIf="datos.length === 0">
+      <mat-icon>inbox</mat-icon>
+      <p>No hay registros para mostrar</p>
+    </div>
+  </div>
+
+</div>

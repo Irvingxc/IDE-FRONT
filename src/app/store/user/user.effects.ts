@@ -64,7 +64,8 @@ export class UserEffects {
             tap((response: UserResponse) => {
               localStorage.setItem('token', response.token);
               localStorage.setItem(USER_KEY, JSON.stringify(response));
-              this.router.navigate(['/']);
+              const destino = response.sucursalId == null ? '/seleccionar-sucursal' : '/';
+              this.router.navigate([destino]);
             }),
             map((response: UserResponse) => new fromActions.SignInEmailSuccess(response.email, response || null)),
             catchError(err => {
@@ -81,21 +82,27 @@ export class UserEffects {
       ofType(fromActions.Types.INIT),
       switchMap(() => {
         const token = localStorage.getItem('token');
-        const userJson = localStorage.getItem(USER_KEY);
 
-        if (token && userJson && !tokenExpirado(token)) {
-          try {
-            const user: UserResponse = JSON.parse(userJson);
-            return of(new fromActions.InitAuthorized(user.email, user));
-          } catch {
+        if (!token || tokenExpirado(token)) {
+          localStorage.removeItem('token');
+          localStorage.removeItem(USER_KEY);
+          return of(new fromActions.InitUnauthorized());
+        }
+
+        return this.httpClient.get<UserResponse>(`${environment.url}api/Usuario`).pipe(
+          tap((user: UserResponse) => {
+            localStorage.setItem(USER_KEY, JSON.stringify(user));
+            if (user.sucursalId == null) {
+              this.router.navigate(['/seleccionar-sucursal']);
+            }
+          }),
+          map((user: UserResponse) => new fromActions.InitAuthorized(user.email!, user)),
+          catchError(() => {
             localStorage.removeItem('token');
             localStorage.removeItem(USER_KEY);
             return of(new fromActions.InitUnauthorized());
-          }
-        }
-        localStorage.removeItem('token');
-        localStorage.removeItem(USER_KEY);
-        return of(new fromActions.InitUnauthorized());
+          })
+        );
       })
     )
   );

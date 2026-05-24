@@ -1,7 +1,7 @@
 <div class="dashboard">
 
   <div class="welcome-header">
-    <h1>Bienvenido, Administrador</h1>
+    <h1>Bienvenido, {{ nombreUsuario$ | async }}</h1>
     <p class="date-info">{{ currentDate }} · Año escolar {{ schoolYear }}</p>
   </div>
 
@@ -21,7 +21,7 @@
   <h2 class="section-title">MÓDULOS DEL SISTEMA</h2>
 
   <div class="modules-grid">
-    <mat-card class="module-card" *ngFor="let mod of modules" [routerLink]="mod.route">
+    <mat-card class="module-card" *ngFor="let mod of modules$ | async" [routerLink]="mod.route">
       <div class="module-icon-wrap" [style.background]="mod.color + '22'">
         <mat-icon [style.color]="mod.color">{{ mod.icon }}</mat-icon>
       </div>

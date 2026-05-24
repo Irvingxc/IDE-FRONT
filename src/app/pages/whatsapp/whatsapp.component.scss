@@ -1,0 +1,68 @@
+.page-container {
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+
+  h1 { margin: 0; font-size: 24px; font-weight: 600; }
+  .breadcrumb { margin: 4px 0 0; font-size: 13px; color: #666; }
+}
+
+.resumen-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
+  width: fit-content;
+
+  .resumen-icon { font-size: 36px; width: 36px; height: 36px; color: #25D366; }
+  .resumen-numero { font-size: 28px; font-weight: 700; color: #15803d; display: block; line-height: 1; }
+  .resumen-label { font-size: 13px; color: #666; }
+}
+
+.loading-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 24px;
+  color: #666;
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.data-table {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.telefono-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; color: #25D366; }
+}
+
+.no-data-row td {
+  padding: 24px;
+  text-align: center;
+  color: #999;
+}

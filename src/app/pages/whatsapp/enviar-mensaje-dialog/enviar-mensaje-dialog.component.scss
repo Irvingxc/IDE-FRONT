@@ -1,0 +1,40 @@
+.destinatarios-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  color: #15803d;
+
+  mat-icon { color: #16a34a; }
+}
+
+.mensaje-field {
+  width: 100%;
+}
+
+.progreso-container {
+  margin-top: 16px;
+
+  .progreso-label {
+    display: block;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    margin-top: 6px;
+  }
+}
+
+.enviado-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #16a34a;
+  font-weight: 500;
+  margin-top: 16px;
+
+  mat-icon { color: #16a34a; }
+}

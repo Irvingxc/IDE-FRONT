@@ -1,98 +1,102 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-
-export interface ItemFactura {
-  concepto: string;
-  cantidad: number;
-  precioUnitario: number;
-  exento: boolean;
-}
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
+import { Router } from '@angular/router';
+import { FacturacionService, PagoResumen, PagoDetalle } from '@app/services/facturacion/facturacion.service';
+import { NuevaFacturaDialogComponent, NuevaFacturaDialogData } from './nueva-factura-dialog/nueva-factura-dialog.component';
 
 @Component({
   selector: 'app-facturacion',
   templateUrl: './facturacion.component.html',
   styleUrls: ['./facturacion.component.scss']
 })
-export class FacturacionComponent implements OnInit {
+export class FacturacionComponent implements OnInit, AfterViewInit {
 
-  form!: FormGroup;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  // Datos del emisor (normalmente vendrían de configuración/backend)
-  emisor = {
-    nombre: 'Instituto Educativo EduGestión HN',
-    rtn: '0801-1990-00123',
-    direccion: 'Col. Kennedy, Tegucigalpa, Francisco Morazán',
-    telefono: '2234-5678',
-    cai: 'A1B2C3-D4E5F6-G7H8I9-J0K1L2-M3N4O5-P6',
-    rangoDesde: '001-001-01-00000001',
-    rangoHasta: '001-001-01-00000200',
-    fechaLimiteEmision: '31/12/2026',
-    numeroFactura: '001-001-01-00000001',
-  };
+  columns    = ['noFactura', 'fecha', 'alumno', 'grado', 'total', 'estado', 'acciones'];
+  dataSource = new MatTableDataSource<PagoResumen>();
+  cargando   = false;
+  anio      = new Date().getFullYear();
+  mes       = 0;
+  filtroAlumno  = '';
+  filtroEstado  = '';
 
-  ISV_RATE = 0.15;
-
-  items: ItemFactura[] = [
-    { concepto: '', cantidad: 1, precioUnitario: 0, exento: true }
+  readonly meses = [
+    { val: 0,  label: 'Todos' },
+    { val: 1,  label: 'Enero' },    { val: 2,  label: 'Febrero' },
+    { val: 3,  label: 'Marzo' },    { val: 4,  label: 'Abril' },
+    { val: 5,  label: 'Mayo' },     { val: 6,  label: 'Junio' },
+    { val: 7,  label: 'Julio' },    { val: 8,  label: 'Agosto' },
+    { val: 9,  label: 'Septiembre'},{ val: 10, label: 'Octubre' },
+    { val: 11, label: 'Noviembre'}, { val: 12, label: 'Diciembre' },
   ];
 
-  itemsColumns = ['concepto', 'cantidad', 'precio', 'exento', 'total', 'acciones'];
+  constructor(
+    private facturacionService: FacturacionService,
+    private dialog: MatDialog,
+    private router: Router
+  ) {}
 
-  constructor(private fb: FormBuilder) {}
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+  }
 
   ngOnInit(): void {
-    this.form = this.fb.group({
-      nombreCliente: ['', Validators.required],
-      rtnCliente: [''],
-      fechaEmision: [new Date(), Validators.required],
+    this.cargar();
+    // Si viene desde CXC (navegación con estado), abrir dialog pre-cargado
+    const state = history.state as NuevaFacturaDialogData & { fromCxc?: boolean };
+    if (state?.fromCxc) {
+      // Limpiar el estado del history para no re-abrir en reload
+      history.replaceState({}, '');
+      setTimeout(() => this.abrirDialog(state), 300);
+    }
+  }
+
+  cargar(): void {
+    this.cargando = true;
+    this.facturacionService.getListarPagos(this.anio, this.mes, this.filtroAlumno, this.filtroEstado).subscribe({
+      next: (data) => { this.dataSource.data = data ?? []; this.cargando = false; },
+      error: ()     => { this.cargando = false; }
     });
   }
 
-  addItem(): void {
-    this.items = [...this.items, { concepto: '', cantidad: 1, precioUnitario: 0, exento: true }];
+  nuevaFactura(): void {
+    this.abrirDialog({ fromCxc: false, alumnoIdentidad: '', alumnoNombre: '', alumnoTutor: '', gradoNombre: '', items: [], idsCxc: [] });
   }
 
-  removeItem(index: number): void {
-    if (this.items.length > 1) {
-      this.items = this.items.filter((_, i) => i !== index);
-    }
+  private abrirDialog(data: NuevaFacturaDialogData): void {
+    const ref = this.dialog.open(NuevaFacturaDialogComponent, {
+      width: '820px',
+      maxWidth: '96vw',
+      disableClose: true,
+      data
+    });
+    ref.afterClosed().subscribe(ok => { if (ok) this.cargar(); });
   }
 
-  totalItem(item: ItemFactura): number {
-    return item.cantidad * item.precioUnitario;
+  imprimir(pago: PagoResumen): void {
+    this.facturacionService.getDetalle(pago.id).subscribe(detalle => {
+      this.abrirVentanaImpresion(detalle);
+    });
   }
 
-  get subtotalExento(): number {
-    return this.items
-      .filter(i => i.exento)
-      .reduce((sum, i) => sum + this.totalItem(i), 0);
+  formatLps(v: number): string { return this.facturacionService.formatLps(v); }
+
+  limpiar(): void {
+    this.filtroAlumno = '';
+    this.filtroEstado = '';
+    this.mes = 0;
+    this.cargar();
   }
 
-  get subtotalGravado(): number {
-    return this.items
-      .filter(i => !i.exento)
-      .reduce((sum, i) => sum + this.totalItem(i), 0);
+  private abrirVentanaImpresion(p: PagoDetalle): void {
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(this.facturacionService.buildFacturaHtml(p));
+    win.document.close();
+    setTimeout(() => { win.focus(); win.print(); }, 500);
   }
 
-  get isv(): number {
-    return this.subtotalGravado * this.ISV_RATE;
-  }
-
-  get totalPagar(): number {
-    return this.subtotalExento + this.subtotalGravado + this.isv;
-  }
-
-  onGuardar(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-    console.log({ emisor: this.emisor, cliente: this.form.value, items: this.items });
-    // TODO: llamar endpoint del backend
-  }
-
-  onLimpiar(): void {
-    this.form.reset({ fechaEmision: new Date() });
-    this.items = [{ concepto: '', cantidad: 1, precioUnitario: 0, exento: true }];
-  }
 }

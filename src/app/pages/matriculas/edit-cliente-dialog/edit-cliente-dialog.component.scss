@@ -25,3 +25,10 @@ $guinda: #6B0F1A;
 mat-dialog-content { max-height: 72vh; }
 
 input[matInput] { text-transform: uppercase; }
+
+.telefono-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 0 16px;
+}

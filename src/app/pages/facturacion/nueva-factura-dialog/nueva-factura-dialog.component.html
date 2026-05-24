@@ -1,0 +1,209 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;margin-right:8px">receipt_long</mat-icon>
+  Nueva Factura
+</h2>
+
+<mat-dialog-content>
+
+  <!-- SAR loading -->
+  <div *ngIf="cargandoSar" class="loading-sar">
+    <mat-spinner diameter="24"></mat-spinner>
+    <span>Cargando datos SAR...</span>
+  </div>
+
+  <ng-container *ngIf="!cargandoSar">
+
+    <!-- ═══ BLOQUE SAR ═══ -->
+    <div class="sar-card" *ngIf="sar">
+      <div class="sar-row">
+        <span class="sar-label">N° Factura (próximo)</span>
+        <span class="sar-value mono bold">{{ nextInvoiceNumber }}</span>
+      </div>
+      <div class="sar-row">
+        <span class="sar-label">CAI</span>
+        <span class="sar-value mono">{{ sar?.cai }}</span>
+      </div>
+      <div class="sar-row">
+        <span class="sar-label">Rango autorizado</span>
+        <span class="sar-value mono">{{ sar?.rangoDel }} — {{ sar?.rangoAl }}</span>
+      </div>
+      <div class="sar-row">
+        <span class="sar-label">Fecha límite de emisión</span>
+        <span class="sar-value" [class.vencido]="sar?.fechaLim && sar!.fechaLim < hoyStr">
+          {{ sarFechaLimStr }}
+        </span>
+      </div>
+    </div>
+
+    <div class="sar-card sin-sar" *ngIf="!sar">
+      <mat-icon>warning</mat-icon>
+      <span>No hay un CAI vigente registrado para esta sucursal. Registre uno antes de facturar.</span>
+    </div>
+
+    <!-- ═══ RECEPTOR ═══ -->
+    <div class="seccion-titulo">Receptor</div>
+
+    <!-- Búsqueda de alumno (solo modo directo) -->
+    <div *ngIf="!data.fromCxc" class="busqueda-alumno">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Buscar estudiante</mat-label>
+        <input matInput [(ngModel)]="busquedaAlumno"
+               (ngModelChange)="onBusquedaChange($event)"
+               [matAutocomplete]="autoAlumno"
+               placeholder="Nombre o identidad...">
+        <mat-icon matSuffix>search</mat-icon>
+        <mat-autocomplete #autoAlumno="matAutocomplete">
+          <mat-option *ngFor="let a of alumnosSugeridos"
+                      [value]="a.nombreCompleto"
+                      (onSelectionChange)="seleccionarAlumno(a)">
+            <span class="opt-nombre">{{ a.nombreCompleto }}</span>
+            <span class="opt-grado">{{ a.grado }}</span>
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    </div>
+
+    <div class="receptor-grid">
+      <div class="campo-readonly">
+        <span class="campo-label">Estudiante</span>
+        <span class="campo-valor">{{ alumnoNombre || '—' }}</span>
+      </div>
+      <div class="campo-readonly">
+        <span class="campo-label">Cliente / Tutor</span>
+        <span class="campo-valor">{{ alumnoTutor || alumnoNombre || '—' }}</span>
+      </div>
+      <div class="campo-readonly">
+        <span class="campo-label">Grado</span>
+        <span class="campo-valor">{{ gradoNombre || '—' }}</span>
+      </div>
+      <div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Fecha de emisión</mat-label>
+          <input matInput [matDatepicker]="picker" [(ngModel)]="fechaEmision">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- ═══ ÍTEMS ═══ -->
+    <div class="seccion-titulo">
+      Detalle
+      <button mat-stroked-button color="primary" class="btn-add-item"
+              *ngIf="!data.fromCxc && !idGradoAlumno"
+              (click)="agregarItem()">
+        <mat-icon>add</mat-icon> Agregar ítem libre
+      </button>
+    </div>
+
+    <!-- Catálogo de productos del grado (solo flujo directo) -->
+    <div class="catalogo-botones" *ngIf="!data.fromCxc && idGradoAlumno">
+
+      <!-- Productos simples (Matrícula, Libros, Uniformes, etc.) -->
+      <div class="catalogo-grupo" *ngIf="productosSimples.length > 0">
+        <span class="catalogo-label">Productos</span>
+        <div class="productos-grid">
+          <ng-container *ngFor="let p of productosSimples">
+            <button *ngIf="!estaFacturado(p.idProducto)"
+                    mat-stroked-button class="btn-producto"
+                    (click)="agregarProducto(p)">
+              <mat-icon>add</mat-icon>
+              {{ p.productoNombre }}
+              <span class="precio-badge">{{ formatLps(p.precio) }}</span>
+            </button>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- Mensualidades (12 meses) -->
+      <div class="catalogo-grupo" *ngIf="tieneMensualidad">
+        <span class="catalogo-label">
+          Mensualidades &nbsp;
+          <span *ngIf="descuentoAlumno > 0" class="precio-tachado">{{ formatLps(precioMensualidadBase) }}</span>
+          <span class="precio-badge-small">{{ formatLps(precioMensualidad) }}</span>
+          <span *ngIf="descuentoAlumno > 0" class="descuento-badge">-{{ descuentoAlumno }}%</span>
+        </span>
+        <div class="meses-grid">
+          <ng-container *ngFor="let m of [1,2,3,4,5,6,7,8,9,10,11,12]">
+            <button *ngIf="!estaFacturado(2, nombresMeses[m])"
+                    mat-stroked-button class="btn-mes"
+                    (click)="agregarMensualidad(m)">
+              {{ nombresMeses[m].slice(0, 3) }}
+            </button>
+          </ng-container>
+        </div>
+      </div>
+
+      <p class="catalogo-vacio" *ngIf="catalogoProductos.length === 0">
+        Sin productos en catálogo para este grado.
+      </p>
+    </div>
+
+    <table mat-table [dataSource]="items" class="items-table mat-elevation-z1">
+
+      <ng-container matColumnDef="concepto">
+        <th mat-header-cell *matHeaderCellDef>Concepto / Mes</th>
+        <td mat-cell *matCellDef="let item">
+          <input class="inline-input" [(ngModel)]="item.concepto"
+                 placeholder="Ej. Mensualidad Mayo">
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="precio">
+        <th mat-header-cell *matHeaderCellDef>Precio</th>
+        <td mat-cell *matCellDef="let item">
+          <input class="inline-input number-input" type="number" min="0" step="1"
+                 [(ngModel)]="item.precio">
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="cantidad">
+        <th mat-header-cell *matHeaderCellDef>Cant.</th>
+        <td mat-cell *matCellDef="let item">
+          <input class="inline-input number-input small" type="number" min="1"
+                 [(ngModel)]="item.cantidad">
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+        <td mat-cell *matCellDef="let item" class="monto text-right">
+          {{ formatLps(totalItem(item)) }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let item; let i = index">
+          <button mat-icon-button color="warn" (click)="eliminarItem(i)"
+                  [disabled]="items.length === 1">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="itemColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: itemColumns;"></tr>
+    </table>
+
+    <!-- ═══ TOTALES ═══ -->
+    <div class="totales-bloque">
+      <div class="total-fila"><span>Importe Exento</span><span class="monto">{{ formatLps(subtotal) }}</span></div>
+      <div class="total-fila"><span>ISV 15%</span><span class="monto">L. 0.00</span></div>
+      <div class="total-fila total-final"><span>TOTAL</span><span class="monto">{{ formatLps(subtotal) }}</span></div>
+    </div>
+
+  </ng-container>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button mat-raised-button color="primary"
+          (click)="guardar()"
+          [disabled]="!puedeGuardar || guardando">
+    <mat-spinner *ngIf="guardando" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+    <mat-icon *ngIf="!guardando">receipt_long</mat-icon>
+    {{ guardando ? 'Guardando...' : 'Guardar y Emitir' }}
+  </button>
+</mat-dialog-actions>

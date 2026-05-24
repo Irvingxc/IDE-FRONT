@@ -5,8 +5,12 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
 import { EditClienteDialogComponent } from './edit-cliente-dialog/edit-cliente-dialog.component';
 import { HijosDialogComponent } from './hijos-dialog/hijos-dialog.component';
 import { EditAlumnoDialogComponent } from './edit-alumno-dialog/edit-alumno-dialog.component';
+import { DescuentoAlumnoDialogComponent } from './descuento-alumno-dialog/descuento-alumno-dialog.component';
+import { ContratoDialogComponent } from './contrato-dialog/contrato-dialog.component';
+import { CarnetAlumnoDialogComponent } from './carnet-alumno-dialog/carnet-alumno-dialog.component';
 import { ClienteService, ClienteResponse } from '@app/services/cliente/cliente.service';
 import { AlumnoService, AlumnoResponse } from '@app/services/alumno/alumno.service';
+import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.service';
 
 @Component({
   selector: 'app-matriculas',
@@ -16,32 +20,17 @@ import { AlumnoService, AlumnoResponse } from '@app/services/alumno/alumno.servi
 export class MatriculasComponent implements OnInit {
 
   // ── Alumnos ──
-  alumnosColumns = ['nombre', 'grado', 'estado', 'tutor', 'acciones'];
+  alumnosColumns = ['nombre', 'grado', 'estado', 'descuento', 'tutor', 'acciones'];
   alumnos: AlumnoResponse[] = [];
   alumnosLoading = false;
   totalAlumnos = 0;
   paginaAlumnos = 1;
 
-  filtroNombre = '';
-  filtroGrado  = '';
-  filtroEstado = 'Activo';
+  filtroNombre    = '';
+  filtroIdGrado: number | null = null;
+  filtroEstado    = 'Activo';
 
-  grados = [
-    'Primer Grado Pre-Basica',
-    'Segundo Grado Pre-Basica',
-    'Tercer Grado Pre-Basica',
-    'Primer Grado Basica',
-    'Segundo Grado Basica',
-    'Tercer Grado Basica',
-    'Cuarto Grado Basica',
-    'Quinto Grado Basica',
-    'Sexto Grado Basica',
-    'Septimo Grado Basica',
-    'Octavo Grado Basica',
-    'Noveno Grado Basica',
-    'Decimo',
-    'Undecimo',
-  ];
+  grados: GradoDto[] = [];
 
   readonly ALUMNOS_PAGE_SIZE = 10;
 
@@ -57,10 +46,12 @@ export class MatriculasComponent implements OnInit {
   constructor(
     private dialog: MatDialog,
     private clienteService: ClienteService,
-    private alumnoService: AlumnoService
+    private alumnoService: AlumnoService,
+    private catalogoService: CatalogoService
   ) {}
 
   ngOnInit(): void {
+    this.catalogoService.getGrados().subscribe({ next: (data) => this.grados = data ?? [] });
     this.cargarAlumnos();
     this.cargarClientes();
   }
@@ -73,7 +64,7 @@ export class MatriculasComponent implements OnInit {
       pagina,
       this.ALUMNOS_PAGE_SIZE,
       this.filtroNombre,
-      this.filtroGrado,
+      this.filtroIdGrado ?? undefined,
       this.filtroEstado
     ).subscribe({
       next: (data) => {
@@ -95,9 +86,9 @@ export class MatriculasComponent implements OnInit {
   }
 
   limpiarFiltros(): void {
-    this.filtroNombre = '';
-    this.filtroGrado  = '';
-    this.filtroEstado = '';
+    this.filtroNombre    = '';
+    this.filtroIdGrado   = null;
+    this.filtroEstado    = '';
     this.cargarAlumnos(1);
   }
 
@@ -108,6 +99,16 @@ export class MatriculasComponent implements OnInit {
     });
     ref.afterClosed().subscribe((actualizado) => {
       if (actualizado) this.cargarAlumnos(this.paginaAlumnos);
+    });
+  }
+
+  registrarDescuento(alumno: AlumnoResponse): void {
+    const ref = this.dialog.open(DescuentoAlumnoDialogComponent, {
+      width: '440px',
+      data: alumno
+    });
+    ref.afterClosed().subscribe((guardado) => {
+      if (guardado) this.cargarAlumnos(this.paginaAlumnos);
     });
   }
 
@@ -167,6 +168,20 @@ export class MatriculasComponent implements OnInit {
     });
     ref.afterClosed().subscribe((actualizado) => {
       if (actualizado) this.cargarClientes(this.paginaActual);
+    });
+  }
+
+  generarCarnet(alumno: AlumnoResponse): void {
+    this.dialog.open(CarnetAlumnoDialogComponent, {
+      width: '440px',
+      data: alumno
+    });
+  }
+
+  generarContrato(cliente: ClienteResponse): void {
+    this.dialog.open(ContratoDialogComponent, {
+      width: '500px',
+      data: cliente
     });
   }
 }

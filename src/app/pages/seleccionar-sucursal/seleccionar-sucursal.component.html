@@ -1,0 +1,26 @@
+<div class="page-wrap">
+  <div class="card">
+    <div class="card-header">
+      <mat-icon class="logo-icon">account_balance</mat-icon>
+      <h1>Seleccionar sucursal</h1>
+      <p>Elige la sucursal en la que trabajarás en esta sesión.</p>
+    </div>
+
+    <div *ngIf="cargando" class="loading">Cargando sucursales...</div>
+
+    <div class="sucursales-grid" *ngIf="!cargando">
+      <button
+        class="sucursal-card"
+        *ngFor="let s of sucursales"
+        (click)="seleccionar(s.id)"
+        [disabled]="guardando">
+        <mat-icon>store</mat-icon>
+        <span>{{ s.nombre }}</span>
+      </button>
+    </div>
+
+    <p class="no-sucursales" *ngIf="!cargando && sucursales.length === 0">
+      No hay sucursales activas registradas.
+    </p>
+  </div>
+</div>

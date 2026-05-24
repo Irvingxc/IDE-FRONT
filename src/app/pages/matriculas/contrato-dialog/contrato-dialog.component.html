@@ -1,0 +1,69 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;margin-right:8px">description</mat-icon>
+  Generar Contrato — {{ cliente.nombreCompleto }}
+</h2>
+
+<mat-dialog-content>
+
+  <div *ngIf="cargando" style="text-align:center;padding:24px;color:#888">
+    <mat-icon class="spin-icon">sync</mat-icon> Cargando estudiantes...
+  </div>
+
+  <ng-container *ngIf="!cargando">
+
+    <!-- Sin estudiantes activos -->
+    <div *ngIf="alumnos.length === 0" style="padding:12px 0;color:#888">
+      Este cliente no tiene estudiantes activos. Se generará el contrato con el nombre del estudiante en blanco.
+    </div>
+
+    <!-- Selección de alumno -->
+    <ng-container *ngIf="alumnos.length > 0">
+      <p style="margin-bottom:12px;font-size:14px;color:#555">
+        Seleccione el estudiante para el contrato:
+      </p>
+
+      <mat-selection-list [multiple]="false" style="max-height:200px;overflow-y:auto">
+        <mat-list-option
+          *ngFor="let a of alumnos"
+          [value]="a"
+          [selected]="alumnoSeleccionado?.identidad === a.identidad"
+          (click)="seleccionar(a)">
+          <span matListItemTitle>{{ a.nombreCompleto }}</span>
+          <span matListItemLine>{{ a.grado }}</span>
+        </mat-list-option>
+      </mat-selection-list>
+    </ng-container>
+
+    <!-- Resumen financiero del contrato -->
+    <div *ngIf="alumnoSeleccionado" class="resumen-financiero">
+      <div class="resumen-fila">
+        <span class="resumen-etiqueta">Mensualidad del grado</span>
+        <span class="resumen-valor">L. {{ alumnoSeleccionado.valorMensualidad | number:'1.2-2' }}</span>
+      </div>
+      <div class="resumen-fila descuento-fila" *ngIf="alumnoSeleccionado.descuento && alumnoSeleccionado.descuento > 0">
+        <span class="resumen-etiqueta">
+          Descuento
+          <span class="motivo" *ngIf="alumnoSeleccionado.motivoDescuento">({{ alumnoSeleccionado.motivoDescuento }})</span>
+        </span>
+        <span class="resumen-valor descuento">− L. {{ alumnoSeleccionado.descuento | number:'1.2-2' }}</span>
+      </div>
+      <div class="resumen-fila total-fila">
+        <span class="resumen-etiqueta"><strong>Total mensual</strong></span>
+        <span class="resumen-valor total">L. {{ mensualNeto | number:'1.2-2' }}</span>
+      </div>
+      <div class="resumen-fila">
+        <span class="resumen-etiqueta">Total anual (×12)</span>
+        <span class="resumen-valor">L. {{ mensualNeto * 12 | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+  </ng-container>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="primary" (click)="generar()" [disabled]="cargando">
+    <mat-icon>print</mat-icon> Generar e imprimir
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,109 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;margin-right:8px">account_balance_wallet</mat-icon>
+  Estado de Cuenta — {{ data.nombre }}
+</h2>
+
+<mat-dialog-content>
+
+  <div *ngIf="cargando" class="loading">
+    <mat-spinner diameter="32"></mat-spinner>
+    <span>Cargando...</span>
+  </div>
+
+  <ng-container *ngIf="!cargando">
+
+    <p class="subtitulo">Año lectivo {{ data.anio }}</p>
+
+    <table mat-table [dataSource]="detalle" class="tabla-detalle mat-elevation-z1">
+
+      <ng-container matColumnDef="seleccion">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox *ngIf="row.estado === 'Pendiente'"
+                        [(ngModel)]="row.seleccionado"
+                        color="primary">
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="tipoCuota">
+        <th mat-header-cell *matHeaderCellDef>Cuota</th>
+        <td mat-cell *matCellDef="let row">{{ row.tipoCuota }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="mes">
+        <th mat-header-cell *matHeaderCellDef>Período</th>
+        <td mat-cell *matCellDef="let row">{{ mesLabel(row.mes) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="fechaVence">
+        <th mat-header-cell *matHeaderCellDef>Vence</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.fechaVence ? (row.fechaVence | date:'dd/MM/yyyy') : '—' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="monto">
+        <th mat-header-cell *matHeaderCellDef>Monto</th>
+        <td mat-cell *matCellDef="let row" class="monto-cell">{{ formatLps(row.monto) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let row">
+          <span [class]="'chip ' + (row.estado === 'Pagado' ? 'chip-verde' : 'chip-rojo')">
+            {{ row.estado }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="fechaPago">
+        <th mat-header-cell *matHeaderCellDef>Fecha Pago</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.fechaPago ? (row.fechaPago | date:'dd/MM/yyyy') : '—' }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"
+          [class.fila-pendiente]="row.estado === 'Pendiente'"
+          [class.fila-pagada]="row.estado === 'Pagado'"
+          [class.fila-seleccionada]="row.seleccionado">
+      </tr>
+
+    </table>
+
+    <!-- Totales selección -->
+    <div class="seleccion-info" *ngIf="seleccionados.length > 0">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ seleccionados.length }} ítem(s) seleccionado(s) —
+        <strong>{{ formatLps(totalSeleccionado) }}</strong>
+      </span>
+    </div>
+
+    <div class="totales-row">
+      <div class="total-bloque">
+        <span class="total-label">Total Pagado</span>
+        <span class="total-valor pagado">{{ formatLps(totalPagado) }}</span>
+      </div>
+      <div class="total-bloque">
+        <span class="total-label">Total Pendiente</span>
+        <span class="total-valor pendiente">{{ formatLps(totalPendiente) }}</span>
+      </div>
+    </div>
+
+  </ng-container>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close>Cerrar</button>
+  <button mat-stroked-button color="primary" (click)="imprimir()" [disabled]="cargando">
+    <mat-icon>print</mat-icon> Estado de cuenta
+  </button>
+  <button mat-raised-button color="primary"
+          (click)="facturar()"
+          [disabled]="cargando || seleccionados.length === 0">
+    <mat-icon>receipt_long</mat-icon> Facturar ({{ seleccionados.length }})
+  </button>
+</mat-dialog-actions>

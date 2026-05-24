@@ -1,0 +1,21 @@
+.add-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+
+  .input-nuevo { flex: 1; }
+}
+
+.roles-table {
+  width: 100%;
+}
+
+.input-editar {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.loading { padding: 16px; color: #666; }
+.no-data { padding: 16px; text-align: center; color: #999; }

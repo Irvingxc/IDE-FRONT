@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ClienteResponse, ClienteService } from '@app/services/cliente/cliente.service';
 import { NotificationService } from '@app/services';
+import { PAISES_TELEFONO, PaisTelefono } from '../telefono-mask.directive';
 
 @Component({
   selector: 'app-edit-cliente-dialog',
@@ -14,6 +15,7 @@ export class EditClienteDialogComponent implements OnInit {
   form!: FormGroup;
   guardando = false;
 
+  paises: PaisTelefono[] = PAISES_TELEFONO;
   tiposId = ['DNI / Identidad', 'Pasaporte'];
   sexos = ['Masculino', 'Femenino'];
   nacionalidades = [
@@ -35,7 +37,21 @@ export class EditClienteDialogComponent implements OnInit {
     private notification: NotificationService
   ) {}
 
+  get paisSeleccionado(): PaisTelefono {
+    const codigo = this.form?.get('paisTelefono')?.value ?? '+504';
+    return this.paises.find(p => p.codigo === codigo) ?? this.paises[0];
+  }
+
+  private parsearTelefono(telefono: string | null): { codigo: string; numero: string } {
+    if (!telefono) return { codigo: '+504', numero: '' };
+    const pais = this.paises.find(p => telefono.startsWith(p.codigo + ' '));
+    if (pais) return { codigo: pais.codigo, numero: telefono.slice(pais.codigo.length + 1) };
+    return { codigo: '+504', numero: telefono };
+  }
+
   ngOnInit(): void {
+    const tel = this.parsearTelefono(this.data.telefono ?? null);
+
     this.form = this.fb.group({
       primerNombre:       [this.data.nombres        || '', Validators.required],
       segundoNombre:      [this.data.segundoNombre  || ''],
@@ -50,7 +66,8 @@ export class EditClienteDialogComponent implements OnInit {
       departamento:       [this.data.departamento],
       municipio:          [this.data.municipio],
       direccion:          [this.data.direccion      || ''],
-      telefono:           [this.data.telefono],
+      paisTelefono:       [tel.codigo],
+      telefono:           [tel.numero],
       correoElectronico:  [this.data.correoElectronico, Validators.email],
       rtn:                [this.data.rtn            || ''],
     });
@@ -78,7 +95,7 @@ export class EditClienteDialogComponent implements OnInit {
                             : undefined,
       departamento:       f.departamento         || undefined,
       municipio:          up(f.municipio),
-      telefono:           f.telefono             || undefined,
+      telefono:           f.telefono ? `${f.paisTelefono} ${f.telefono}` : undefined,
       correoElectronico:  f.correoElectronico    || undefined,
       direccion:          up(f.direccion),
       rtn:                f.rtn                  || undefined,

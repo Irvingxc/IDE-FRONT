@@ -1,0 +1,128 @@
+$guinda: #6B0F1A;
+
+.page-container { padding: 24px; }
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  h1          { font-size: 22px; font-weight: 600; margin: 0; }
+  .breadcrumb { font-size: 12px; color: #888; margin: 2px 0 0; }
+}
+
+.leyenda {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &.badge-rojo     { background: #ffebee; color: #c62828; }
+  &.badge-amarillo { background: #fffde7; color: #f57f17; }
+  &.badge-verde    { background: #e8f5e9; color: #2e7d32; }
+}
+
+/* Filtros */
+.filtros-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.filtro-nombre { flex: 1; min-width: 200px; }
+.filtro-anio   { width: 100px; }
+.filtro-estado { width: 160px; }
+
+/* Hint */
+.hint-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 14px;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+  .total-global {
+    margin-left: auto;
+    font-size: 13px;
+    color: #333;
+    strong { color: $guinda; }
+  }
+}
+
+/* Tabla */
+.table-wrapper { overflow-x: auto; }
+
+table { width: 100%; }
+
+.clickable-row {
+  cursor: pointer;
+  transition: filter 0.1s;
+  &:hover { filter: brightness(0.96); }
+}
+
+/* Colores de fila */
+.fila-roja     { background-color: #ffebee !important; }
+.fila-amarilla { background-color: #fffde7 !important; }
+
+/* Chips */
+.chip {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+
+  &.chip-verde { background: #e8f5e9; color: #2e7d32; }
+  &.chip-rojo  { background: #ffebee; color: #c62828; }
+}
+
+.sin-dato { color: #bbb; }
+
+/* Contadores */
+.count-rojo     { color: #c62828; font-weight: 700; font-size: 13px; }
+.count-amarillo { color: #e65100; font-weight: 700; font-size: 13px; }
+.count-verde    { color: #2e7d32; font-weight: 600; font-size: 13px; }
+
+/* Montos */
+.monto-cell {
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &.monto-pendiente { color: #c62828; }
+  &.monto-pagado    { color: #2e7d32; }
+}
+
+.nombre-cell { font-weight: 500; }
+
+/* Spinner / Empty */
+.spinner-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px;
+  color: #bbb;
+
+  mat-icon { font-size: 48px; width: 48px; height: 48px; }
+  p        { margin-top: 8px; font-size: 14px; }
+}

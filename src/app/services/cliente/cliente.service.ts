@@ -94,4 +94,9 @@ export class ClienteService {
     const params = new HttpParams().set('nombre', nombre.trim());
     return this.http.get<ClienteResponse[]>(`${environment.url}api/Cliente/lista`, { params });
   }
+
+  buscarPorIdentidad(identidad: string): Observable<ClienteResponse | null> {
+    const params = new HttpParams().set('identidad', identidad.trim());
+    return this.http.get<ClienteResponse | null>(`${environment.url}api/Cliente/buscar-identidad`, { params });
+  }
 }

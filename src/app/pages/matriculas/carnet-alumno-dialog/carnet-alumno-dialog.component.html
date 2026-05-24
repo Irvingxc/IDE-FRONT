@@ -1,0 +1,127 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;margin-right:8px">badge</mat-icon>
+  Carnet — {{ alumno.nombreCompleto }}
+</h2>
+
+<mat-dialog-content>
+
+  <div *ngIf="cargando" class="loading">
+    <mat-icon class="spin-icon">sync</mat-icon> Generando carnet...
+  </div>
+
+  <ng-container *ngIf="!cargando">
+
+    <div class="carnet-preview">
+
+      <!-- Header -->
+      <div class="cp-header">
+        <svg class="cp-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 145 56">
+          <!-- Círculo dorado -->
+          <circle cx="28" cy="28" r="25" fill="#FFD700"/>
+          <!-- Birrete: tablero superior -->
+          <polygon points="28,9 44,16 28,23 12,16" fill="#2D1200"/>
+          <!-- Birrete: cuerpo colgante -->
+          <path d="M20,21 L20,27 Q28,31.5 36,27 L36,21" fill="#2D1200"/>
+          <!-- Borla -->
+          <line x1="44" y1="16" x2="44" y2="25" stroke="#2D1200" stroke-width="2"/>
+          <circle cx="44" cy="27" r="2.5" fill="#2D1200"/>
+          <!-- Libro abierto izquierda -->
+          <path d="M12,31 L12,47 Q20,45 28,47 L28,31 Q20,29 12,31 Z" fill="#2D1200"/>
+          <!-- Libro abierto derecha -->
+          <path d="M44,31 L44,47 Q36,45 28,47 L28,31 Q36,29 44,31 Z" fill="#2D1200"/>
+          <!-- Lomo del libro -->
+          <line x1="28" y1="31" x2="28" y2="47" stroke="#FFD700" stroke-width="1.5"/>
+          <!-- Líneas de páginas -->
+          <line x1="15" y1="35" x2="26" y2="34" stroke="#8B6914" stroke-width="0.8"/>
+          <line x1="15" y1="38" x2="26" y2="37" stroke="#8B6914" stroke-width="0.8"/>
+          <line x1="15" y1="41" x2="26" y2="40" stroke="#8B6914" stroke-width="0.8"/>
+          <line x1="41" y1="35" x2="30" y2="34" stroke="#8B6914" stroke-width="0.8"/>
+          <line x1="41" y1="38" x2="30" y2="37" stroke="#8B6914" stroke-width="0.8"/>
+          <line x1="41" y1="41" x2="30" y2="40" stroke="#8B6914" stroke-width="0.8"/>
+          <!-- Texto IDE -->
+          <text x="60" y="38" font-family="Georgia,serif" font-weight="bold" font-size="27" fill="#FFD700" letter-spacing="6">IDE</text>
+        </svg>
+        <div class="cp-school-sub">Institute for the Development of Excellence</div>
+        <div class="cp-school-name">Danlí, El Paraíso, Honduras</div>
+        <div class="cp-label">Carnet Estudiantil {{ anio }}</div>
+      </div>
+
+      <!-- Cuerpo -->
+      <div class="cp-body">
+
+        <div class="cp-foto">
+          <img *ngIf="fotoBase64" [src]="fotoBase64" alt="foto">
+          <mat-icon *ngIf="!fotoBase64">person</mat-icon>
+        </div>
+
+        <div class="cp-info">
+          <div class="cp-nombre">{{ alumno.nombreCompleto }}</div>
+          <div class="cp-grado">{{ alumno.grado || '—' }}</div>
+          <div class="cp-codigo">{{ codigoIde }}</div>
+        </div>
+
+        <div class="cp-qr">
+          <img *ngIf="qrDataUrl" [src]="qrDataUrl" alt="QR">
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="cp-footer">
+        Vigencia {{ anio }}
+      </div>
+
+    </div>
+
+    <!-- Reverso -->
+    <p class="lado-label">Reverso</p>
+    <div class="carnet-preview reverso">
+
+      <div class="rv-header">
+        <div class="rv-school">IDE Danlí, El Paraíso</div>
+        <div class="rv-sub">Institute for the Development of Excellence</div>
+      </div>
+
+      <div class="rv-body">
+        <div class="rv-deco-line"></div>
+        <div class="rv-badge">Misión</div>
+        <div class="rv-quote">"Somos un centro educativo comprometido en la formación de profesionales de alto nivel, con talentos excepcionales para afrontar los retos del mundo actual, ofreciendo educación bilingüe de óptima calidad en los niveles de prebásica, básica y media."</div>
+        <div class="rv-deco-line"></div>
+        <div class="rv-bottom">
+          <div class="rv-firma">
+            <img src="/assets/firma_carnet.png" alt="Firma y Sello">
+            <div class="rv-firma-nombre">SATURNINO CALIX EUCEDA</div>
+            <div class="rv-firma-cargo">DIRECTOR</div>
+          </div>
+          <div class="rv-pride">IDE PRIDE</div>
+        </div>
+      </div>
+
+      <div class="rv-footer">
+        <div class="rv-contacto-row">
+          <span class="rv-icon">&#128222;</span>
+          <span>3165 0838</span>
+        </div>
+        <div class="rv-contacto-row">
+          <span class="rv-icon">&#128205;</span>
+          <span>Res. Villa Madrid, Danlí · 100m al este de la UNAH</span>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="hint">
+      <mat-icon>info</mat-icon>
+      Se imprimirá en tamaño tarjeta vertical (54 × 85.6 mm).
+    </p>
+
+  </ng-container>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close>Cancelar</button>
+  <button mat-raised-button color="primary" (click)="imprimir()" [disabled]="cargando || !qrDataUrl">
+    <mat-icon>print</mat-icon> Imprimir / PDF
+  </button>
+</mat-dialog-actions>

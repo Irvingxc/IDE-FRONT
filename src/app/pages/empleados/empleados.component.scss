@@ -18,6 +18,12 @@ $cream:  #FAF6F0;
   .breadcrumb { margin: 4px 0 0; font-size: 13px; color: #999; }
 }
 
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 .card {
   background: #fff;
   border-radius: 12px;

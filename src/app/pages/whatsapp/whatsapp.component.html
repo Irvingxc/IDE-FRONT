@@ -1,0 +1,62 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>WhatsApp</h1>
+      <p class="breadcrumb">Inicio / WhatsApp</p>
+    </div>
+    <button mat-raised-button color="primary"
+      (click)="abrirEnvioMasivo()"
+      [disabled]="loading || clientes.length === 0">
+      <mat-icon>send</mat-icon> Enviar mensaje masivo
+    </button>
+  </div>
+
+  <div class="resumen-card">
+    <mat-icon class="resumen-icon">smartphone</mat-icon>
+    <div>
+      <span class="resumen-numero">{{ clientes.length }}</span>
+      <span class="resumen-label">clientes con teléfono registrado</span>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-row">
+    <mat-icon class="spin-icon">sync</mat-icon>
+    <span>Cargando clientes...</span>
+  </div>
+
+  <table mat-table [dataSource]="clientes" class="data-table" *ngIf="!loading">
+
+    <ng-container matColumnDef="nombre">
+      <th mat-header-cell *matHeaderCellDef>Nombre completo</th>
+      <td mat-cell *matCellDef="let row">{{ row.nombreCompleto }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="telefono">
+      <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="telefono-chip">
+          <mat-icon>phone</mat-icon> {{ row.telefono }}
+        </span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="acciones">
+      <th mat-header-cell *matHeaderCellDef>Acciones</th>
+      <td mat-cell *matCellDef="let row">
+        <button mat-icon-button title="Enviar mensaje" (click)="enviarIndividual(row)">
+          <mat-icon style="color:#25D366">chat</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
+    <tr class="mat-row no-data-row" *matNoDataRow>
+      <td class="mat-cell" [attr.colspan]="columnas.length">
+        <span>No hay clientes con teléfono registrado.</span>
+      </td>
+    </tr>
+  </table>
+
+</div>

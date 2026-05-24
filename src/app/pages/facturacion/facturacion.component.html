@@ -2,184 +2,117 @@
 
   <div class="page-header">
     <div>
-      <h1>Nueva Factura</h1>
-      <p class="breadcrumb">Inicio / Facturar</p>
+      <h1>Facturación</h1>
+      <p class="breadcrumb">Inicio / Facturación</p>
     </div>
-    <div class="header-actions">
-      <button mat-stroked-button (click)="onLimpiar()">
-        <mat-icon>refresh</mat-icon> Limpiar
-      </button>
-      <button mat-raised-button color="primary" (click)="onGuardar()">
-        <mat-icon>save</mat-icon> Guardar factura
-      </button>
-    </div>
+    <button mat-raised-button color="primary" (click)="nuevaFactura()">
+      <mat-icon>add</mat-icon> Nueva Factura
+    </button>
   </div>
 
-  <div class="factura-wrapper">
+  <!-- Filtros -->
+  <div class="filtros-bar">
+    <mat-form-field appearance="outline" class="filtro-anio">
+      <mat-label>Año</mat-label>
+      <input matInput type="number" [(ngModel)]="anio" (change)="cargar()">
+    </mat-form-field>
 
-    <!-- ═══ DATOS DEL EMISOR ═══ -->
-    <mat-card class="seccion-card">
-      <mat-card-header>
-        <mat-card-title>Datos del emisor</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="emisor-grid">
-          <div class="emisor-main">
-            <p class="empresa-nombre">{{ emisor.nombre }}</p>
-            <p><strong>RTN:</strong> {{ emisor.rtn }}</p>
-            <p><strong>Dirección:</strong> {{ emisor.direccion }}</p>
-            <p><strong>Teléfono:</strong> {{ emisor.telefono }}</p>
-          </div>
-          <div class="factura-numero-box">
-            <span class="factura-label">N° FACTURA</span>
-            <span class="factura-numero">{{ emisor.numeroFactura }}</span>
-          </div>
-        </div>
+    <mat-form-field appearance="outline" class="filtro-mes">
+      <mat-label>Mes</mat-label>
+      <mat-select [(ngModel)]="mes" (ngModelChange)="cargar()">
+        <mat-option *ngFor="let m of meses" [value]="m.val">{{ m.label }}</mat-option>
+      </mat-select>
+    </mat-form-field>
 
-        <mat-divider class="my-divider"></mat-divider>
+    <mat-form-field appearance="outline" class="filtro-nombre">
+      <mat-label>Estudiante / Identidad</mat-label>
+      <input matInput [(ngModel)]="filtroAlumno" (keyup.enter)="cargar()" placeholder="Buscar...">
+      <mat-icon matSuffix (click)="cargar()" style="cursor:pointer">search</mat-icon>
+    </mat-form-field>
 
-        <div class="cai-grid">
-          <div>
-            <span class="cai-label">CAI</span>
-            <span class="cai-value">{{ emisor.cai }}</span>
-          </div>
-          <div>
-            <span class="cai-label">Rango autorizado</span>
-            <span class="cai-value">{{ emisor.rangoDesde }} al {{ emisor.rangoHasta }}</span>
-          </div>
-          <div>
-            <span class="cai-label">Fecha límite de emisión</span>
-            <span class="cai-value">{{ emisor.fechaLimiteEmision }}</span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <mat-form-field appearance="outline" class="filtro-estado">
+      <mat-label>Estado</mat-label>
+      <mat-select [(ngModel)]="filtroEstado" (ngModelChange)="cargar()">
+        <mat-option value="">Todas</mat-option>
+        <mat-option value="0">Vigentes</mat-option>
+        <mat-option value="1">Anuladas</mat-option>
+      </mat-select>
+    </mat-form-field>
 
-    <!-- ═══ DATOS DEL CLIENTE ═══ -->
-    <mat-card class="seccion-card" [formGroup]="form">
-      <mat-card-header>
-        <mat-card-title>Datos del receptor</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="receptor-grid">
-          <mat-form-field appearance="outline">
-            <mat-label>Nombre / Razón social</mat-label>
-            <input matInput formControlName="nombreCliente" placeholder="Nombre del cliente">
-            <mat-error>Campo requerido</mat-error>
-          </mat-form-field>
+    <button mat-stroked-button (click)="limpiar()">
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>RTN del cliente</mat-label>
-            <input matInput formControlName="rtnCliente" placeholder="0000-0000-000000">
-            <mat-hint>Opcional para personas naturales</mat-hint>
-          </mat-form-field>
+  <!-- Tabla -->
+  <div class="tabla-wrapper mat-elevation-z2">
+    <div *ngIf="cargando" class="loading-row">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Cargando facturas...</span>
+    </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Fecha de emisión</mat-label>
-            <input matInput [matDatepicker]="picker" formControlName="fechaEmision">
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <table mat-table [dataSource]="dataSource" *ngIf="!cargando">
 
-    <!-- ═══ DETALLE ═══ -->
-    <mat-card class="seccion-card">
-      <mat-card-header>
-        <mat-card-title>Detalle de la factura</mat-card-title>
-        <div class="card-header-action">
-          <button mat-stroked-button color="primary" (click)="addItem()">
-            <mat-icon>add</mat-icon> Agregar ítem
+      <ng-container matColumnDef="noFactura">
+        <th mat-header-cell *matHeaderCellDef>N° Factura</th>
+        <td mat-cell *matCellDef="let row" class="mono">{{ row.noFactura }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+        <td mat-cell *matCellDef="let row">{{ row.fecha | date:'dd/MM/yyyy' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="alumno">
+        <th mat-header-cell *matHeaderCellDef>Estudiante</th>
+        <td mat-cell *matCellDef="let row">{{ row.nombreAlumno }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="grado">
+        <th mat-header-cell *matHeaderCellDef>Grado</th>
+        <td mat-cell *matCellDef="let row">{{ row.grade }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+        <td mat-cell *matCellDef="let row" class="monto-cell text-right">{{ formatLps(row.total) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let row">
+          <span [class]="'chip ' + (row.anulada === '1' ? 'chip-rojo' : 'chip-verde')">
+            {{ row.anulada === '1' ? 'Anulada' : 'Vigente' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button color="primary"
+                  matTooltip="Reimprimir factura"
+                  (click)="imprimir(row)">
+            <mat-icon>print</mat-icon>
           </button>
-        </div>
-      </mat-card-header>
-      <mat-card-content>
-        <table mat-table [dataSource]="items" class="items-table">
+        </td>
+      </ng-container>
 
-          <ng-container matColumnDef="concepto">
-            <th mat-header-cell *matHeaderCellDef>Concepto</th>
-            <td mat-cell *matCellDef="let item">
-              <input class="inline-input" [(ngModel)]="item.concepto" placeholder="Descripción del servicio">
-            </td>
-          </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"
+          [class.fila-anulada]="row.anulada === '1'"></tr>
+    </table>
 
-          <ng-container matColumnDef="cantidad">
-            <th mat-header-cell *matHeaderCellDef>Cant.</th>
-            <td mat-cell *matCellDef="let item">
-              <input class="inline-input number-input" type="number" min="1" [(ngModel)]="item.cantidad">
-            </td>
-          </ng-container>
+    <mat-paginator *ngIf="!cargando && dataSource.data.length > 0"
+                   [pageSize]="20"
+                   [pageSizeOptions]="[10, 20, 50]"
+                   showFirstLastButtons>
+    </mat-paginator>
 
-          <ng-container matColumnDef="precio">
-            <th mat-header-cell *matHeaderCellDef>Precio unitario</th>
-            <td mat-cell *matCellDef="let item">
-              <input class="inline-input number-input" type="number" min="0" step="0.01" [(ngModel)]="item.precioUnitario">
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="exento">
-            <th mat-header-cell *matHeaderCellDef>Exento ISV</th>
-            <td mat-cell *matCellDef="let item">
-              <mat-checkbox [(ngModel)]="item.exento" color="primary"></mat-checkbox>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="total">
-            <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
-            <td mat-cell *matCellDef="let item" class="text-right">
-              L {{ totalItem(item) | number:'1.2-2' }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="acciones">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let item; let i = index">
-              <button mat-icon-button color="warn" (click)="removeItem(i)" [disabled]="items.length === 1">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="itemsColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: itemsColumns;"></tr>
-        </table>
-      </mat-card-content>
-    </mat-card>
-
-    <!-- ═══ TOTALES ═══ -->
-    <mat-card class="seccion-card totales-card">
-      <mat-card-content>
-        <div class="totales-grid">
-
-          <div class="sar-notice">
-            <mat-icon>info_outline</mat-icon>
-            <span>La factura es un beneficio de todos, <strong>exígala</strong></span>
-          </div>
-
-          <div class="totales-tabla">
-            <div class="total-row">
-              <span>Importe exento de ISV</span>
-              <span>L {{ subtotalExento | number:'1.2-2' }}</span>
-            </div>
-            <div class="total-row">
-              <span>Importe gravado (15%)</span>
-              <span>L {{ subtotalGravado | number:'1.2-2' }}</span>
-            </div>
-            <div class="total-row">
-              <span>ISV (15%)</span>
-              <span>L {{ isv | number:'1.2-2' }}</span>
-            </div>
-            <mat-divider></mat-divider>
-            <div class="total-row total-final">
-              <span>TOTAL A PAGAR</span>
-              <span>L {{ totalPagar | number:'1.2-2' }}</span>
-            </div>
-          </div>
-
-        </div>
-      </mat-card-content>
-    </mat-card>
-
+    <div *ngIf="!cargando && dataSource.data.length === 0" class="empty-state">
+      <mat-icon>receipt_long</mat-icon>
+      <p>No hay facturas para los filtros seleccionados</p>
+    </div>
   </div>
+
 </div>

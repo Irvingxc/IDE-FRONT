@@ -1,0 +1,32 @@
+.loading { padding: 24px; color: #666; }
+
+.select-all-row {
+  padding: 12px 0 8px;
+}
+
+.modulos-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modulo-row {
+  padding: 8px 4px;
+  border-radius: 6px;
+  transition: background 0.15s;
+
+  &:hover { background: rgba(0,0,0,0.03); }
+}
+
+.modulo-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 4px;
+
+  .modulo-icon  { font-size: 18px; color: #666; }
+  .modulo-nombre { font-size: 14px; font-weight: 500; }
+  .modulo-clave  { font-size: 11px; color: #999; background: #f0f0f0;
+                   padding: 1px 6px; border-radius: 4px; }
+}

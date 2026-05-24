@@ -74,6 +74,24 @@ $gold:        #C9A227;
   align-items: center;
   gap: 12px;
 
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  .sucursal-badge {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.80);
+    letter-spacing: 0.3px;
+
+    mat-icon { font-size: 11px; width: 11px; height: 11px; }
+  }
+
   .auth-link {
     color: $gold;
     text-decoration: none;

@@ -2,6 +2,37 @@ $guinda: #6B0F1A;
 $gold:   #C9A227;
 $cream:  #FAF6F0;
 
+.cliente-existente-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff8e1;
+  border: 1px solid #f9a825;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+
+  mat-icon { color: #f9a825; flex-shrink: 0; }
+
+  .alerta-texto {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    strong { font-size: 13px; }
+    span   { font-size: 13px; color: #555; }
+  }
+}
+
+.spin-icon { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.telefono-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 0 16px;
+}
+
 .page-container {
   padding: 28px 32px;
   background: $cream;
@@ -152,6 +183,51 @@ mat-stepper {
 }
 
 .divider { margin: 20px 0; }
+
+/* Foto upload */
+.foto-upload {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 0 8px;
+}
+
+.foto-preview {
+  width: 90px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
+.foto-placeholder-new {
+  width: 90px;
+  height: 110px;
+  border-radius: 6px;
+  border: 2px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #bbb;
+  flex-shrink: 0;
+  mat-icon { font-size: 40px; width: 40px; height: 40px; }
+}
+
+.foto-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: $guinda;
+  border: 1px solid $guinda;
+  border-radius: 4px;
+  padding: 6px 12px;
+  transition: background 0.2s;
+  &:hover { background: rgba($guinda, 0.06); }
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
 
 /* Actions */
 .step-actions {
