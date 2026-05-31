@@ -45,11 +45,11 @@ export class ContratoService {
     const gradoAlumno  = alumno?.grado          ?? '___________________________';
 
     const descuento    = alumno?.descuento ?? 0;
-    const mensualNeto  = colegiaturaMensual - descuento;
+    const mensualNeto  = colegiaturaMensual * (1 - descuento / 100);
     const anualNeto    = mensualNeto * 12;
 
     const mensualStr = colegiaturaMensual > 0
-      ? `${this.formatLps(mensualNeto)}/mes${descuento > 0 ? ` (descuento aplicado: ${this.formatLps(descuento)})` : ''}`
+      ? `${this.formatLps(mensualNeto)}/mes${descuento > 0 ? ` (descuento aplicado: ${descuento}%)` : ''}`
       : '___________________________';
 
     const anualStr = colegiaturaAnual > 0 ? this.formatLps(anualNeto) : '___________________________';

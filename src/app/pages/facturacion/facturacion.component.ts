@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { FacturacionService, PagoResumen, PagoDetalle } from '@app/services/facturacion/facturacion.service';
 import { NuevaFacturaDialogComponent, NuevaFacturaDialogData } from './nueva-factura-dialog/nueva-factura-dialog.component';
@@ -36,7 +37,8 @@ export class FacturacionComponent implements OnInit, AfterViewInit {
   constructor(
     private facturacionService: FacturacionService,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private snack: MatSnackBar
   ) {}
 
   ngAfterViewInit(): void {
@@ -74,6 +76,20 @@ export class FacturacionComponent implements OnInit, AfterViewInit {
       data
     });
     ref.afterClosed().subscribe(ok => { if (ok) this.cargar(); });
+  }
+
+  anular(pago: PagoResumen): void {
+    if (!confirm(`¿Anular la factura ${pago.noFactura} de ${pago.nombreAlumno}? Esta acción no se puede deshacer.`)) return;
+    this.facturacionService.anularFactura(pago.id).subscribe({
+      next: () => {
+        this.snack.open('Factura anulada correctamente', '', { duration: 3000 });
+        this.cargar();
+      },
+      error: (err) => {
+        const msg = err?.error?.message ?? 'Error al anular la factura';
+        this.snack.open(msg, '', { duration: 4000 });
+      }
+    });
   }
 
   imprimir(pago: PagoResumen): void {

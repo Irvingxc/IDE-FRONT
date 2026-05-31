@@ -11,6 +11,7 @@ export interface CxcResumen {
   cuotasPagadas:    number;
   totalPendiente:   number;
   totalPagado:      number;
+  totalDeudaAnio:   number;
 }
 
 export interface CxcDetalle {

@@ -61,7 +61,9 @@ export class ContratoDialogComponent implements OnInit {
 
   get mensualNeto(): number {
     if (!this.alumnoSeleccionado) return 0;
-    return (this.alumnoSeleccionado.valorMensualidad ?? 0) - (this.alumnoSeleccionado.descuento ?? 0);
+    const base = this.alumnoSeleccionado.valorMensualidad ?? 0;
+    const pct  = this.alumnoSeleccionado.descuento ?? 0;
+    return base * (1 - pct / 100);
   }
 
   generar(): void {

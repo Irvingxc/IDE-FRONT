@@ -1,0 +1,64 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;margin-right:8px">add_box</mat-icon>
+  Nuevo Producto
+</h2>
+
+<mat-dialog-content>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Nombre del producto *</mat-label>
+    <input matInput [(ngModel)]="nombre" placeholder="Ej. Paquete de Útiles 2025">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Descripción (opcional)</mat-label>
+    <input matInput [(ngModel)]="descripcion">
+  </mat-form-field>
+
+  <!-- CXC -->
+  <div class="cxc-section">
+    <mat-checkbox [(ngModel)]="agregarCxc" color="primary">
+      Generar registros CXC para el año
+    </mat-checkbox>
+    <input *ngIf="agregarCxc"
+           class="anio-input" type="number" min="2020" max="2099"
+           [(ngModel)]="anioCxc">
+  </div>
+
+  <!-- Grados -->
+  <div class="grados-section">
+    <div class="grados-header">
+      <span class="grados-title">Grados y precios iniciales</span>
+      <div class="grados-actions">
+        <button mat-button (click)="toggleTodos(true)">Todos</button>
+        <button mat-button (click)="toggleTodos(false)">Ninguno</button>
+      </div>
+    </div>
+
+    <div class="grados-lista">
+      <div class="grado-fila" *ngFor="let g of grados">
+        <mat-checkbox [(ngModel)]="g.seleccionado" color="primary" class="grado-check">
+          <span class="nivel-chip" [attr.data-nivel]="g.nivel">{{ g.nivel }}</span>
+          <span class="grado-nombre">{{ g.gradoNombre }}</span>
+        </mat-checkbox>
+        <div class="precio-wrap" *ngIf="g.seleccionado">
+          <span class="lps">L.</span>
+          <input class="precio-input" type="number" min="0" step="1"
+                 [(ngModel)]="g.precio" placeholder="0.00">
+        </div>
+      </div>
+    </div>
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button mat-raised-button color="primary"
+          [disabled]="!puedeGuardar"
+          (click)="guardar()">
+    <mat-spinner *ngIf="guardando" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+    <mat-icon *ngIf="!guardando">save</mat-icon>
+    {{ guardando ? 'Guardando...' : 'Crear Producto' }}
+  </button>
+</mat-dialog-actions>

@@ -108,9 +108,12 @@
 
       <!-- Total pendiente -->
       <ng-container matColumnDef="totalPendiente">
-        <th mat-header-cell *matHeaderCellDef>Total Pendiente</th>
+        <th mat-header-cell *matHeaderCellDef>Total Vencido</th>
         <td mat-cell *matCellDef="let row" class="monto-cell monto-pendiente">
           {{ formatLps(row.totalPendiente) }}
+          <div *ngIf="row.totalDeudaAnio > row.totalPendiente" class="deuda-anio">
+            año: {{ formatLps(row.totalDeudaAnio) }}
+          </div>
         </td>
       </ng-container>
 

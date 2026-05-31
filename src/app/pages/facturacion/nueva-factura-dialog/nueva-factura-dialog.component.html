@@ -21,15 +21,15 @@
       </div>
       <div class="sar-row">
         <span class="sar-label">CAI</span>
-        <span class="sar-value mono">{{ sar?.cai }}</span>
+        <span class="sar-value mono">{{ sar.cai }}</span>
       </div>
       <div class="sar-row">
         <span class="sar-label">Rango autorizado</span>
-        <span class="sar-value mono">{{ sar?.rangoDel }} — {{ sar?.rangoAl }}</span>
+        <span class="sar-value mono">{{ sar.rangoDel }} — {{ sar.rangoAl }}</span>
       </div>
       <div class="sar-row">
         <span class="sar-label">Fecha límite de emisión</span>
-        <span class="sar-value" [class.vencido]="sar?.fechaLim && sar!.fechaLim < hoyStr">
+        <span class="sar-value" [class.vencido]="sar.fechaLim && sar.fechaLim < hoyStr">
           {{ sarFechaLimStr }}
         </span>
       </div>
@@ -125,7 +125,7 @@
         </span>
         <div class="meses-grid">
           <ng-container *ngFor="let m of [1,2,3,4,5,6,7,8,9,10,11,12]">
-            <button *ngIf="!estaFacturado(2, nombresMeses[m])"
+            <button *ngIf="mesesConCxc.has(m) && !estaFacturado(2, nombresMeses[m])"
                     mat-stroked-button class="btn-mes"
                     (click)="agregarMensualidad(m)">
               {{ nombresMeses[m].slice(0, 3) }}

@@ -26,6 +26,11 @@ export interface ActualizarPrecioDto {
   precio:     number;
 }
 
+export interface CrearProductoDto {
+  nombre:      string;
+  descripcion?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CatalogoService {
 
@@ -43,5 +48,17 @@ export class CatalogoService {
 
   actualizarPrecio(dto: ActualizarPrecioDto): Observable<void> {
     return this.http.put<void>(`${this.url}/grados-precios`, dto);
+  }
+
+  crearProducto(dto: CrearProductoDto): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(`${this.url}/productos`, dto);
+  }
+
+  inactivarProducto(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.url}/productos/${id}`);
+  }
+
+  generarCxcProducto(id: number, anio: number): Observable<{ registrosGenerados: number }> {
+    return this.http.post<{ registrosGenerados: number }>(`${this.url}/productos/${id}/cxc?anio=${anio}`, null);
   }
 }

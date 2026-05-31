@@ -10,6 +10,7 @@
     "start:dev": "ng serve --c=dev",
     "build:dev": "ng build --c=dev",
     "start:prod": "ng serve --c=prod",
+    "start:local": "ng serve --host 0.0.0.0 --c=prod",
     "build:prod": "ng build --c=prod"
   },
   "private": true,

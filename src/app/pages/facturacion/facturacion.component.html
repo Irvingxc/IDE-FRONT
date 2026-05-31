@@ -95,6 +95,12 @@
                   (click)="imprimir(row)">
             <mat-icon>print</mat-icon>
           </button>
+          <button mat-icon-button color="warn"
+                  matTooltip="Anular factura"
+                  *ngIf="row.anulada !== '1'"
+                  (click)="anular(row)">
+            <mat-icon>cancel</mat-icon>
+          </button>
         </td>
       </ng-container>
 

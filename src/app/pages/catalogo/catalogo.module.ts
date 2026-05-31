@@ -12,13 +12,16 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { CatalogoComponent } from './catalogo.component';
+import { NuevoProductoDialogComponent } from './nuevo-producto-dialog/nuevo-producto-dialog.component';
 
 const routes: Routes = [{ path: '', component: CatalogoComponent }];
 
 @NgModule({
-  declarations: [CatalogoComponent],
+  declarations: [CatalogoComponent, NuevoProductoDialogComponent],
   imports: [
     CommonModule,
     RouterModule.forChild(routes),
@@ -33,6 +36,8 @@ const routes: Routes = [{ path: '', component: CatalogoComponent }];
     MatSnackBarModule,
     MatTooltipModule,
     MatChipsModule,
+    MatDialogModule,
+    MatCheckboxModule,
   ]
 })
 export class CatalogoModule {}

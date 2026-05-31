@@ -45,7 +45,7 @@
           Descuento
           <span class="motivo" *ngIf="alumnoSeleccionado.motivoDescuento">({{ alumnoSeleccionado.motivoDescuento }})</span>
         </span>
-        <span class="resumen-valor descuento">− L. {{ alumnoSeleccionado.descuento | number:'1.2-2' }}</span>
+        <span class="resumen-valor descuento">−{{ alumnoSeleccionado.descuento | number:'1.0-1' }}%</span>
       </div>
       <div class="resumen-fila total-fila">
         <span class="resumen-etiqueta"><strong>Total mensual</strong></span>

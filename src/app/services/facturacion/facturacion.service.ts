@@ -65,7 +65,6 @@ export interface ItemFacturaRequest {
 
 export interface CrearFacturaRequest {
   alumno:          string;
-  grade:           string;
   idSar:           number;
   fechaEmision:    string;
   total:           number;
@@ -121,6 +120,10 @@ export class FacturacionService {
     );
   }
 
+  anularFactura(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
   getProductosFacturados(identidad: string, anio: number): Observable<{ idProducto: string; mes: string }[]> {
     return this.http.get<{ idProducto: string; mes: string }[]>(
       `${this.base}/${encodeURIComponent(identidad)}/facturados`,
@@ -153,11 +156,13 @@ export class FacturacionService {
       </tr>`;
     }).join('');
 
+    const esAnulada = p.anulada === '1';
+
     return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Factura ${p.noFactura}</title>
+  <title>Factura ${p.noFactura}${esAnulada ? ' [ANULADA]' : ''}</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; }
@@ -166,6 +171,14 @@ export class FacturacionService {
       padding: 1cm; -webkit-print-color-adjust: exact; print-color-adjust: exact;
     }
     @page { margin: 1cm; size: letter landscape; }
+    .sello-anulada {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) rotate(-35deg);
+      font-size: 90pt; font-weight: 900; color: rgba(180,0,0,0.18);
+      border: 12px solid rgba(180,0,0,0.18); border-radius: 12px;
+      padding: 10px 30px; pointer-events: none; white-space: nowrap;
+      z-index: 9999; letter-spacing: 8px;
+    }
     .header {
       display: flex; align-items: center; gap: 14px;
       padding-bottom: 10px; border-bottom: 3px solid #6B0F1A; margin-bottom: 10px;
@@ -210,6 +223,7 @@ export class FacturacionService {
   </style>
 </head>
 <body>
+  ${esAnulada ? '<div class="sello-anulada">ANULADA</div>' : ''}
   <div class="header">
     <img src="${logoUrl}" alt="IDE Logo">
     <div class="header-text">

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CatalogoService, GradoPrecioFlat } from '@app/services/catalogo/catalogo.service';
+import { NuevoProductoDialogComponent } from './nuevo-producto-dialog/nuevo-producto-dialog.component';
 
 interface PrecioItem {
   idProducto:     number;
@@ -33,6 +35,7 @@ export class CatalogoComponent implements OnInit {
 
   constructor(
     private catService: CatalogoService,
+    private dialog: MatDialog,
     private snack: MatSnackBar
   ) {}
 
@@ -127,5 +130,27 @@ export class CatalogoComponent implements OnInit {
 
   cancelar(row: GradoRow): void {
     row.precios.forEach(p => p.precio = p.original);
+  }
+
+  nuevoProducto(): void {
+    const ref = this.dialog.open(NuevoProductoDialogComponent, {
+      width: '600px',
+      maxWidth: '96vw',
+      disableClose: true,
+    });
+    ref.afterClosed().subscribe(ok => { if (ok) this.cargar(); });
+  }
+
+  confirmarInactivar(prod: { id: number; nombre: string }): void {
+    if (!confirm(`¿Inactivar el producto "${prod.nombre}"? Ya no aparecerá en el catálogo ni en nuevas facturas.`)) return;
+    this.catService.inactivarProducto(prod.id).subscribe({
+      next: () => {
+        this.snack.open(`Producto "${prod.nombre}" inactivado`, 'OK', { duration: 3000 });
+        this.cargar();
+      },
+      error: (err) => {
+        this.snack.open(err?.error?.message ?? 'Error al inactivar', 'OK', { duration: 4000 });
+      }
+    });
   }
 }

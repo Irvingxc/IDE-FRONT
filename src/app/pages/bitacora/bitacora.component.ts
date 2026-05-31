@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { BitacoraService, BitacoraItem } from '@app/services/bitacora/bitacora.service';
 
-const MODULOS = ['MATRICULAS', 'PAGOS', 'EMPLEADOS', 'INVENTARIO', 'ENTRADAS', 'WHATSAPP', 'REPORTES', 'BITACORA', 'CONTABILIDAD'];
+const MODULOS = ['FAC', 'MAT', 'EST', 'CXC', 'CAT', 'PAGOS', 'MATRICULAS', 'EMPLEADOS', 'INVENTARIO', 'ENTRADAS', 'WHATSAPP', 'REPORTES', 'BITACORA', 'CONTABILIDAD'];
 
 @Component({
   selector: 'app-bitacora',

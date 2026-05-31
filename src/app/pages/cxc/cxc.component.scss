@@ -107,6 +107,13 @@ table { width: 100%; }
   &.monto-pagado    { color: #2e7d32; }
 }
 
+.deuda-anio {
+  font-size: 10px;
+  color: #999;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
 .nombre-cell { font-weight: 500; }
 
 /* Spinner / Empty */

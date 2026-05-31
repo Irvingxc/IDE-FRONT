@@ -1,0 +1,40 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Build producción
+        run: npm run build:prod
+
+      - name: Detener sitio IIS
+        run: |
+          & "$env:SystemRoot\System32\inetsrv\appcmd.exe" stop site /site.name:"IDE-FRONT"
+        continue-on-error: true
+
+      - name: Copiar dist a IIS
+        run: |
+          $dest = "C:\inetpub\wwwroot\ide-front"
+          if (Test-Path $dest) { Remove-Item $dest -Recurse -Force }
+          Copy-Item -Path "dist\ide-front" -Destination $dest -Recurse
+
+      - name: Iniciar sitio IIS
+        run: |
+          & "$env:SystemRoot\System32\inetsrv\appcmd.exe" start site /site.name:"IDE-FRONT"

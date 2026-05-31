@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { catchError, debounceTime, distinctUntilChanged, forkJoin, of, Subject, switchMap } from 'rxjs';
 import { FacturacionService, Sar, CrearFacturaRequest, GradoPrecio } from '@app/services/facturacion/facturacion.service';
 import { AlumnoService, AlumnoResponse } from '@app/services/alumno/alumno.service';
+import { CxcService } from '@app/services/cxc/cxc.service';
 
 export interface ItemFacturaLocal {
   concepto:        string;
@@ -52,6 +53,8 @@ export class NuevaFacturaDialogComponent implements OnInit {
   idGradoAlumno: number | null = null;
   catalogoProductos: GradoPrecio[] = [];
   facturadosSet: Set<string> = new Set();
+  mesesConCxc: Set<number> = new Set();
+  cxcMontos: Map<number, number> = new Map();
   descuentoAlumno = 0;
 
   get productosSimples(): GradoPrecio[] {
@@ -78,6 +81,7 @@ export class NuevaFacturaDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: NuevaFacturaDialogData,
     private facturacionService: FacturacionService,
     private alumnoService: AlumnoService,
+    private cxcService: CxcService,
     private snack: MatSnackBar
   ) {}
 
@@ -122,6 +126,7 @@ export class NuevaFacturaDialogComponent implements OnInit {
     this.items            = [];
     this.catalogoProductos = [];
     this.facturadosSet     = new Set();
+    this.mesesConCxc       = new Set();
 
     const anio = this.fechaEmision.getFullYear();
 
@@ -131,7 +136,10 @@ export class NuevaFacturaDialogComponent implements OnInit {
         facturados: this.facturacionService.getProductosFacturados(alumno.identidad, anio).pipe(
           catchError(() => of([] as { idProducto: string; mes: string }[]))
         ),
-      }).subscribe(({ precios, facturados }) => {
+        cxcPendientes: this.cxcService.getDetalle(alumno.identidad, anio, true).pipe(
+          catchError(() => of([]))
+        ),
+      }).subscribe(({ precios, facturados, cxcPendientes }) => {
         this.catalogoProductos = precios;
         this.facturadosSet = new Set(
           facturados.map(f =>
@@ -140,6 +148,9 @@ export class NuevaFacturaDialogComponent implements OnInit {
               : f.idProducto
           )
         );
+        const mensualidadesCxc = cxcPendientes.filter(c => c.idProducto === 2);
+        this.mesesConCxc  = new Set(mensualidadesCxc.map(c => c.mes));
+        this.cxcMontos    = new Map(mensualidadesCxc.map(c => [c.mes, c.monto]));
       });
     }
   }
@@ -150,6 +161,8 @@ export class NuevaFacturaDialogComponent implements OnInit {
   }
 
   agregarProducto(producto: GradoPrecio): void {
+    const yaEnLista = this.items.some(i => i.idProducto === String(producto.idProducto));
+    if (yaEnLista) return;
     this.items = [...this.items, {
       concepto:         producto.productoNombre,
       mes:              'N/A',
@@ -162,10 +175,12 @@ export class NuevaFacturaDialogComponent implements OnInit {
 
   agregarMensualidad(mes: number): void {
     const mesNombre = this.nombresMeses[mes];
+    const yaEnLista = this.items.some(i => i.idProducto === '2' && i.mes === mesNombre.toLowerCase());
+    if (yaEnLista) return;
     const anio = this.fechaEmision.getFullYear();
     this.items = [...this.items, {
       concepto: `Mensualidad ${mesNombre}`, mes: mesNombre.toLowerCase(), idProducto: '2',
-      precio: this.precioMensualidad, cantidad: 1,
+      precio: this.cxcMontos.get(mes) ?? this.precioMensualidad, cantidad: 1,
       fechaMensualidad: `${anio}-${String(mes).padStart(2, '0')}-01`
     }];
   }
@@ -205,7 +220,6 @@ export class NuevaFacturaDialogComponent implements OnInit {
 
     const dto: CrearFacturaRequest = {
       alumno:          this.alumnoIdentidad,
-      grade:           this.gradoNombre,
       idSar:           this.sar.idSar,
       fechaEmision:    this.fechaEmision.toISOString().split('T')[0],
       total:           this.subtotal,

@@ -13,9 +13,11 @@ $gold:   #C9A227;
   gap: 16px;
   margin-bottom: 20px;
 
-  .page-icon { font-size: 40px; width: 40px; height: 40px; color: $guinda; }
-  .page-title { margin: 0; font-size: 22px; font-weight: 700; color: $guinda; }
-  .page-sub   { margin: 0; font-size: 13px; color: #888; }
+  .page-icon       { font-size: 40px; width: 40px; height: 40px; color: $guinda; }
+  .page-header-text { flex: 1; }
+  .page-title      { margin: 0; font-size: 22px; font-weight: 700; color: $guinda; }
+  .page-sub        { margin: 0; font-size: 13px; color: #888; }
+  .btn-nuevo       { background: $guinda; color: #fff; white-space: nowrap; }
 }
 
 .filtro-bar {
@@ -118,3 +120,21 @@ $gold:   #C9A227;
 }
 
 .ok-icon { color: #bbb; font-size: 20px; width: 20px; height: 20px; }
+
+.prod-header {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+
+  .btn-inactivar {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    opacity: 0;
+    transition: opacity 0.15s;
+    mat-icon { font-size: 16px; color: #c0392b; }
+  }
+
+  &:hover .btn-inactivar { opacity: 1; }
+}
