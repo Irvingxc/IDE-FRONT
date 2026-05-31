@@ -163,13 +163,14 @@ export class NuevaFacturaDialogComponent implements OnInit {
   agregarProducto(producto: GradoPrecio): void {
     const yaEnLista = this.items.some(i => i.idProducto === String(producto.idProducto));
     if (yaEnLista) return;
+    const anio = this.fechaEmision.getFullYear();
     this.items = [...this.items, {
       concepto:         producto.productoNombre,
       mes:              'N/A',
       idProducto:       String(producto.idProducto),
       precio:           producto.precio,
       cantidad:         1,
-      fechaMensualidad: null,
+      fechaMensualidad: `${anio}-01-01`,
     }];
   }
 

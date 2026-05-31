@@ -66,8 +66,9 @@
   <div class="hint-row">
     <mat-icon>touch_app</mat-icon>
     <span>Doble clic en un alumno para ver su estado de cuenta completo</span>
-    <span class="total-global" *ngIf="datos.length > 0">
-      Total pendiente: <strong>{{ formatLps(totalPendienteGlobal) }}</strong>
+    <span class="totales-global" *ngIf="datos.length > 0">
+      <span>Total vencido: <strong class="monto-rojo">{{ formatLps(totalPendienteGlobal) }}</strong></span>
+      <span>Total pagado: <strong class="monto-verde">{{ formatLps(totalPagadoGlobal) }}</strong></span>
     </span>
   </div>
 

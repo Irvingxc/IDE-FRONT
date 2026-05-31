@@ -56,11 +56,15 @@ $guinda: #6B0F1A;
 
   mat-icon { font-size: 16px; width: 16px; height: 16px; }
 
-  .total-global {
+  .totales-global {
     margin-left: auto;
+    display: flex;
+    gap: 24px;
     font-size: 13px;
     color: #333;
-    strong { color: $guinda; }
+
+    .monto-rojo  { color: #c62828; }
+    .monto-verde { color: #2e7d32; }
   }
 }
 

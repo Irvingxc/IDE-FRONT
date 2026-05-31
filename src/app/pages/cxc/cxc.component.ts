@@ -97,4 +97,8 @@ export class CxcComponent implements OnInit {
   get totalPendienteGlobal(): number {
     return this.datos.reduce((s, r) => s + r.totalPendiente, 0);
   }
+
+  get totalPagadoGlobal(): number {
+    return this.datos.reduce((s, r) => s + r.totalPagado, 0);
+  }
 }
