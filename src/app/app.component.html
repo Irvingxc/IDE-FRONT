@@ -6,11 +6,12 @@
     ></app-menu-list>
   </mat-sidenav>
   <mat-sidenav-content>
-    <app-header (menuToggle)="menu.toggle()"
-    [isAuthorized] = "isAuthorized$ | async"
-    [user] = "user$ | async"
+    <app-header *ngIf="!(isLanding$ | async)"
+    (menuToggle)="menu.toggle()"
+    [isAuthorized]="isAuthorized$ | async"
+    [user]="user$ | async"
     (signOut)="onSignOut()"></app-header>
-    <main>
+    <main [class.no-header]="isLanding$ | async">
       <router-outlet></router-outlet>
     </main>
   </mat-sidenav-content>

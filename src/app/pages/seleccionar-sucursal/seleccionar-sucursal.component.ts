@@ -37,7 +37,7 @@ export class SeleccionarSucursalComponent implements OnInit {
         localStorage.setItem('token', user.token);
         localStorage.setItem('user_session', JSON.stringify(user));
         this.store.dispatch(new fromUser.InitAuthorized(user.email!, user));
-        this.router.navigate(['/']);
+        this.router.navigate(['/static/welcome']);
       },
       error: () => { this.guardando = false; }
     });

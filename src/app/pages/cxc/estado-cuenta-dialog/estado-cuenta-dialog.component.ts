@@ -1,9 +1,11 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CxcService, CxcDetalle } from '@app/services/cxc/cxc.service';
 import { AlumnoService } from '@app/services/alumno/alumno.service';
 import { NuevaFacturaDialogData } from '../../facturacion/nueva-factura-dialog/nueva-factura-dialog.component';
+import { toLocalDateStr, parseLocalDate } from '@app/utils/date.utils';
 
 interface CxcDetalleSeleccionable extends CxcDetalle {
   seleccionado: boolean;
@@ -18,7 +20,7 @@ export class EstadoCuentaDialogComponent implements OnInit {
 
   detalle: CxcDetalleSeleccionable[] = [];
   cargando = true;
-  columns  = ['seleccion', 'tipoCuota', 'mes', 'fechaVence', 'monto', 'estado', 'fechaPago'];
+  columns  = ['seleccion', 'tipoCuota', 'mes', 'fechaVence', 'monto', 'estado', 'fechaPago', 'acciones'];
 
   nombreTutor = '';
 
@@ -26,7 +28,21 @@ export class EstadoCuentaDialogComponent implements OnInit {
                                 'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
   get totalPendiente(): number {
-    return this.detalle.filter(d => d.estado === 'Pendiente').reduce((s, d) => s + d.monto, 0);
+    const hoy         = new Date();
+    const anioHoy     = hoy.getFullYear();
+    const mesHoy      = hoy.getMonth() + 1;
+    // Corte del 20: si hoy < 20, el último mes cerrado es el anterior
+    const mesCorteFin = hoy.getDate() >= 20 ? mesHoy : mesHoy - 1;
+
+    return this.detalle
+      .filter(d => {
+        if (d.estado !== 'Pendiente') return false;
+        if (d.anio < anioHoy) return true;   // año pasado: todo vencido
+        if (d.anio > anioHoy) return false;  // año futuro: nada vencido
+        if (d.mes === 0) return true;         // Única (matrícula, etc.): siempre incluida
+        return d.mes <= mesCorteFin;
+      })
+      .reduce((s, d) => s + d.monto, 0);
   }
   get totalPagado(): number {
     return this.detalle.filter(d => d.estado === 'Pagado').reduce((s, d) => s + d.monto, 0);
@@ -42,12 +58,14 @@ export class EstadoCuentaDialogComponent implements OnInit {
     private cxcService: CxcService,
     private alumnoService: AlumnoService,
     private router: Router,
+    private snack: MatSnackBar,
     public  dialogRef: MatDialogRef<EstadoCuentaDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: {
       identidad:   string;
       nombre:      string;
       anio:        number;
       gradoNombre: string;
+      esAdmin?:    boolean;
     }
   ) {}
 
@@ -108,22 +126,27 @@ export class EstadoCuentaDialogComponent implements OnInit {
     setTimeout(() => { win.focus(); win.print(); }, 500);
   }
 
+  private escHtml(s: string | null | undefined): string {
+    return (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
   private buildHtml(): string {
     const filas = this.detalle.map(d => `
       <tr class="${d.estado === 'Pendiente' ? 'row-pend' : 'row-pag'}">
-        <td>${d.tipoCuota}</td>
+        <td>${this.escHtml(d.tipoCuota)}</td>
         <td>${this.mesLabel(d.mes)}</td>
-        <td>${d.fechaVence ? new Date(d.fechaVence).toLocaleDateString('es-HN') : '—'}</td>
+        <td>${d.fechaVence ? parseLocalDate(d.fechaVence).toLocaleDateString('es-HN') : '—'}</td>
         <td class="monto">${this.formatLps(d.monto)}</td>
-        <td><span class="chip ${d.estado === 'Pagado' ? 'chip-v' : 'chip-r'}">${d.estado}</span></td>
-        <td>${d.fechaPago ? new Date(d.fechaPago).toLocaleDateString('es-HN') : '—'}</td>
+        <td><span class="chip ${d.estado === 'Pagado' ? 'chip-v' : 'chip-r'}">${this.escHtml(d.estado)}</span></td>
+        <td>${d.fechaPago ? parseLocalDate(d.fechaPago).toLocaleDateString('es-HN') : '—'}</td>
       </tr>`).join('');
 
     return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Estado de Cuenta — ${this.data.nombre}</title>
+  <title>Estado de Cuenta — ${this.escHtml(this.data.nombre)}</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; font-size: 11pt; color: #000; padding: 2cm;
@@ -158,8 +181,8 @@ export class EstadoCuentaDialogComponent implements OnInit {
     <p>Institute for the Development of Excellence (IDE) — Danlí, El Paraíso, Honduras</p>
   </div>
   <div class="alumno-info">
-    <strong>Alumno:</strong> ${this.data.nombre}<br>
-    <strong>Identidad:</strong> ${this.data.identidad}<br>
+    <strong>Alumno:</strong> ${this.escHtml(this.data.nombre)}<br>
+    <strong>Identidad:</strong> ${this.escHtml(this.data.identidad)}<br>
     <strong>Año lectivo:</strong> ${this.data.anio}
   </div>
   <table>
@@ -174,7 +197,7 @@ export class EstadoCuentaDialogComponent implements OnInit {
       <div class="total-valor pagado">${this.formatLps(this.totalPagado)}</div>
     </div>
     <div class="total-bloque">
-      <div class="total-label">Total Pendiente</div>
+      <div class="total-label">Pendiente al corte</div>
       <div class="total-valor pend">${this.formatLps(this.totalPendiente)}</div>
     </div>
   </div>
@@ -182,7 +205,27 @@ export class EstadoCuentaDialogComponent implements OnInit {
 </html>`;
   }
 
+  cancelarCuota(item: CxcDetalleSeleccionable): void {
+    const motivo = prompt(`Motivo de cancelación para "${item.tipoCuota}":`);
+    if (motivo === null) return; // usuario canceló el prompt
+    this.cxcService.cancelarCuota(item.id, motivo.trim()).subscribe({
+      next: () => {
+        this.snack.open('Cuota cancelada', 'OK', { duration: 3000 });
+        this.cargarDetalle();
+      },
+      error: (err) => this.snack.open(err?.error?.message ?? 'Error al cancelar', '', { duration: 4000 })
+    });
+  }
+
+  private cargarDetalle(): void {
+    this.cxcService.getDetalle(this.data.identidad, this.data.anio).subscribe({
+      next: (d) => {
+        this.detalle = (d ?? []).map(item => ({ ...item, seleccionado: false }));
+      }
+    });
+  }
+
   get hoyStr(): string {
-    return new Date().toISOString().split('T')[0];
+    return toLocalDateStr(new Date());
   }
 }

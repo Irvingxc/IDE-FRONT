@@ -1,0 +1,79 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;margin-right:8px">store</mat-icon>
+  {{ titulo }}
+</h2>
+
+<mat-dialog-content>
+
+  <div class="seccion">Datos generales</div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Nombre / Razón Social *</mat-label>
+    <input matInput [(ngModel)]="nombre" placeholder="Ej. Distribuidora El Carmen">
+  </mat-form-field>
+
+  <div class="row-2">
+    <mat-form-field appearance="outline">
+      <mat-label>RTN</mat-label>
+      <input matInput [(ngModel)]="rtn" placeholder="08019999999999">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Categoría</mat-label>
+      <mat-select [(ngModel)]="categoria">
+        <mat-option value="">Sin categoría</mat-option>
+        <mat-option *ngFor="let c of categorias" [value]="c">{{ c }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="row-2">
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono</mat-label>
+      <input matInput [(ngModel)]="telefono" placeholder="2799-0000">
+      <mat-icon matPrefix>phone</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Correo electrónico</mat-label>
+      <input matInput [(ngModel)]="correo" type="email" placeholder="proveedor@correo.com">
+      <mat-icon matPrefix>email</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Dirección</mat-label>
+    <input matInput [(ngModel)]="direccion" placeholder="Colonia, ciudad, departamento">
+    <mat-icon matPrefix>location_on</mat-icon>
+  </mat-form-field>
+
+  <div class="seccion">Persona de contacto</div>
+
+  <div class="row-2">
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre del contacto</mat-label>
+      <input matInput [(ngModel)]="contacto" placeholder="Nombre completo">
+      <mat-icon matPrefix>person</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono del contacto</mat-label>
+      <input matInput [(ngModel)]="telefonoContacto" placeholder="9999-0000">
+      <mat-icon matPrefix>smartphone</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <mat-slide-toggle [(ngModel)]="activo" color="primary" *ngIf="esEdicion">
+    Proveedor activo
+  </mat-slide-toggle>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button mat-raised-button color="primary" [disabled]="!puedeGuardar" (click)="guardar()">
+    <mat-spinner *ngIf="guardando" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+    <mat-icon *ngIf="!guardando">save</mat-icon>
+    {{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Registrar') }}
+  </button>
+</mat-dialog-actions>

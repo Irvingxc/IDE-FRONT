@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '@src/environments/environment';
+import { parseLocalDate } from '@app/utils/date.utils';
 
 export interface Sar {
   idSar:        number;
@@ -42,6 +43,7 @@ export interface PagoDetalle {
   alumno:          string;
   nombreAlumno:    string;
   nombreCliente:   string | null;
+  rtnCliente:      string | null;
   noFactura:       string;
   total:           number;
   impuestoGravado: number;
@@ -135,17 +137,69 @@ export class FacturacionService {
     return 'L. ' + v.toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  private numToLetras(n: number): string {
+    const UNIDADES = ['', 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE',
+                      'DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISÉIS',
+                      'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'];
+    const DECENAS  = ['', '', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA',
+                      'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+    const CENTENAS = ['', 'CIEN', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS',
+                      'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
+
+    const grupo = (num: number): string => {
+      if (num === 0) return '';
+      if (num === 100) return 'CIEN';
+      let t = '';
+      const c = Math.floor(num / 100);
+      const r = num % 100;
+      if (c > 0) t += CENTENAS[c] + (r > 0 ? ' ' : '');
+      if (r < 20) {
+        t += UNIDADES[r];
+      } else {
+        const d = Math.floor(r / 10);
+        const u = r % 10;
+        t += DECENAS[d] + (u > 0 ? ' Y ' + UNIDADES[u] : '');
+      }
+      return t;
+    };
+
+    const entero = Math.floor(n);
+    const cents  = Math.round((n - entero) * 100);
+    let res = '';
+
+    const mill = Math.floor(entero / 1_000_000);
+    if (mill > 0) res += (mill === 1 ? 'UN MILLÓN' : grupo(mill) + ' MILLONES') + ' ';
+    const miles = Math.floor((entero % 1_000_000) / 1_000);
+    if (miles > 0) res += (miles === 1 ? 'MIL' : grupo(miles) + ' MIL') + ' ';
+    const resto = entero % 1_000;
+    if (resto > 0) res += grupo(resto);
+
+    res = res.trim() || 'CERO';
+    res += entero === 1 ? ' LEMPIRA' : ' LEMPIRAS';
+    res += cents > 0
+      ? ` CON ${grupo(cents)} ${cents === 1 ? 'CENTAVO' : 'CENTAVOS'}`
+      : ' EXACTOS';
+    return res;
+  }
+
+  private escHtml(s: string | null | undefined): string {
+    return (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
   buildFacturaHtml(p: PagoDetalle): string {
     const logoUrl     = window.location.origin + '/assets/logo.png';
     const totalExento = p.total - p.impuestoGravado;
-    const fechaStr    = p.fecha    ? new Date(p.fecha).toLocaleDateString('es-HN')    : '—';
-    const fechaLimStr = p.fechaLim ? new Date(p.fechaLim).toLocaleDateString('es-HN') : '—';
+    const fechaStr    = p.fecha    ? parseLocalDate(p.fecha).toLocaleDateString('es-HN')    : '—';
+    const fechaLimStr = p.fechaLim ? parseLocalDate(p.fechaLim).toLocaleDateString('es-HN') : '—';
     const cliente     = p.nombreCliente || p.nombreAlumno;
 
     const filas = p.items.map((i, idx) => {
+      const anioMens = i.fechaMensualidad ? parseLocalDate(i.fechaMensualidad).getFullYear() : null;
+      const sufijo   = i.mes && i.mes !== 'N/A' ? ` ${this.escHtml(i.mes)}${anioMens ? ' ' + anioMens : ''}` : '';
       const concepto = i.nombreProducto
-        ? (i.mes && i.mes !== 'N/A' ? `${i.nombreProducto} ${i.mes}` : i.nombreProducto)
-        : (i.mes && i.mes !== 'N/A' ? `Mensualidad ${i.mes}` : `Producto ${i.idProducto}`);
+        ? (sufijo ? `${this.escHtml(i.nombreProducto)}${sufijo}` : this.escHtml(i.nombreProducto))
+        : (sufijo ? `Mensualidad${sufijo}` : `Producto ${this.escHtml(i.idProducto)}`);
       return `
       <tr class="${idx % 2 === 1 ? 'fila-alt' : ''}">
         <td>${concepto}</td>
@@ -158,11 +212,13 @@ export class FacturacionService {
 
     const esAnulada = p.anulada === '1';
 
+    const valorLetras = this.numToLetras(p.total);
+
     return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Factura ${p.noFactura}${esAnulada ? ' [ANULADA]' : ''}</title>
+  <title>Factura ${this.escHtml(p.noFactura)}${esAnulada ? ' [ANULADA]' : ''}</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; }
@@ -203,7 +259,7 @@ export class FacturacionService {
       background: #fafafa; margin-bottom: 10px; font-size: 8.5pt;
     }
     .receptor label { font-weight: bold; color: #6B0F1A; margin-right: 4px; }
-    table.items { width: 100%; border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; }
+    table.items { width: 100%; border-collapse: collapse; margin-bottom: 6px; table-layout: fixed; }
     table.items thead tr { background: #6B0F1A; color: #fff; }
     table.items th { padding: 6px 7px; font-size: 8.5pt; text-align: left; font-weight: 600; }
     table.items th.monto, table.items td.monto { text-align: right; font-family: 'Courier New', monospace; }
@@ -211,15 +267,25 @@ export class FacturacionService {
     table.items td { padding: 5px 7px; font-size: 8.5pt; border-bottom: 1px solid #eee; }
     table.items tr.fila-alt td { background: #fdf0f0; }
     table.items tbody tr:last-child td { border-bottom: 2px solid #6B0F1A; }
-    .totales-section { display: grid; grid-template-columns: 1fr 240px; gap: 0 24px; margin-top: 4px; }
+    .valor-letras {
+      font-size: 8.5pt; padding: 5px 8px; margin-bottom: 8px;
+      border: 1px solid #ddd; border-radius: 3px; background: #fafafa;
+    }
+    .valor-letras strong { color: #6B0F1A; margin-right: 4px; }
+    .totales-section { display: grid; grid-template-columns: 1fr 260px; gap: 0 24px; margin-top: 4px; }
     .firmas { font-size: 7.5pt; color: #555; padding-top: 20px; line-height: 2.4; }
     .firmas span { display: block; border-bottom: 1px solid #999; margin-bottom: 2px; }
     .totales-tabla { font-size: 8.5pt; }
     .t-row { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px dotted #ddd; gap: 8px; }
     .t-row label { color: #444; white-space: nowrap; }
     .t-val { font-family: 'Courier New', monospace; white-space: nowrap; }
-    .t-row.grand { font-size: 12pt; font-weight: bold; color: #6B0F1A; border-top: 2px solid #6B0F1A; border-bottom: 2px solid #6B0F1A; padding: 5px 0; margin-top: 3px; }
-    .footer { text-align: center; margin-top: 22px; padding-top: 8px; border-top: 2px solid #6B0F1A; font-size: 8.5pt; font-weight: bold; letter-spacing: 2px; color: #6B0F1A; text-transform: uppercase; }
+    .t-row.grand { font-size: 12pt; font-weight: bold; color: #c62828; border-top: 2px solid #6B0F1A; border-bottom: 2px solid #6B0F1A; padding: 5px 0; margin-top: 3px; }
+    .footer {
+      text-align: center; margin-top: 16px; padding-top: 8px;
+      border-top: 2px solid #6B0F1A; font-size: 8.5pt; color: #6B0F1A;
+    }
+    .footer .exijala { font-size: 9pt; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+    .footer .lema    { font-size: 7.5pt; letter-spacing: 2px; color: #888; margin-top: 2px; text-transform: uppercase; }
   </style>
 </head>
 <body>
@@ -233,49 +299,54 @@ export class FacturacionService {
     </div>
   </div>
   <div class="meta-box">
-    <div class="meta-row"><label>No:</label> <span class="no-factura-val">${p.noFactura}</span></div>
-    <div class="meta-row"><label>CAI:</label> <span>${p.cai ?? '—'}</span></div>
-    <div class="meta-row"><label>Rango del:</label> <span>${p.rangoDel ?? '—'} &nbsp;Al&nbsp; ${p.rangoAl ?? '—'}</span></div>
+    <div class="meta-row"><label>No:</label> <span class="no-factura-val">${this.escHtml(p.noFactura)}</span></div>
+    <div class="meta-row"><label>CAI:</label> <span>${this.escHtml(p.cai)}</span></div>
+    <div class="meta-row"><label>Rango del:</label> <span>${this.escHtml(p.rangoDel)} &nbsp;Al&nbsp; ${this.escHtml(p.rangoAl)}</span></div>
     <div class="meta-row"><label>Fecha Límite:</label> <span>${fechaLimStr}</span></div>
     <div class="meta-row"><label>Fecha Emisión:</label> <span>${fechaStr}</span></div>
     <div></div>
   </div>
   <div class="receptor">
-    <div><label>Estudiante:</label>${p.nombreAlumno}</div>
-    <div><label>Grado:</label>${p.grade ?? '—'}</div>
-    <div><label>Cliente:</label>${cliente}</div>
-    <div></div>
+    <div><label>Estudiante:</label>${this.escHtml(p.nombreAlumno)}</div>
+    <div><label>Grado:</label>${this.escHtml(p.grade) || '—'}</div>
+    <div><label>Cliente:</label>${this.escHtml(cliente)}</div>
+    ${p.rtnCliente ? `<div><label>RTN Cliente:</label>${this.escHtml(p.rtnCliente)}</div>` : '<div></div>'}
   </div>
   <table class="items">
     <thead>
       <tr>
-        <th style="width:40%">Detalle</th>
-        <th class="monto">Precio</th>
+        <th style="width:40%">Descripción</th>
+        <th class="monto">Precio Unitario</th>
         <th class="center">Cantidad</th>
-        <th class="monto">ISV</th>
+        <th class="monto">Descuentos y Rebajas</th>
         <th class="monto">Total</th>
       </tr>
     </thead>
     <tbody>${filas}</tbody>
   </table>
+  <div class="valor-letras">
+    <strong>VALOR EN LETRAS:</strong>${valorLetras}
+  </div>
   <div class="totales-section">
     <div class="firmas">
-      <span>No O/C exenta &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-      <span>No registro de exonerado &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-      <span>No registro de la SAG &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <span>Nº Correlativo de orden de compra exenta &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <span>Nº Correlativo de constancia de registro exonerado &nbsp;</span>
+      <span>Nº Correlativo del registro de la SAG &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
     </div>
     <div class="totales-tabla">
-      <div class="t-row"><label>Sub Total</label><span class="t-val">${this.formatLps(p.total)}</span></div>
-      <div class="t-row"><label>Descuentos</label><span class="t-val">0</span></div>
+      <div class="t-row"><label>Importe Exonerado</label><span class="t-val">L. 0.00</span></div>
       <div class="t-row"><label>Importe Exento</label><span class="t-val">${this.formatLps(totalExento)}</span></div>
       <div class="t-row"><label>Importe Gravado 15%</label><span class="t-val">${this.formatLps(p.impuestoGravado)}</span></div>
-      <div class="t-row"><label>Importe Gravado 18%</label><span class="t-val">0</span></div>
-      <div class="t-row"><label>ISV 15%</label><span class="t-val">0.00</span></div>
-      <div class="t-row"><label>ISV 18%</label><span class="t-val">0</span></div>
-      <div class="t-row grand"><label>Total</label><span class="t-val">${this.formatLps(p.total)}</span></div>
+      <div class="t-row"><label>Importe Gravado 18%</label><span class="t-val">L. 0.00</span></div>
+      <div class="t-row"><label>I.S.V. 15%</label><span class="t-val">L. 0.00</span></div>
+      <div class="t-row"><label>I.S.V. 18%</label><span class="t-val">L. 0.00</span></div>
+      <div class="t-row grand"><label>TOTAL A PAGAR</label><span class="t-val">${this.formatLps(p.total)}</span></div>
     </div>
   </div>
-  <div class="footer">Ethics, Science &amp; Technology</div>
+  <div class="footer">
+    <div class="exijala">La factura es beneficio de todos &mdash; &ldquo;¡EXÍJALA!&rdquo;</div>
+    <div class="lema">Ethics, Science &amp; Technology</div>
+  </div>
 </body>
 </html>`;
   }

@@ -1,0 +1,57 @@
+$guinda: #6B0F1A;
+
+.page-container { padding: 24px; }
+
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+  h1 { font-size: 22px; font-weight: 600; margin: 0; }
+  .breadcrumb { font-size: 12px; color: #888; margin: 2px 0 0; }
+}
+
+.filtros-bar {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: center;
+  .filtro-anio { width: 100px; }
+  .filtro-mes  { width: 140px; }
+  .filtro-cat  { width: 200px; }
+}
+
+.resumen-cards {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;
+}
+
+.resumen-card {
+  background: #fff; border: 1px solid #e0e0e0; border-radius: 10px;
+  padding: 12px 18px; min-width: 160px;
+  display: flex; flex-direction: column; gap: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+
+  .cat-nombre { font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+  .cat-monto  { font-size: 16px; font-weight: 700; color: #c62828; font-family: 'Courier New', monospace; }
+
+  &.total-card {
+    border-color: $guinda; background: #fdf5f5;
+    .cat-nombre { color: $guinda; }
+    .total-monto { font-size: 18px; color: $guinda; }
+  }
+}
+
+.spinner-wrap { display: flex; justify-content: center; padding: 48px; }
+
+.tabla-wrapper { overflow-x: auto; border-radius: 8px; }
+table { width: 100%; }
+.text-right { text-align: right !important; }
+.monto-cell { font-family: 'Courier New', monospace; font-weight: 600; color: #c62828; }
+.desc-cell  { font-size: 12px; color: #888; max-width: 240px; }
+
+.chip-cat {
+  background: #f3f3f3; border-radius: 12px; padding: 3px 10px;
+  font-size: 12px; font-weight: 500; color: #444;
+}
+
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 48px; color: #bbb;
+  mat-icon { font-size: 48px; width: 48px; height: 48px; }
+  p { margin-top: 8px; }
+}

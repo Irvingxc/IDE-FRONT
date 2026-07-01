@@ -39,7 +39,7 @@
       <ng-container matColumnDef="fechaVence">
         <th mat-header-cell *matHeaderCellDef>Vence</th>
         <td mat-cell *matCellDef="let row">
-          {{ row.fechaVence ? (row.fechaVence | date:'dd/MM/yyyy') : '—' }}
+          {{ row.fechaVence ? (row.fechaVence + 'T00:00:00' | date:'dd/MM/yyyy') : '—' }}
         </td>
       </ng-container>
 
@@ -51,16 +51,31 @@
       <ng-container matColumnDef="estado">
         <th mat-header-cell *matHeaderCellDef>Estado</th>
         <td mat-cell *matCellDef="let row">
-          <span [class]="'chip ' + (row.estado === 'Pagado' ? 'chip-verde' : 'chip-rojo')">
+          <span [class]="'chip ' + (row.estado === 'Pagado' ? 'chip-verde' : row.estado === 'Cancelado' ? 'chip-gris' : 'chip-rojo')">
             {{ row.estado }}
           </span>
+          <div *ngIf="row.estado === 'Cancelado' && row.motivo" class="motivo-texto">
+            {{ row.motivo }}
+          </div>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="fechaPago">
         <th mat-header-cell *matHeaderCellDef>Fecha Pago</th>
         <td mat-cell *matCellDef="let row">
-          {{ row.fechaPago ? (row.fechaPago | date:'dd/MM/yyyy') : '—' }}
+          {{ row.fechaPago ? (row.fechaPago + 'T00:00:00' | date:'dd/MM/yyyy') : '—' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <button *ngIf="row.estado === 'Pendiente' && data.esAdmin"
+                  mat-icon-button color="warn"
+                  matTooltip="Cancelar cuota"
+                  (click)="cancelarCuota(row)">
+            <mat-icon>block</mat-icon>
+          </button>
         </td>
       </ng-container>
 
@@ -68,6 +83,7 @@
       <tr mat-row *matRowDef="let row; columns: columns;"
           [class.fila-pendiente]="row.estado === 'Pendiente'"
           [class.fila-pagada]="row.estado === 'Pagado'"
+          [class.fila-cancelada]="row.estado === 'Cancelado'"
           [class.fila-seleccionada]="row.seleccionado">
       </tr>
 
@@ -87,7 +103,7 @@
         <span class="total-valor pagado">{{ formatLps(totalPagado) }}</span>
       </div>
       <div class="total-bloque">
-        <span class="total-label">Total Pendiente</span>
+        <span class="total-label">Pendiente al corte</span>
         <span class="total-valor pendiente">{{ formatLps(totalPendiente) }}</span>
       </div>
     </div>

@@ -1,0 +1,88 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;margin-right:8px">verified</mat-icon>
+  Nuevo CAI / Autorización SAR
+</h2>
+
+<mat-dialog-content>
+
+  <p class="instruccion">
+    Ingrese los datos del nuevo rango autorizado por el SAR. Los campos se formatean automáticamente.
+  </p>
+
+  <!-- CAI -->
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>CAI</mat-label>
+    <input matInput
+           [value]="cai"
+           (input)="onCaiInput($event)"
+           placeholder="XXXXXX-XXXXXX-XXXXXX-XXXXXX-XXXXXX-XX"
+           maxlength="39"
+           autocomplete="off"
+           spellcheck="false"
+           class="mono">
+    <mat-icon matSuffix [class.ok]="caiValido" [class.pendiente]="!caiValido">
+      {{ caiValido ? 'check_circle' : 'radio_button_unchecked' }}
+    </mat-icon>
+    <mat-hint>32 caracteres hexadecimales — se insertan guiones automáticamente</mat-hint>
+  </mat-form-field>
+
+  <div class="rangos-grid">
+    <!-- Rango Del -->
+    <mat-form-field appearance="outline">
+      <mat-label>Rango Desde</mat-label>
+      <input matInput
+             [value]="rangoDel"
+             (input)="onRangoDelInput($event)"
+             placeholder="000-001-01-00000001"
+             maxlength="19"
+             autocomplete="off"
+             class="mono">
+      <mat-icon matSuffix [class.ok]="rangoDelValido" [class.pendiente]="!rangoDelValido">
+        {{ rangoDelValido ? 'check_circle' : 'radio_button_unchecked' }}
+      </mat-icon>
+    </mat-form-field>
+
+    <!-- Rango Al -->
+    <mat-form-field appearance="outline">
+      <mat-label>Rango Hasta</mat-label>
+      <input matInput
+             [value]="rangoAl"
+             (input)="onRangoAlInput($event)"
+             placeholder="000-001-01-00099999"
+             maxlength="19"
+             autocomplete="off"
+             class="mono">
+      <mat-icon matSuffix [class.ok]="rangoAlValido" [class.pendiente]="!rangoAlValido">
+        {{ rangoAlValido ? 'check_circle' : 'radio_button_unchecked' }}
+      </mat-icon>
+    </mat-form-field>
+  </div>
+
+  <div class="extra-grid">
+    <!-- Fecha Límite -->
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha Límite de Emisión</mat-label>
+      <input matInput [matDatepicker]="picker" [(ngModel)]="fechaLim">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <!-- Impuesto -->
+    <mat-form-field appearance="outline">
+      <mat-label>Tasa ISV (%)</mat-label>
+      <input matInput type="number" [(ngModel)]="impuestoPct" min="0" max="100" step="1">
+      <span matSuffix>%</span>
+      <mat-hint>Normalmente 15%</mat-hint>
+    </mat-form-field>
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancelar()" [disabled]="guardando">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="guardar()" [disabled]="!puedeGuardar">
+    <mat-spinner *ngIf="guardando" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+    <mat-icon *ngIf="!guardando">save</mat-icon>
+    {{ guardando ? 'Guardando...' : 'Guardar CAI' }}
+  </button>
+</mat-dialog-actions>

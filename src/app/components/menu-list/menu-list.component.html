@@ -32,6 +32,14 @@
       <mat-icon>shopping_cart</mat-icon>
       <span class="navegacion-list-label">Compras / Entradas</span>
     </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/egresos" *ngIf="tieneModulo('EGRESOS')">
+      <mat-icon>payments</mat-icon>
+      <span class="navegacion-list-label">Egresos</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/proveedores" *ngIf="tieneModulo('EGRESOS')">
+      <mat-icon>store</mat-icon>
+      <span class="navegacion-list-label">Proveedores</span>
+    </a>
     <a mat-list-item (click)="closeMenu()" routerLink="/empleados" *ngIf="tieneModulo('EMPLEADOS')">
       <mat-icon>badge</mat-icon>
       <span class="navegacion-list-label">Empleados</span>
@@ -40,6 +48,10 @@
       <mat-icon>price_change</mat-icon>
       <span class="navegacion-list-label">Catálogo de Precios</span>
     </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/sar-config" *ngIf="tieneModulo('EMPLEADOS')">
+      <mat-icon>verified</mat-icon>
+      <span class="navegacion-list-label">SAR / Autorizaciones</span>
+    </a>
     <a mat-list-item (click)="closeMenu()" routerLink="/whatsapp" *ngIf="tieneModulo('WHATSAPP')">
       <mat-icon>chat</mat-icon>
       <span class="navegacion-list-label">WhatsApp</span>
@@ -47,6 +59,10 @@
     <a mat-list-item (click)="closeMenu()" routerLink="/reportes" *ngIf="tieneModulo('REPORTES')">
       <mat-icon>bar_chart</mat-icon>
       <span class="navegacion-list-label">Reportes</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/cierre-mes" *ngIf="tieneModulo('EGRESOS')">
+      <mat-icon>event_available</mat-icon>
+      <span class="navegacion-list-label">Cierre de Mes</span>
     </a>
     <a mat-list-item (click)="closeMenu()" routerLink="/bitacora" *ngIf="tieneModulo('BITACORA')">
       <mat-icon>history</mat-icon>

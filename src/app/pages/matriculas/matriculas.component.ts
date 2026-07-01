@@ -11,6 +11,8 @@ import { CarnetAlumnoDialogComponent } from './carnet-alumno-dialog/carnet-alumn
 import { ClienteService, ClienteResponse } from '@app/services/cliente/cliente.service';
 import { AlumnoService, AlumnoResponse } from '@app/services/alumno/alumno.service';
 import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.service';
+import { PortalClienteService } from '@app/services/portal-cliente/portal-cliente.service';
+import { NotificationService } from '@app/services';
 
 @Component({
   selector: 'app-matriculas',
@@ -43,11 +45,15 @@ export class MatriculasComponent implements OnInit {
   readonly PAGE_SIZE = 10;
   filtroNombreCliente = '';
 
+  enviandoAcceso: { [id: number]: boolean } = {};
+
   constructor(
     private dialog: MatDialog,
     private clienteService: ClienteService,
     private alumnoService: AlumnoService,
-    private catalogoService: CatalogoService
+    private catalogoService: CatalogoService,
+    private portalService: PortalClienteService,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -182,6 +188,25 @@ export class MatriculasComponent implements OnInit {
     this.dialog.open(ContratoDialogComponent, {
       width: '500px',
       data: cliente
+    });
+  }
+
+  enviarAcceso(cliente: ClienteResponse): void {
+    this.enviandoAcceso[cliente.id] = true;
+    this.portalService.invitar(cliente.id).subscribe({
+      next: (inv) => {
+        this.enviandoAcceso[cliente.id] = false;
+        this.notification.success(
+          `Invitación generada para ${inv.nombreCliente}. Envía el link al correo: ${inv.email}`
+        );
+        // Copiar link al portapapeles
+        const link = `${window.location.origin}/activar-cuenta/${inv.token}`;
+        navigator.clipboard.writeText(link).catch(() => {});
+      },
+      error: () => {
+        this.enviandoAcceso[cliente.id] = false;
+        this.notification.error('No se pudo generar la invitación.');
+      }
     });
   }
 }

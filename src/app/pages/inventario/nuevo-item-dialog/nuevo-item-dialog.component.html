@@ -1,0 +1,68 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;margin-right:8px">inventory_2</mat-icon>
+  Agregar al Inventario
+</h2>
+
+<mat-dialog-content>
+
+  <mat-form-field appearance="outline" class="full-width" [class.campo-error]="nombreDuplicado">
+    <mat-label>Nombre del ítem *</mat-label>
+    <input matInput [(ngModel)]="nombre" placeholder="Ej. Escritorio ejecutivo">
+    <mat-error *ngIf="nombreDuplicado">Ya existe un ítem con este nombre</mat-error>
+  </mat-form-field>
+  <div class="warn-duplicado" *ngIf="nombreDuplicado">
+    <mat-icon>warning</mat-icon>
+    <span>Ya existe <strong>{{ nombre.trim() }}</strong> en el inventario. Usá Compras para agregar stock.</span>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Categoría *</mat-label>
+    <mat-select [(ngModel)]="categoria">
+      <mat-option *ngFor="let c of categorias" [value]="c">{{ c }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div class="row-3">
+    <mat-form-field appearance="outline">
+      <mat-label>Cantidad *</mat-label>
+      <input matInput type="number" min="1" [(ngModel)]="cantidad">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Valor unitario (L.) *</mat-label>
+      <input matInput type="number" min="0" step="1" [(ngModel)]="valorUnitario">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha adquisición *</mat-label>
+      <input matInput [matDatepicker]="picker" [(ngModel)]="fechaAdquisicion">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <div class="total-preview" *ngIf="valorTotal > 0">
+    <span>Valor total:</span>
+    <strong>L. {{ valorTotal.toLocaleString('es-HN', {minimumFractionDigits:2}) }}</strong>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Descripción (opcional)</mat-label>
+    <textarea matInput [(ngModel)]="descripcion" rows="2"></textarea>
+  </mat-form-field>
+
+  <div class="error-banner" *ngIf="errorMsg">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMsg }}</span>
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button mat-raised-button color="primary" [disabled]="!puedeGuardar" (click)="guardar()">
+    <mat-spinner *ngIf="guardando" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+    <mat-icon *ngIf="!guardando">save</mat-icon>
+    {{ guardando ? 'Guardando...' : 'Agregar' }}
+  </button>
+</mat-dialog-actions>

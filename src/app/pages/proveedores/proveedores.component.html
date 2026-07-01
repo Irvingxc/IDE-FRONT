@@ -1,0 +1,112 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Proveedores</h1>
+      <p class="breadcrumb">Inicio / Proveedores</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="abrirDialog()">
+      <mat-icon>add</mat-icon> Nuevo Proveedor
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-bar">
+    <mat-form-field appearance="outline" class="filtro-nombre">
+      <mat-label>Buscar proveedor</mat-label>
+      <input matInput [(ngModel)]="filtroNombre" (keyup.enter)="cargar()" placeholder="Nombre...">
+      <mat-icon matSuffix style="cursor:pointer" (click)="cargar()">search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filtro-cat">
+      <mat-label>Categoría</mat-label>
+      <mat-select [(ngModel)]="filtroCategoria" (ngModelChange)="cargar()">
+        <mat-option value="">Todas</mat-option>
+        <mat-option *ngFor="let c of categorias" [value]="c">{{ c }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-slide-toggle [(ngModel)]="soloActivos" (ngModelChange)="cargar()" color="primary">
+      Solo activos
+    </mat-slide-toggle>
+
+    <button mat-stroked-button (click)="limpiar()" *ngIf="filtroNombre || filtroCategoria">
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
+
+  <!-- Spinner -->
+  <div class="spinner-wrap" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <!-- Tabla -->
+  <div class="tabla-wrapper mat-elevation-z2" *ngIf="!cargando">
+    <table mat-table [dataSource]="datos">
+
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef>Nombre / Razón Social</th>
+        <td mat-cell *matCellDef="let row">
+          <div><strong>{{ row.nombre }}</strong></div>
+          <div class="sub-dato" *ngIf="row.rtn">RTN: {{ row.rtn }}</div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="rtn">
+        <th mat-header-cell *matHeaderCellDef>RTN</th>
+        <td mat-cell *matCellDef="let row">{{ row.rtn || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="telefono">
+        <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+        <td mat-cell *matCellDef="let row">
+          <div>{{ row.telefono || '—' }}</div>
+          <div class="sub-dato" *ngIf="row.correo">{{ row.correo }}</div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="contacto">
+        <th mat-header-cell *matHeaderCellDef>Contacto</th>
+        <td mat-cell *matCellDef="let row">
+          <div>{{ row.contacto || '—' }}</div>
+          <div class="sub-dato" *ngIf="row.telefonoContacto">{{ row.telefonoContacto }}</div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="categoria">
+        <th mat-header-cell *matHeaderCellDef>Categoría</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="chip-cat" *ngIf="row.categoria">{{ row.categoria }}</span>
+          <span *ngIf="!row.categoria">—</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="activo">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let row">
+          <span [class]="'chip ' + (row.activo ? 'chip-verde' : 'chip-rojo')">
+            {{ row.activo ? 'Activo' : 'Inactivo' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button color="primary" matTooltip="Editar" (click)="abrirDialog(row)">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;" [class.fila-inactiva]="!row.activo"></tr>
+    </table>
+
+    <div class="empty-state" *ngIf="datos.length === 0">
+      <mat-icon>store</mat-icon>
+      <p>No hay proveedores registrados</p>
+    </div>
+  </div>
+
+</div>

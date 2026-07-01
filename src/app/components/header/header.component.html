@@ -5,9 +5,9 @@
       <button mat-icon-button class="menu-btn" (click)="onMenuToggleDispatch()">
         <mat-icon>menu</mat-icon>
       </button>
-      <a routerLink="/" class="brand-link">
+      <a routerLink="/static/welcome" class="brand-link">
         <div class="brand-logo">
-          <mat-icon>school</mat-icon>
+          <img src="/assets/logo.png" alt="IDE" class="brand-logo-img">
         </div>
         <div class="brand-text">
           <span class="brand-name">IDE</span>
@@ -18,7 +18,9 @@
 
     <div class="header-right">
       <ng-container *ngIf="!isAuthorized">
-        <a routerLink="auth/login" class="auth-link">Login</a>
+        <a routerLink="/" class="auth-link">
+          <mat-icon style="font-size:16px;vertical-align:middle;margin-right:4px">arrow_back</mat-icon>Regresar
+        </a>
       </ng-container>
       <ng-container *ngIf="isAuthorized">
         <div class="user-info">
@@ -34,7 +36,7 @@
   </div>
 
   <nav class="header-nav" *ngIf="isAuthorized">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Inicio</a>
+    <a routerLink="/static/welcome" routerLinkActive="active">Inicio</a>
     <a routerLink="/matriculas" routerLinkActive="active">Estudiantes</a>
     <a routerLink="/facturacion" routerLinkActive="active">Facturación</a>
     <a routerLink="/academico" routerLinkActive="active">Académico</a>

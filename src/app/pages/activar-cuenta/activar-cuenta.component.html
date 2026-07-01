@@ -1,0 +1,66 @@
+<div class="activar-wrap">
+  <div class="activar-card">
+
+    <div class="activar-logo">
+      <img src="/assets/logo.png" alt="IDE">
+    </div>
+
+    <!-- Cargando -->
+    <ng-container *ngIf="estado === 'cargando'">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Verificando invitación...</p>
+    </ng-container>
+
+    <!-- Token inválido o expirado -->
+    <ng-container *ngIf="estado === 'invalido'">
+      <mat-icon class="icon-error">cancel</mat-icon>
+      <h2>Enlace no válido</h2>
+      <p>Esta invitación ya fue utilizada o ha expirado.<br>Solicita un nuevo enlace al colegio.</p>
+      <a routerLink="/" class="btn-volver">Volver al inicio</a>
+    </ng-container>
+
+    <!-- Formulario de activación -->
+    <ng-container *ngIf="estado === 'valido' || estado === 'activando'">
+      <h2>Activar acceso al portal</h2>
+      <p class="activar-sub">Bienvenido/a, <strong>{{ invitacion?.nombreCliente }}</strong>.<br>
+         Elige una contraseña para tu cuenta.</p>
+
+      <div class="activar-email">
+        <mat-icon>email</mat-icon> {{ invitacion?.email }}
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="activar()">
+        <mat-form-field appearance="outline">
+          <mat-label>Contraseña</mat-label>
+          <input matInput type="password" formControlName="password">
+          <mat-error *ngIf="form.get('password')?.hasError('required')">Requerida</mat-error>
+          <mat-error *ngIf="form.get('password')?.hasError('minlength')">Mínimo 6 caracteres</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Confirmar contraseña</mat-label>
+          <input matInput type="password" formControlName="confirmar">
+          <mat-error *ngIf="form.hasError('noCoinciden')">Las contraseñas no coinciden</mat-error>
+        </mat-form-field>
+
+        <div class="activar-error" *ngIf="errorMsg">
+          <mat-icon>warning</mat-icon> {{ errorMsg }}
+        </div>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="estado === 'activando'">
+          <mat-icon>check_circle</mat-icon>
+          {{ estado === 'activando' ? 'Activando...' : 'Activar mi cuenta' }}
+        </button>
+      </form>
+    </ng-container>
+
+    <!-- Cuenta activada -->
+    <ng-container *ngIf="estado === 'listo'">
+      <mat-icon class="icon-ok">check_circle</mat-icon>
+      <h2>¡Cuenta activada!</h2>
+      <p>Redirigiendo a tu portal...</p>
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </ng-container>
+
+  </div>
+</div>

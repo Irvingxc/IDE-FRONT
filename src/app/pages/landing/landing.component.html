@@ -1,0 +1,398 @@
+<!-- ══════════════════════════════════════════════ NAVBAR ══ -->
+<nav class="navbar" [class.scrolled]="navScrolled">
+  <div class="nav-inner">
+    <div class="nav-brand" (click)="scrollTo('hero')">
+      <img src="/assets/logo.png" alt="IDE Logo" class="nav-logo">
+      <div class="nav-brand-text">
+        <span class="brand-sigla">IDE</span>
+        <span class="brand-full">Institute for the Development of Excellence</span>
+      </div>
+    </div>
+
+    <ul class="nav-links" [class.open]="menuOpen">
+      <li *ngFor="let item of [
+            {id:'nosotros',   label:'Nosotros'},
+            {id:'programas',  label:'Programas'},
+            {id:'bilingue',   label:'Bilingüismo'},
+            {id:'admisiones', label:'Admisiones'},
+            {id:'contacto',   label:'Contacto'}
+          ]">
+        <a (click)="scrollTo(item.id)" [class.active]="activeSection === item.id">
+          {{ item.label }}
+        </a>
+      </li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="btn-portal" (click)="irLogin()">
+        <span class="material-icons">login</span> Portal Académico
+      </button>
+      <button class="hamburger" (click)="menuOpen = !menuOpen">
+        <span class="material-icons">{{ menuOpen ? 'close' : 'menu' }}</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════ HERO ══ -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <span class="hero-label">Colegio Bilingüe · Danlí, El Paraíso</span>
+    <h1 class="hero-title">
+      Formamos líderes<br><em>que transforman</em> el mundo
+    </h1>
+    <p class="hero-sub">
+      Educación bilingüe de calidad que integra valores, ciencia y tecnología para preparar
+      a nuestros estudiantes para el futuro.
+    </p>
+    <div class="hero-motto">
+      <span>Ethics</span><span class="dot">·</span>
+      <span>Science</span><span class="dot">·</span>
+      <span>Technology</span>
+    </div>
+    <div class="hero-ctas">
+      <button class="btn-primary-hero" (click)="scrollTo('admisiones')">
+        <span class="material-icons">how_to_reg</span> Inscríbete {{ year + 1 }}
+      </button>
+      <button class="btn-outline-hero" (click)="scrollTo('nosotros')">
+        <span class="material-icons">play_circle</span> Conócenos
+      </button>
+    </div>
+  </div>
+  <div class="hero-scroll" (click)="scrollTo('nosotros')">
+    <span class="material-icons">keyboard_arrow_down</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ STATS ══ -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <span class="stat-num">10+</span>
+    <span class="stat-lbl">Años formando<br>excelencia</span>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat-item">
+    <span class="stat-num">500+</span>
+    <span class="stat-lbl">Estudiantes<br>graduados</span>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat-item">
+    <span class="stat-num">100%</span>
+    <span class="stat-lbl">Enseñanza<br>bilingüe</span>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat-item">
+    <span class="stat-num">K–12</span>
+    <span class="stat-lbl">Todos los<br>niveles</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ NOSOTROS ══ -->
+<section class="seccion" id="nosotros">
+  <div class="container">
+    <div class="seccion-doble">
+      <div class="doble-texto">
+        <span class="chip">Quiénes somos</span>
+        <h2>Una comunidad educativa comprometida con la <em>excelencia</em></h2>
+        <p>
+          El <strong>Institute for the Development of Excellence (IDE)</strong> nació con la
+          convicción de que cada niño y joven merece una educación de calidad que lo prepare
+          integralmente para los desafíos del siglo XXI.
+        </p>
+        <p>
+          Ubicados en Villa Madrid, Danlí, somos un colegio bilingüe que combina el rigor
+          académico, la formación en valores y la integración tecnológica para potenciar el
+          talento de cada estudiante.
+        </p>
+        <div class="mis-vis">
+          <div class="mv-card">
+            <span class="material-icons mv-icon">flag</span>
+            <div>
+              <strong>Misión</strong>
+              <p>Brindar educación bilingüe integral que forme personas éticas, críticas y preparadas para contribuir positivamente a la sociedad.</p>
+            </div>
+          </div>
+          <div class="mv-card">
+            <span class="material-icons mv-icon">visibility</span>
+            <div>
+              <strong>Visión</strong>
+              <p>Ser el colegio bilingüe de referencia en El Paraíso, reconocido por su excelencia académica y la formación de líderes de carácter.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="doble-deco">
+        <div class="deco-card deco-card--main">
+          <span class="material-icons deco-icon">school</span>
+          <span>Educación de calidad</span>
+        </div>
+        <div class="deco-card deco-card--sec">
+          <span class="material-icons deco-icon">translate</span>
+          <span>100% Bilingüe</span>
+        </div>
+        <div class="deco-card deco-card--ter">
+          <span class="material-icons deco-icon">emoji_events</span>
+          <span>Excelencia académica</span>
+        </div>
+        <div class="deco-circle"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ PILARES ══ -->
+<section class="seccion seccion--dark" id="pilares">
+  <div class="container">
+    <div class="seccion-header">
+      <span class="chip chip--light">Nuestros Pilares</span>
+      <h2>Los tres pilares que guían nuestra <em>educación</em></h2>
+      <p>Todo lo que hacemos en IDE gira en torno a tres principios fundamentales que
+         definen nuestra identidad y nuestra promesa a las familias.</p>
+    </div>
+    <div class="pilares-grid">
+      <div class="pilar-card" *ngFor="let p of pilares; let i = index">
+        <div class="pilar-num">0{{ i + 1 }}</div>
+        <span class="material-icons pilar-icon">{{ p.icon }}</span>
+        <h3>{{ p.titulo }}</h3>
+        <span class="pilar-en">{{ p.ingles }}</span>
+        <p>{{ p.desc }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ PROGRAMAS ══ -->
+<section class="seccion" id="programas">
+  <div class="container">
+    <div class="seccion-header">
+      <span class="chip">Oferta Académica</span>
+      <h2>Programas para <em>cada etapa</em> de vida</h2>
+      <p>Acompañamos a los estudiantes desde sus primeros pasos hasta la graduación,
+         con un currículo coherente y progresivo en español e inglés.</p>
+    </div>
+    <div class="niveles-grid">
+      <div class="nivel-card" *ngFor="let n of nivelesEducativos">
+        <div class="nivel-header">
+          <div class="nivel-icon-wrap">
+            <span class="material-icons">{{ n.icon }}</span>
+          </div>
+          <div class="nivel-titles">
+            <h3>{{ n.nivel }}</h3>
+            <span class="nivel-en">{{ n.ingles }}</span>
+          </div>
+        </div>
+        <p class="nivel-desc">{{ n.desc }}</p>
+        <div class="nivel-grados">
+          <div class="nivel-grado" *ngFor="let g of n.grados">
+            <div class="grado-rango-badge">{{ g.rango }}</div>
+            <div class="grado-info">
+              <strong>{{ g.grado }}</strong>
+              <span>{{ g.detalle }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ BILINGÜE ══ -->
+<section class="seccion seccion--accent" id="bilingue">
+  <div class="container">
+    <div class="bilingue-wrap">
+      <div class="bilingue-texto">
+        <span class="chip">Programa Bilingüe</span>
+        <h2>Dos idiomas, <em>infinitas oportunidades</em></h2>
+        <p>
+          En IDE el inglés no es solo una asignatura — es el vehículo de aprendizaje.
+          Nuestros estudiantes desarrollan fluidez natural en ambos idiomas desde
+          los primeros años de escolaridad.
+        </p>
+        <ul class="bilingue-lista">
+          <li>
+            <span class="material-icons">check_circle</span>
+            Clases impartidas en inglés y español desde Pre-Kínder
+          </li>
+          <li>
+            <span class="material-icons">check_circle</span>
+            Docentes nativos y certificados en inglés como segunda lengua
+          </li>
+          <li>
+            <span class="material-icons">check_circle</span>
+            Evaluaciones alineadas a estándares internacionales
+          </li>
+          <li>
+            <span class="material-icons">check_circle</span>
+            Preparación para exámenes de certificación internacional
+          </li>
+          <li>
+            <span class="material-icons">check_circle</span>
+            Actividades extracurriculares en inglés: debates, teatro y club de lectura
+          </li>
+        </ul>
+      </div>
+      <div class="bilingue-cards">
+        <div class="lang-card lang-es">
+          <span class="lang-flag">🇭🇳</span>
+          <span class="lang-nombre">Español</span>
+          <span class="lang-desc">Lengua materna, cultura e identidad hondureña</span>
+        </div>
+        <div class="lang-plus">+</div>
+        <div class="lang-card lang-en">
+          <span class="lang-flag">🇺🇸</span>
+          <span class="lang-nombre">English</span>
+          <span class="lang-desc">Global language for science, business & opportunity</span>
+        </div>
+        <div class="lang-igual">=</div>
+        <div class="lang-resultado">
+          <span class="material-icons">star</span>
+          <span>Ciudadano global del siglo XXI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ POR QUÉ IDE ══ -->
+<section class="seccion" id="diferenciadores">
+  <div class="container">
+    <div class="seccion-header">
+      <span class="chip">¿Por qué elegir IDE?</span>
+      <h2>Lo que nos hace <em>diferentes</em></h2>
+    </div>
+    <div class="dif-grid">
+      <div class="dif-card" *ngFor="let d of diferenciadores">
+        <span class="material-icons dif-icon">{{ d.icon }}</span>
+        <div>
+          <strong>{{ d.texto }}</strong>
+          <p>{{ d.sub }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ ADMISIONES ══ -->
+<section class="seccion seccion--dark" id="admisiones">
+  <div class="container">
+    <div class="seccion-header">
+      <span class="chip chip--gold">Inscripciones Abiertas {{ year + 1 }}</span>
+      <h2>Únete a la familia <em>IDE</em></h2>
+      <p>El proceso de admisión es simple y transparente. Te acompañamos en cada paso.</p>
+    </div>
+    <div class="pasos-grid">
+      <div class="paso-card" *ngFor="let p of pasos">
+        <div class="paso-num">{{ p.num }}</div>
+        <h3>{{ p.titulo }}</h3>
+        <p>{{ p.desc }}</p>
+      </div>
+    </div>
+    <div class="admisiones-cta">
+      <p>¿Listo para dar el primer paso?</p>
+      <a href="mailto:ide@developmentofexcellence.com" class="btn-primary-hero">
+        <span class="material-icons">mail</span> Solicitar información
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ CONTACTO ══ -->
+<section class="seccion" id="contacto">
+  <div class="container">
+    <div class="seccion-header">
+      <span class="chip">Contáctenos</span>
+      <h2>Estamos aquí para <em>orientarle</em></h2>
+    </div>
+    <div class="contacto-grid">
+      <div class="contacto-card">
+        <span class="material-icons contacto-icon">location_on</span>
+        <h4>Dirección</h4>
+        <p>Villa Madrid, Danlí, El Paraíso<br>A 100 metros de UNAH-TEC Danlí</p>
+        <a href="https://maps.app.goo.gl/CvyRy3RvGwQKjPTD8" target="_blank" class="contacto-link">
+          Ver en Google Maps <span class="material-icons">open_in_new</span>
+        </a>
+      </div>
+      <div class="contacto-card">
+        <span class="material-icons contacto-icon">email</span>
+        <h4>Correo electrónico</h4>
+        <p>Para consultas académicas,<br>admisiones e información general.</p>
+        <a href="mailto:ide@developmentofexcellence.com" class="contacto-link">
+          ide@developmentofexcellence.com
+        </a>
+      </div>
+      <div class="contacto-card">
+        <span class="material-icons contacto-icon">schedule</span>
+        <h4>Horario de atención</h4>
+        <p>Lunes a Viernes<br>7:00 am – 4:00 pm</p>
+        <p class="contacto-nota">Sábados con cita previa</p>
+      </div>
+      <div class="contacto-card contacto-card--wa">
+        <div class="contacto-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" class="wa-svg">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+          </svg>
+        </div>
+        <h4>WhatsApp</h4>
+        <p>¿Tienes preguntas? Escríbenos directamente para más información sobre admisiones y programas.</p>
+        <a href="https://wa.me/50431650838?text=Hola%2C%20me%20gustar%C3%ADa%20obtener%20m%C3%A1s%20informaci%C3%B3n%20sobre%20el%20colegio%20IDE." target="_blank" class="contacto-link contacto-link--wa">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+          +504 3165-0838
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ FOOTER ══ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="/assets/logo.png" alt="IDE Logo" class="footer-logo">
+        <div>
+          <div class="footer-brand-name">IDE</div>
+          <div class="footer-brand-full">Institute for the Development of Excellence</div>
+          <div class="footer-motto">Ethics · Science · Technology</div>
+        </div>
+      </div>
+      <div class="footer-links">
+        <strong>Navegación</strong>
+        <a (click)="scrollTo('nosotros')">Nosotros</a>
+        <a (click)="scrollTo('programas')">Programas</a>
+        <a (click)="scrollTo('bilingue')">Bilingüismo</a>
+        <a (click)="scrollTo('admisiones')">Admisiones</a>
+        <a (click)="scrollTo('contacto')">Contacto</a>
+      </div>
+      <div class="footer-links">
+        <strong>Acceso</strong>
+        <a (click)="irLogin()">Portal Académico</a>
+        <a (click)="irLogin()">Portal de Padres</a>
+        <a (click)="irLogin()">Portal Docentes</a>
+      </div>
+      <div class="footer-contacto">
+        <strong>Contacto</strong>
+        <span><span class="material-icons">location_on</span> Villa Madrid, Danlí, El Paraíso</span>
+        <span><span class="material-icons">email</span> ide@developmentofexcellence.com</span>
+        <span><span class="material-icons">language</span> RTN: 08019021301711</span>
+        <div class="footer-social">
+          <a href="https://www.facebook.com/Instituteforthedevelopmentofexcellence" target="_blank" aria-label="Facebook" class="social-btn social-btn--fb">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/ide.hn/" target="_blank" aria-label="Instagram" class="social-btn social-btn--ig">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </a>
+          <a href="https://www.tiktok.com/@developmentofexcellence" target="_blank" aria-label="TikTok" class="social-btn social-btn--tt">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© {{ year }} Inversiones Calix Gutiérrez S. de R.L. — Todos los derechos reservados.</span>
+      <button class="btn-portal btn-portal--sm" (click)="irLogin()">
+        <span class="material-icons">lock</span> Ingresar al sistema
+      </button>
+    </div>
+  </div>
+</footer>

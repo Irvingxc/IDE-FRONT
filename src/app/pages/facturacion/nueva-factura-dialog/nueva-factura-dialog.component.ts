@@ -5,6 +5,7 @@ import { catchError, debounceTime, distinctUntilChanged, forkJoin, of, Subject, 
 import { FacturacionService, Sar, CrearFacturaRequest, GradoPrecio } from '@app/services/facturacion/facturacion.service';
 import { AlumnoService, AlumnoResponse } from '@app/services/alumno/alumno.service';
 import { CxcService } from '@app/services/cxc/cxc.service';
+import { toLocalDateStr, parseLocalDate } from '@app/utils/date.utils';
 
 export interface ItemFacturaLocal {
   concepto:        string;
@@ -216,13 +217,13 @@ export class NuevaFacturaDialogComponent implements OnInit {
   }
 
   guardar(): void {
-    if (!this.puedeGuardar || !this.sar) return;
+    if (this.guardando || !this.puedeGuardar || !this.sar) return;
     this.guardando = true;
 
     const dto: CrearFacturaRequest = {
       alumno:          this.alumnoIdentidad,
       idSar:           this.sar.idSar,
-      fechaEmision:    this.fechaEmision.toISOString().split('T')[0],
+      fechaEmision:    toLocalDateStr(this.fechaEmision),
       total:           this.subtotal,
       impuestoGravado: 0,
       items: this.items.map(i => ({
@@ -237,7 +238,6 @@ export class NuevaFacturaDialogComponent implements OnInit {
 
     this.facturacionService.crearFactura(dto).subscribe({
       next: (creada) => {
-        this.guardando = false;
         this.dialogRef.close(true);
         this.imprimirFactura(creada.noFactura, creada.idPago);
       },
@@ -264,12 +264,12 @@ export class NuevaFacturaDialogComponent implements OnInit {
   }
 
   get hoyStr(): string {
-    return new Date().toISOString().split('T')[0];
+    return toLocalDateStr(new Date());
   }
 
   get sarFechaLimStr(): string {
     if (!this.sar?.fechaLim) return '—';
-    return new Date(this.sar.fechaLim).toLocaleDateString('es-HN');
+    return parseLocalDate(this.sar.fechaLim).toLocaleDateString('es-HN');
   }
 
   formatLps(v: number): string {

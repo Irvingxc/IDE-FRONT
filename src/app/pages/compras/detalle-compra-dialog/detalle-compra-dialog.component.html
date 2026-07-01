@@ -1,0 +1,71 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;margin-right:8px">receipt</mat-icon>
+  Detalle de Compra
+  <span *ngIf="compra" [class]="'chip-estado ' + (compra.estado === 'Activa' ? 'verde' : 'rojo')">
+    {{ compra.estado }}
+  </span>
+</h2>
+
+<mat-dialog-content>
+
+  <div *ngIf="cargando" class="loading">
+    <mat-spinner diameter="32"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!cargando && compra">
+
+    <!-- Encabezado -->
+    <div class="info-grid">
+      <div class="info-item"><span class="lbl">Proveedor</span><span class="val">{{ compra.proveedor }}</span></div>
+      <div class="info-item" *ngIf="compra.proveedorRTN"><span class="lbl">RTN</span><span class="val mono">{{ compra.proveedorRTN }}</span></div>
+      <div class="info-item"><span class="lbl">Fecha</span><span class="val">{{ formatFecha(compra.fecha) }}</span></div>
+      <div class="info-item" *ngIf="compra.noFactura"><span class="lbl">N° Factura</span><span class="val mono">{{ compra.noFactura }}</span></div>
+      <div class="info-item" *ngIf="compra.cai"><span class="lbl">CAI</span><span class="val mono">{{ compra.cai }}</span></div>
+      <div class="info-item" *ngIf="compra.observaciones"><span class="lbl">Observaciones</span><span class="val">{{ compra.observaciones }}</span></div>
+    </div>
+
+    <!-- Detalle -->
+    <table mat-table [dataSource]="compra.items" class="tabla-items mat-elevation-z1">
+      <ng-container matColumnDef="descripcion">
+        <th mat-header-cell *matHeaderCellDef>Descripción</th>
+        <td mat-cell *matCellDef="let i"><strong>{{ i.descripcion }}</strong></td>
+      </ng-container>
+      <ng-container matColumnDef="categoria">
+        <th mat-header-cell *matHeaderCellDef>Categoría</th>
+        <td mat-cell *matCellDef="let i"><span class="chip-cat">{{ i.categoria }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="cantidad">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Cant.</th>
+        <td mat-cell *matCellDef="let i" class="text-center">{{ i.cantidad }}</td>
+      </ng-container>
+      <ng-container matColumnDef="valorUnitario">
+        <th mat-header-cell *matHeaderCellDef class="text-right">Precio Unit.</th>
+        <td mat-cell *matCellDef="let i" class="text-right monto">{{ formatLps(i.valorUnitario) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+        <td mat-cell *matCellDef="let i" class="text-right monto bold">{{ formatLps(i.total) }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+    </table>
+
+    <!-- Totales -->
+    <div class="totales">
+      <div class="t-fila"><span>Subtotal</span><span class="monto">{{ formatLps(compra.subtotal) }}</span></div>
+      <div class="t-fila" *ngIf="compra.porcentajeIsv > 0">
+        <span>ISV {{ compra.porcentajeIsv }}%</span><span class="monto">{{ formatLps(compra.isv) }}</span>
+      </div>
+      <div class="t-fila" *ngIf="compra.descuento > 0">
+        <span>Descuento</span><span class="monto">− {{ formatLps(compra.descuento) }}</span>
+      </div>
+      <div class="t-fila t-total"><span>TOTAL</span><span class="monto">{{ formatLps(compra.total) }}</span></div>
+    </div>
+
+  </ng-container>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

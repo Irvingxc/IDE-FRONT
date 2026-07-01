@@ -1,0 +1,168 @@
+<div class="portal-wrap">
+
+  <!-- Header -->
+  <div class="portal-header">
+    <div class="portal-brand">
+      <img src="/assets/logo.png" alt="IDE">
+      <div>
+        <div class="brand-name">IDE</div>
+        <div class="brand-sub">Portal de Padres de Familia</div>
+      </div>
+    </div>
+    <div class="portal-user" *ngIf="user$ | async as u">
+      <span class="avatar">{{ u.nombre?.charAt(0) }}{{ u.apellido?.charAt(0) }}</span>
+      <span>{{ u.nombre }} {{ u.apellido }}</span>
+    </div>
+  </div>
+
+  <div class="portal-body">
+
+    <!-- Sidebar hijos -->
+    <aside class="sidebar">
+      <h3>Mis hijos</h3>
+      <div *ngIf="cargandoHijos" class="sidebar-loading">
+        <mat-spinner diameter="24"></mat-spinner>
+      </div>
+      <div class="hijo-card"
+           *ngFor="let h of hijos"
+           [class.activo]="hijoSeleccionado?.identidad === h.identidad"
+           (click)="seleccionar(h)">
+        <div class="hijo-avatar">
+          <img *ngIf="h.foto" [src]="h.foto" alt="">
+          <mat-icon *ngIf="!h.foto">person</mat-icon>
+        </div>
+        <div class="hijo-info">
+          <strong>{{ h.nombreCompleto }}</strong>
+          <span>{{ h.grado }}</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="main-content" *ngIf="hijoSeleccionado">
+
+      <div class="section-title">
+        <mat-icon>person</mat-icon>
+        {{ hijoSeleccionado.nombreCompleto }}
+        <span class="grado-badge">{{ hijoSeleccionado.grado }}</span>
+      </div>
+
+      <!-- Resumen CXC -->
+      <div class="resumen-cards">
+        <div class="resumen-card resumen-card--pendiente">
+          <mat-icon>pending_actions</mat-icon>
+          <div>
+            <span class="resumen-label">Saldo pendiente</span>
+            <span class="resumen-valor">{{ svc.formatLps(totalPendiente) }}</span>
+            <span class="resumen-sub">{{ pendientes.length }} cuota(s)</span>
+          </div>
+        </div>
+        <div class="resumen-card resumen-card--pagado">
+          <mat-icon>check_circle</mat-icon>
+          <div>
+            <span class="resumen-label">Total pagado {{ anio }}</span>
+            <span class="resumen-valor">{{ svc.formatLps(totalPagado) }}</span>
+            <span class="resumen-sub">{{ pagadas.length }} cuota(s)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <mat-tab-group [(selectedIndex)]="tabActiva" class="portal-tabs">
+
+        <!-- Estado de cuenta -->
+        <mat-tab label="Estado de cuenta">
+          <div class="tab-toolbar">
+            <mat-form-field appearance="outline" class="anio-select">
+              <mat-label>Año</mat-label>
+              <mat-select [value]="anio" (selectionChange)="cambiarAnio($event.value)">
+                <mat-option *ngFor="let a of anios" [value]="a">{{ a }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div *ngIf="cargandoCxc" class="loading-row">
+            <mat-spinner diameter="28"></mat-spinner>
+          </div>
+
+          <table mat-table [dataSource]="cxc" class="portal-table" *ngIf="!cargandoCxc">
+            <ng-container matColumnDef="mes">
+              <th mat-header-cell *matHeaderCellDef>Mes</th>
+              <td mat-cell *matCellDef="let r">{{ svc.nombreMes(r.mes) }} {{ r.anio }}</td>
+            </ng-container>
+            <ng-container matColumnDef="producto">
+              <th mat-header-cell *matHeaderCellDef>Concepto</th>
+              <td mat-cell *matCellDef="let r">{{ r.producto || r.tipoCuota || '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="monto">
+              <th mat-header-cell *matHeaderCellDef>Monto</th>
+              <td mat-cell *matCellDef="let r">{{ svc.formatLps(r.monto) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="vence">
+              <th mat-header-cell *matHeaderCellDef>Vence</th>
+              <td mat-cell *matCellDef="let r">{{ r.fechaVence ? (r.fechaVence | date:'dd/MM/yyyy') : '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let r">
+                <span class="estado-badge" [class.pagado]="r.estado === 'Pagado'" [class.pendiente]="r.estado === 'Pendiente'">
+                  {{ r.estado }}
+                </span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="fechaPago">
+              <th mat-header-cell *matHeaderCellDef>Fecha pago</th>
+              <td mat-cell *matCellDef="let r">{{ r.fechaPago ? (r.fechaPago | date:'dd/MM/yyyy') : '—' }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="cxcColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: cxcColumns;"></tr>
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell" colspan="6" style="text-align:center;padding:24px">Sin registros para este año.</td>
+            </tr>
+          </table>
+        </mat-tab>
+
+        <!-- Facturas -->
+        <mat-tab label="Facturas">
+          <div *ngIf="cargandoFacturas" class="loading-row">
+            <mat-spinner diameter="28"></mat-spinner>
+          </div>
+          <table mat-table [dataSource]="facturas" class="portal-table" *ngIf="!cargandoFacturas">
+            <ng-container matColumnDef="noFactura">
+              <th mat-header-cell *matHeaderCellDef>N° Factura</th>
+              <td mat-cell *matCellDef="let r">{{ r.noFactura }}</td>
+            </ng-container>
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef>Fecha</th>
+              <td mat-cell *matCellDef="let r">{{ r.fecha | date:'dd/MM/yyyy' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>Total</th>
+              <td mat-cell *matCellDef="let r">{{ svc.formatLps(r.total) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let r">
+                <span class="estado-badge" [class.anulada]="r.anulada === '1'" [class.pagado]="r.anulada !== '1'">
+                  {{ r.anulada === '1' ? 'Anulada' : 'Válida' }}
+                </span>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="facColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: facColumns;"></tr>
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell" colspan="4" style="text-align:center;padding:24px">Sin facturas registradas.</td>
+            </tr>
+          </table>
+        </mat-tab>
+
+      </mat-tab-group>
+    </main>
+
+    <main class="main-content main-empty" *ngIf="!hijoSeleccionado && !cargandoHijos">
+      <mat-icon>school</mat-icon>
+      <p>Selecciona un hijo para ver su información.</p>
+    </main>
+
+  </div>
+</div>

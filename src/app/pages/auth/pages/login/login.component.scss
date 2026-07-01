@@ -1,9 +1,81 @@
-mat-form-field{
-  width: 100%;
+$guinda: #6B0F1A;
+$gold:   #C9A227;
+
+.login-wrap {
+  min-height: calc(100vh - 56px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f0eb;
+  padding: 24px;
 }
 
-mat-card{
-  width: 300px;
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(107,15,26,.12) !important;
+  padding: 32px 28px !important;
+}
+
+.login-header {
   text-align: center;
-  margin-top: 20px;
+  margin-bottom: 28px;
+
+  .login-logo {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid $gold;
+    box-shadow: 0 0 0 4px rgba($gold,.2);
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: $guinda;
+    margin: 0 0 4px;
+  }
+
+  span {
+    font-size: 11px;
+    color: #999;
+    letter-spacing: .4px;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  mat-form-field { width: 100%; }
+
+  button[type=submit] {
+    margin-top: 8px;
+    height: 46px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+}
+
+.login-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #fff3f3;
+  border: 1px solid #f5c6c6;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 4px 0;
+
+  mat-icon { color: #c62828; font-size: 18px; width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+  span     { font-size: 13px; color: #c62828; line-height: 1.5; }
 }

@@ -1,12 +1,20 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from '@app/guards/auth/auth.guard';
+import { LandingGuard } from '@app/guards/landing/landing.guard';
 import { ModuloGuard } from '@app/guards/modulo/modulo.guard';
+import { ClienteGuard } from '@app/guards/cliente/cliente.guard';
 
 const routes: Routes = [
   {
     path: '',
     children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        canLoad: [LandingGuard],
+        loadChildren: () => import('./pages/landing/landing.module').then(m => m.LandingModule)
+      },
       {
         path: 'auth',
         loadChildren: () => import('./pages/auth/auth.module').then(m => m.AuthModule)
@@ -64,15 +72,55 @@ const routes: Routes = [
         loadChildren: () => import('./pages/catalogo/catalogo.module').then(m => m.CatalogoModule)
       },
       {
+        path: 'egresos',
+        canLoad: [AuthGuard, ModuloGuard],
+        data: { modulo: 'EGRESOS' },
+        loadChildren: () => import('./pages/egresos/egresos.module').then(m => m.EgresosModule)
+      },
+      {
+        path: 'inventario',
+        canLoad: [AuthGuard, ModuloGuard],
+        data: { modulo: 'INVENTARIO' },
+        loadChildren: () => import('./pages/inventario/inventario.module').then(m => m.InventarioModule)
+      },
+      {
+        path: 'compras',
+        canLoad: [AuthGuard, ModuloGuard],
+        data: { modulo: 'ENTRADAS' },
+        loadChildren: () => import('./pages/compras/compras.module').then(m => m.ComprasModule)
+      },
+      {
+        path: 'proveedores',
+        canLoad: [AuthGuard, ModuloGuard],
+        data: { modulo: 'EGRESOS' },
+        loadChildren: () => import('./pages/proveedores/proveedores.module').then(m => m.ProveedoresModule)
+      },
+      {
+        path: 'cierre-mes',
+        canLoad: [AuthGuard, ModuloGuard],
+        data: { modulo: 'EGRESOS' },
+        loadChildren: () => import('./pages/cierre-mes/cierre-mes.module').then(m => m.CierreMesModule)
+      },
+      {
+        path: 'sar-config',
+        canLoad: [AuthGuard, ModuloGuard],
+        data: { modulo: 'EMPLEADOS' },
+        loadChildren: () => import('./pages/sar-config/sar-config.module').then(m => m.SarConfigModule)
+      },
+      {
         path: 'inmueble',
         canLoad: [AuthGuard],
         loadChildren: () => import('./pages/inmueble/inmueble.module').then(m => m.InmuebleModule)
       },
       {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'static/welcome'
-      }
+        path: 'activar-cuenta/:token',
+        loadChildren: () => import('./pages/activar-cuenta/activar-cuenta.module').then(m => m.ActivarCuentaModule)
+      },
+      {
+        path: 'portal-cliente',
+        canLoad: [ClienteGuard],
+        loadChildren: () => import('./pages/portal-cliente/portal-cliente.module').then(m => m.PortalClienteModule)
+      },
     ]
   },
   {

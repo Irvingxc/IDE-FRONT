@@ -7,6 +7,7 @@ export interface CxcResumen {
   identidad:        string;
   nombreCompleto:   string;
   gradoNombre:      string;
+  nombreTutor:      string;
   cuotasPendientes: number;
   cuotasPagadas:    number;
   totalPendiente:   number;
@@ -27,6 +28,7 @@ export interface CxcDetalle {
   estado:         string;
   fechaPago:      string | null;
   observacion:    string | null;
+  motivo:         string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -52,5 +54,13 @@ export class CxcService {
     let params = new HttpParams().set('soloPendientes', soloPendientes);
     if (anio) params = params.set('anio', anio);
     return this.http.get<CxcDetalle[]>(`${environment.url}api/Cxc/${identidad}/detalle`, { params });
+  }
+
+  cancelarCuota(id: number, motivo: string): Observable<void> {
+    return this.http.patch<void>(
+      `${environment.url}api/Cxc/${id}/cancelar`,
+      JSON.stringify(motivo),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }

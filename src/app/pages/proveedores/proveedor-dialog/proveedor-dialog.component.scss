@@ -1,0 +1,11 @@
+$guinda: #6B0F1A;
+
+.full-width { width: 100%; margin-bottom: 8px; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
+
+.seccion {
+  font-size: 12px; font-weight: 700; color: $guinda;
+  text-transform: uppercase; letter-spacing: .6px;
+  border-bottom: 1px solid #f0e0e0; padding-bottom: 4px;
+  margin: 12px 0 12px;
+}

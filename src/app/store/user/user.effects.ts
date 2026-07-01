@@ -69,8 +69,10 @@ export class UserEffects {
             }),
             map((response: UserResponse) => new fromActions.SignInEmailSuccess(response.email, response || null)),
             catchError(err => {
-              this.notification.error("Credenciales incorrectas");
-              return of(new fromActions.SignInEmailError(err.message));
+              const mensaje = err.status === 0
+                ? 'No se pudo conectar con el servidor. Verifique su conexión.'
+                : (err.error?.errors?.mensaje ?? err.error?.mensaje ?? 'Credenciales incorrectas.');
+              return of(new fromActions.SignInEmailError(mensaje));
             })
           )
       )

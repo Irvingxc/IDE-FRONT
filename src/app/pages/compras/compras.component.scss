@@ -1,0 +1,52 @@
+$guinda: #6B0F1A;
+
+.page-container { padding: 24px; }
+
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+  h1 { font-size: 22px; font-weight: 600; margin: 0; }
+  .breadcrumb { font-size: 12px; color: #888; margin: 2px 0 0; }
+}
+
+.filtros-bar {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; align-items: center;
+  .filtro-anio   { width: 100px; }
+  .filtro-mes    { width: 140px; }
+  .filtro-estado { width: 130px; }
+}
+
+.total-bar {
+  font-size: 13px; color: #555; margin-bottom: 14px;
+  strong { color: $guinda; font-size: 15px; margin-left: 6px; }
+}
+
+.spinner-wrap { display: flex; justify-content: center; padding: 48px; }
+
+.tabla-wrapper { overflow-x: auto; border-radius: 8px; }
+table { width: 100%; }
+
+.text-right  { text-align: right !important; }
+.text-center { text-align: center !important; }
+.mono        { font-family: 'Courier New', monospace; font-size: 12px; }
+.sub-dato    { font-size: 11px; color: #888; margin-top: 2px; }
+.monto-cell  { font-family: 'Courier New', monospace; font-weight: 600; }
+
+.badge-items {
+  background: #e3f2fd; color: #1565c0;
+  border-radius: 12px; padding: 2px 10px; font-size: 12px; font-weight: 700;
+}
+
+.chip {
+  padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;
+  &.chip-verde { background: #e8f5e9; color: #2e7d32; }
+  &.chip-rojo  { background: #ffebee; color: #c62828; }
+}
+
+.fila-anulada td { opacity: .5; }
+
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; padding: 48px; color: #bbb;
+  mat-icon { font-size: 48px; width: 48px; height: 48px; }
+  p { margin-top: 8px; }
+}

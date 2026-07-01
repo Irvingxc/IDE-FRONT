@@ -1,0 +1,29 @@
+.instruccion {
+  font-size: 13px;
+  color: #555;
+  margin: 0 0 16px;
+}
+
+.full-width { width: 100%; }
+
+.rangos-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+
+.extra-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+  margin-top: 4px;
+}
+
+::ng-deep .mono input {
+  font-family: 'Courier New', monospace !important;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+mat-icon.ok       { color: #2e7d32; }
+mat-icon.pendiente { color: #bdbdbd; }

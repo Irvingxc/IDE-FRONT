@@ -1,0 +1,132 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Inventario</h1>
+      <p class="breadcrumb">Inicio / Inventario</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button mat-stroked-button color="primary" routerLink="/inventario/kardex">
+        <mat-icon>receipt_long</mat-icon> Kárdex
+      </button>
+      <button mat-raised-button color="primary" (click)="nuevoItem()">
+        <mat-icon>add</mat-icon> Agregar Ítem
+      </button>
+    </div>
+  </div>
+
+  <!-- Tarjetas resumen -->
+  <div class="summary-cards">
+    <div class="s-card">
+      <mat-icon>inventory_2</mat-icon>
+      <div>
+        <span class="s-label">Ítems activos</span>
+        <span class="s-valor">{{ totalItems }}</span>
+      </div>
+    </div>
+    <div class="s-card">
+      <mat-icon>attach_money</mat-icon>
+      <div>
+        <span class="s-label">Valor total activo</span>
+        <span class="s-valor">{{ formatLps(totalActivos) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-bar">
+    <mat-form-field appearance="outline" class="filtro-cat">
+      <mat-label>Categoría</mat-label>
+      <mat-select [(ngModel)]="filtroCategoria" (ngModelChange)="cargar()">
+        <mat-option value="">Todas</mat-option>
+        <mat-option *ngFor="let c of categorias" [value]="c">{{ c }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filtro-estado">
+      <mat-label>Estado</mat-label>
+      <mat-select [(ngModel)]="filtroEstado" (ngModelChange)="cargar()">
+        <mat-option value="">Todos</mat-option>
+        <mat-option *ngFor="let e of estados" [value]="e">{{ e }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Spinner -->
+  <div class="spinner-wrap" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <!-- Tabla -->
+  <div class="tabla-wrapper mat-elevation-z2" *ngIf="!cargando">
+    <table mat-table [dataSource]="dataSource">
+
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef>Nombre</th>
+        <td mat-cell *matCellDef="let row"><strong>{{ row.nombre }}</strong></td>
+      </ng-container>
+
+      <ng-container matColumnDef="categoria">
+        <th mat-header-cell *matHeaderCellDef>Categoría</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="chip-cat">{{ row.categoria }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="cantidad">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Cantidad</th>
+        <td mat-cell *matCellDef="let row" class="text-center">{{ row.cantidad }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="valorUnitario">
+        <th mat-header-cell *matHeaderCellDef class="text-right"
+            matTooltip="Costo promedio ponderado de todas las entradas">Costo Prom. Unit.</th>
+        <td mat-cell *matCellDef="let row" class="monto-cell text-right">{{ formatLps(row.valorUnitario) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="valorTotal">
+        <th mat-header-cell *matHeaderCellDef class="text-right">Valor Total</th>
+        <td mat-cell *matCellDef="let row" class="monto-cell text-right bold">{{ formatLps(row.valorTotal) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="fechaAdquisicion">
+        <th mat-header-cell *matHeaderCellDef>Adquisición</th>
+        <td mat-cell *matCellDef="let row">{{ formatFecha(row.fechaAdquisicion) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let row">
+          <span [class]="'chip ' + estadoClass(row.estado)">{{ row.estado }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button [matMenuTriggerFor]="menuEstado" matTooltip="Cambiar estado">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menuEstado="matMenu">
+            <button mat-menu-item *ngFor="let e of estados"
+                    [disabled]="row.estado === e"
+                    (click)="cambiarEstado(row, e)">
+              <mat-icon>{{ e === 'Activo' ? 'check_circle' : e === 'En reparación' ? 'build' : 'cancel' }}</mat-icon>
+              {{ e }}
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"
+          [class.fila-baja]="row.estado === 'Dado de baja'"></tr>
+    </table>
+
+    <div class="empty-state" *ngIf="dataSource.data.length === 0">
+      <mat-icon>inventory_2</mat-icon>
+      <p>No hay ítems en inventario</p>
+    </div>
+  </div>
+
+</div>

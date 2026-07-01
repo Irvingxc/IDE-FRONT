@@ -39,14 +39,14 @@ $gold:        #C9A227;
   .brand-logo {
     width: 40px;
     height: 40px;
-    background: $gold;
     border-radius: 50%;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 0 0 3px rgba(201,162,39,0.3);
 
-    mat-icon { color: $guinda-dark; font-size: 22px; }
+    .brand-logo-img { width: 100%; height: 100%; object-fit: cover; }
   }
 
   .brand-text {

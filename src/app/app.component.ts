@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { NotificationService } from '@app/services';
 import { select, Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
+import { filter, map, startWith } from 'rxjs/operators';
 import { distinctUntilChanged } from 'rxjs/operators';
 import * as fromRoot from './store';
 import * as fromUser from './store/user';
@@ -20,6 +21,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   user$!: Observable<fromUser.UserResponse>;
   isAuthorized$!: Observable<boolean>;
+  isLanding$!: Observable<boolean>;
 
   private avisoTimer?: ReturnType<typeof setTimeout>;
   private authSub?: Subscription;
@@ -34,6 +36,14 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.user$ = this.store.pipe(select(fromUser.getUser)) as Observable<fromUser.UserResponse>;
     this.isAuthorized$ = this.store.pipe(select(fromUser.getIsAuthorized)) as Observable<boolean>;
+    const sinHeader = (url: string) =>
+      url === '/' || url.startsWith('/portal-cliente') || url.startsWith('/activar-cuenta');
+
+    this.isLanding$ = this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      map((e: any) => sinHeader(e.urlAfterRedirects || e.url)),
+      startWith(sinHeader(this.router.url))
+    );
     this.store.dispatch(new fromUser.Init());
 
     this.authSub = this.isAuthorized$
@@ -108,6 +118,6 @@ export class AppComponent implements OnInit, OnDestroy {
     localStorage.removeItem('token');
     localStorage.removeItem('user_session');
     this.store.dispatch(new fromUser.SignOut());
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/']);
   }
 }

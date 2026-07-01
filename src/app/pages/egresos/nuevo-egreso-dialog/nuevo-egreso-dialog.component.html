@@ -1,0 +1,49 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;margin-right:8px">add_circle</mat-icon>
+  Registrar Egreso
+</h2>
+
+<mat-dialog-content>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Categoría *</mat-label>
+    <mat-select [(ngModel)]="categoria">
+      <mat-option *ngFor="let c of categorias" [value]="c">{{ c }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Concepto *</mat-label>
+    <input matInput [(ngModel)]="concepto" placeholder="Ej. Pago de planilla mayo">
+  </mat-form-field>
+
+  <div class="row-2">
+    <mat-form-field appearance="outline">
+      <mat-label>Monto (L.) *</mat-label>
+      <input matInput type="number" min="0" step="1" [(ngModel)]="monto">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha *</mat-label>
+      <input matInput [matDatepicker]="picker" [(ngModel)]="fecha">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Descripción (opcional)</mat-label>
+    <textarea matInput [(ngModel)]="descripcion" rows="2"
+              placeholder="Detalles adicionales..."></textarea>
+  </mat-form-field>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button mat-raised-button color="primary" [disabled]="!puedeGuardar" (click)="guardar()">
+    <mat-spinner *ngIf="guardando" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+    <mat-icon *ngIf="!guardando">save</mat-icon>
+    {{ guardando ? 'Guardando...' : 'Guardar' }}
+  </button>
+</mat-dialog-actions>

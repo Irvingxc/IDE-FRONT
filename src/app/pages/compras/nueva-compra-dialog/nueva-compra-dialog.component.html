@@ -1,0 +1,165 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;margin-right:8px">add_shopping_cart</mat-icon>
+  Nueva Compra
+</h2>
+
+<mat-dialog-content>
+
+  <!-- ══ ENCABEZADO ══ -->
+  <div class="seccion">Datos de la factura</div>
+
+  <div class="row-3">
+    <mat-form-field appearance="outline">
+      <mat-label>Proveedor</mat-label>
+      <mat-select [(ngModel)]="idProveedor">
+        <mat-option [value]="0">Sin proveedor</mat-option>
+        <mat-option *ngFor="let p of proveedores" [value]="p.id">{{ p.nombre }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>N° Factura</mat-label>
+      <input matInput [(ngModel)]="noFactura" (input)="maskFactura($event)"
+             placeholder="000-001-01-00000001" maxlength="19">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>CAI</mat-label>
+      <input matInput [(ngModel)]="cai" (input)="maskCai($event)"
+             placeholder="E594DA-E5224B-CE4DB6-404EA9-8B8450-F4" maxlength="37">
+    </mat-form-field>
+  </div>
+
+  <div class="row-3">
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de compra</mat-label>
+      <input matInput [matDatepicker]="picker" [(ngModel)]="fecha">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>ISV %</mat-label>
+      <mat-select [(ngModel)]="porcentajeIsv">
+        <mat-option *ngFor="let v of opcionesIsv" [value]="v">{{ v }}%</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Descuento (L.)</mat-label>
+      <input matInput type="number" min="0" [(ngModel)]="descuento">
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Observaciones</mat-label>
+    <input matInput [(ngModel)]="observaciones">
+  </mat-form-field>
+
+  <!-- ══ DETALLE ══ -->
+  <div class="seccion-detalle">
+    <span>Detalle de ítems</span>
+  </div>
+
+  <!-- Buscador de ítems -->
+  <div class="buscador-wrap">
+    <mat-form-field appearance="outline" class="buscador-field">
+      <mat-label>Buscar ítem del inventario</mat-label>
+      <mat-icon matPrefix style="margin-right:6px">search</mat-icon>
+      <input matInput
+             [(ngModel)]="busquedaItem"
+             [matAutocomplete]="autoBuscar"
+             placeholder="Escribí el nombre del artículo...">
+      <mat-autocomplete #autoBuscar [displayWith]="displayVacio" (optionSelected)="agregarDesdeBusqueda($event.option.value)">
+        <mat-option *ngFor="let item of filtrarItems(busquedaItem)" [value]="item">
+          <div class="opt-item">
+            <span class="opt-nombre">{{ item.nombre }}</span>
+            <small class="opt-cat">{{ item.categoria }} · Stock: {{ item.cantidad }}</small>
+          </div>
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+
+  <div class="tabla-detalle-wrap">
+    <table mat-table [dataSource]="lineas" class="tabla-detalle">
+
+      <ng-container matColumnDef="descripcion">
+        <th mat-header-cell *matHeaderCellDef>Ítem</th>
+        <td mat-cell *matCellDef="let l">
+          <span class="item-nombre">{{ l.descripcion }}</span>
+          <small class="cat-hint-row">{{ l.categoria }}</small>
+        </td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="cantidad">
+        <th mat-header-cell *matHeaderCellDef>Cant.</th>
+        <td mat-cell *matCellDef="let l">
+          <input class="inp num" type="number" min="1" [(ngModel)]="l.cantidad">
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="valorUnitario">
+        <th mat-header-cell *matHeaderCellDef>Precio Unit.</th>
+        <td mat-cell *matCellDef="let l">
+          <input class="inp num" type="number" min="0" step="1" [(ngModel)]="l.valorUnitario">
+          <small class="prom-hint" *ngIf="mostrarPonderado(l)">
+            → Nuevo prom.: {{ formatLps(promedioPonderado(l)) }}
+          </small>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef class="text-right">Total</th>
+        <td mat-cell *matCellDef="let l" class="text-right monto">
+          {{ formatLps(totalLinea(l)) }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="del">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let l; let i = index">
+          <button mat-icon-button color="warn" (click)="eliminarLinea(i)" [disabled]="lineas.length === 1">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
+    </table>
+  </div>
+
+  <!-- ══ TOTALES ══ -->
+  <div class="totales">
+    <div class="t-fila"><span>Subtotal</span><span class="monto">{{ formatLps(subtotal) }}</span></div>
+    <div class="t-fila" *ngIf="porcentajeIsv > 0">
+      <span>ISV {{ porcentajeIsv }}%</span><span class="monto">{{ formatLps(isv) }}</span>
+    </div>
+    <div class="t-fila" *ngIf="descuento > 0">
+      <span>Descuento</span><span class="monto">− {{ formatLps(descuento) }}</span>
+    </div>
+    <div class="t-fila t-total"><span>TOTAL</span><span class="monto">{{ formatLps(total) }}</span></div>
+  </div>
+
+  <div class="nota-info">
+    <mat-icon>info</mat-icon>
+    Al guardar: se actualiza el stock en Inventario con el nuevo <strong>costo promedio ponderado</strong>, se registra movimiento en Kárdex y un egreso por el total de la compra.
+  </div>
+
+  <div class="error-banner" *ngIf="errorMsg">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMsg }}</span>
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button mat-raised-button color="primary" [disabled]="!puedeGuardar" (click)="guardar()">
+    <mat-spinner *ngIf="guardando" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+    <mat-icon *ngIf="!guardando">save</mat-icon>
+    {{ guardando ? 'Guardando...' : 'Registrar Compra' }}
+  </button>
+</mat-dialog-actions>

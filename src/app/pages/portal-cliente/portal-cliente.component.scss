@@ -1,0 +1,159 @@
+$guinda: #6B0F1A;
+$gold:   #C9A227;
+$cream:  #FAF6F0;
+
+.portal-wrap {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  background: $cream;
+}
+
+// ── Header ────────────────────────────────────────
+.portal-header {
+  background: $guinda;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+
+  .portal-brand {
+    display: flex; align-items: center; gap: 12px;
+    img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid $gold; }
+    .brand-name { font-size: 18px; font-weight: 800; color: $gold; letter-spacing: 2px; }
+    .brand-sub  { font-size: 11px; color: rgba(255,255,255,.6); }
+  }
+
+  .portal-user {
+    display: flex; align-items: center; gap: 10px;
+    color: rgba(255,255,255,.85); font-size: 13px;
+
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: $gold; color: $guinda;
+      font-size: 12px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+    }
+  }
+}
+
+// ── Body ──────────────────────────────────────────
+.portal-body {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  flex: 1;
+  gap: 0;
+
+  @media (max-width: 700px) { grid-template-columns: 1fr; }
+}
+
+// ── Sidebar ───────────────────────────────────────
+.sidebar {
+  background: #fff;
+  border-right: 1px solid #e8e0d8;
+  padding: 20px 16px;
+
+  h3 { font-size: 12px; font-weight: 700; color: #999; letter-spacing: 1px;
+       text-transform: uppercase; margin: 0 0 12px; }
+}
+
+.sidebar-loading { display: flex; justify-content: center; padding: 20px; }
+
+.hijo-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; border-radius: 10px; cursor: pointer;
+  transition: background .15s;
+
+  &:hover   { background: $cream; }
+  &.activo  { background: rgba($guinda, .07); }
+
+  .hijo-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: $cream; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    img { width: 100%; height: 100%; object-fit: cover; }
+    mat-icon { color: $guinda; font-size: 24px; }
+  }
+
+  .hijo-info {
+    display: flex; flex-direction: column;
+    strong { font-size: 13px; color: #222; font-weight: 700; line-height: 1.3; }
+    span   { font-size: 11px; color: #888; }
+  }
+}
+
+// ── Main ──────────────────────────────────────────
+.main-content {
+  padding: 24px;
+  overflow-x: auto;
+}
+
+.main-empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 12px; color: #bbb;
+  mat-icon { font-size: 64px; width: 64px; height: 64px; }
+  p { font-size: 15px; }
+}
+
+.section-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 18px; font-weight: 700; color: $guinda;
+  margin-bottom: 20px;
+  mat-icon { font-size: 22px; }
+}
+
+.grado-badge {
+  font-size: 11px; font-weight: 600; color: $guinda;
+  background: rgba($guinda, .08); padding: 3px 10px;
+  border-radius: 20px; letter-spacing: .4px;
+}
+
+// ── Resumen cards ─────────────────────────────────
+.resumen-cards {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 500px) { grid-template-columns: 1fr; }
+}
+
+.resumen-card {
+  border-radius: 12px; padding: 20px;
+  display: flex; align-items: center; gap: 16px;
+
+  mat-icon { font-size: 36px; width: 36px; height: 36px; flex-shrink: 0; }
+
+  > div { display: flex; flex-direction: column; gap: 2px; }
+
+  .resumen-label { font-size: 11px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+  .resumen-valor { font-size: 22px; font-weight: 800; }
+  .resumen-sub   { font-size: 12px; opacity: .7; }
+
+  &--pendiente { background: #fff3e0; mat-icon, .resumen-valor { color: #e65100; } .resumen-label { color: #bf360c; } }
+  &--pagado    { background: #e8f5e9; mat-icon, .resumen-valor { color: #2e7d32; } .resumen-label { color: #1b5e20; } }
+}
+
+// ── Tables ────────────────────────────────────────
+.tab-toolbar {
+  padding: 16px 0 8px;
+  .anio-select { width: 120px; }
+}
+
+.loading-row {
+  display: flex; justify-content: center; padding: 32px;
+}
+
+.portal-table {
+  width: 100%;
+
+  th { font-size: 12px; font-weight: 700; color: #888; letter-spacing: .5px; }
+  td { font-size: 13px; color: #333; }
+}
+
+.estado-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; letter-spacing: .4px;
+
+  &.pagado    { background: #e8f5e9; color: #2e7d32; }
+  &.pendiente { background: #fff3e0; color: #e65100; }
+  &.anulada   { background: #fce4ec; color: #c62828; }
+}
+
+.portal-tabs { margin-top: 4px; }

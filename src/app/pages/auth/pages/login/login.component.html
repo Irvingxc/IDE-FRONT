@@ -1,25 +1,41 @@
 <app-spinner *ngIf="loading$ | async"></app-spinner>
 
-<section fxLayoutAlign="center">
-  <mat-card>
-    <form
-       fxLayout="column"
-       fxLayoutAlign="center center"
-       fxLayoutGap="10px"
-       #f="ngForm"
-       (ngSubmit)="loginUsuario(f)"
-    >
-      <mat-form-field>
-         <mat-label>Ingrese E-Mail</mat-label>
-         <input type="email" matInput placeholder="E-Mail" name="email" ngModel required>
-         <mat-error>Debe ingresar un E-Mail</mat-error>
+<section class="login-wrap">
+  <mat-card class="login-card">
+    <div class="login-header">
+      <img src="/assets/logo.png" alt="IDE" class="login-logo">
+      <h2>Portal Académico</h2>
+      <span>IDE — Institute for the Development of Excellence</span>
+    </div>
+
+    <form #f="ngForm" (ngSubmit)="loginUsuario(f)">
+      <mat-form-field appearance="outline">
+        <mat-label>Correo electrónico</mat-label>
+        <input type="email" matInput name="email" ngModel required>
+        <mat-icon matPrefix>email</mat-icon>
+        <mat-error>Ingrese un correo válido</mat-error>
       </mat-form-field>
-      <mat-form-field>
-       <mat-label>Ingrese Password</mat-label>
-       <input type="password" matInput placeholder="Password" name="password" ngModel required>
-       <mat-error>Debe ingresar un password</mat-error>
-    </mat-form-field>
-    <button mat-raised-button color="primary" type="submit">Enviar</button>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input type="password" matInput name="password" ngModel required>
+        <mat-icon matPrefix>lock</mat-icon>
+        <mat-error>Ingrese su contraseña</mat-error>
+      </mat-form-field>
+
+      <div class="login-error" *ngIf="errorMsg">
+        <mat-icon>warning</mat-icon>
+        <span>{{ errorMsg }}</span>
+      </div>
+
+      <button mat-raised-button color="primary" type="submit"
+              [disabled]="isBlocked || (loading$ | async)">
+        <mat-icon *ngIf="!isBlocked">login</mat-icon>
+        <ng-container *ngIf="isBlocked">
+          <mat-icon>timer</mat-icon> Espere {{ cooldownSeconds }}s
+        </ng-container>
+        <ng-container *ngIf="!isBlocked">Ingresar</ng-container>
+      </button>
     </form>
- </mat-card>
+  </mat-card>
 </section>

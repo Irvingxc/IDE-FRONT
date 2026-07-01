@@ -6,6 +6,10 @@
       <p class="breadcrumb">Inicio / CXC</p>
     </div>
     <div class="header-actions">
+      <button mat-stroked-button (click)="exportarExcel()" [disabled]="datos.length === 0">
+        <mat-icon>download</mat-icon> Exportar Excel
+      </button>
+
       <button mat-raised-button color="accent"
               [matMenuTriggerFor]="menuAnios"
               [disabled]="generando">

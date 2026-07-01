@@ -1,0 +1,86 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="page-title">
+      <mat-icon>verified</mat-icon>
+      <h2>Gestión SAR — Autorizaciones de Facturación</h2>
+    </div>
+    <button mat-flat-button color="primary" (click)="nuevoCai()">
+      <mat-icon>add</mat-icon>
+      Nuevo CAI
+    </button>
+  </div>
+
+  <div class="loading-bar" *ngIf="cargando">
+    <mat-progress-spinner mode="indeterminate" diameter="36"></mat-progress-spinner>
+  </div>
+
+  <mat-table [dataSource]="dataSource" class="mat-elevation-z1" *ngIf="!cargando">
+
+    <!-- Estado -->
+    <ng-container matColumnDef="estado">
+      <mat-header-cell *matHeaderCellDef>Estado</mat-header-cell>
+      <mat-cell *matCellDef="let r">
+        <span class="badge" [class.activo]="r.activo" [class.vencido]="!r.activo">
+          <mat-icon>{{ r.activo ? 'check_circle' : 'cancel' }}</mat-icon>
+          {{ r.activo ? 'ACTIVO' : 'VENCIDO' }}
+        </span>
+      </mat-cell>
+    </ng-container>
+
+    <!-- CAI -->
+    <ng-container matColumnDef="cai">
+      <mat-header-cell *matHeaderCellDef>CAI</mat-header-cell>
+      <mat-cell *matCellDef="let r" class="mono cai-cell" [matTooltip]="r.cai">
+        {{ r.cai }}
+      </mat-cell>
+    </ng-container>
+
+    <!-- Rango Desde -->
+    <ng-container matColumnDef="rangoDel">
+      <mat-header-cell *matHeaderCellDef>Rango Desde</mat-header-cell>
+      <mat-cell *matCellDef="let r" class="mono">{{ r.rangoDel }}</mat-cell>
+    </ng-container>
+
+    <!-- Rango Hasta -->
+    <ng-container matColumnDef="rangoAl">
+      <mat-header-cell *matHeaderCellDef>Rango Hasta</mat-header-cell>
+      <mat-cell *matCellDef="let r" class="mono">{{ r.rangoAl }}</mat-cell>
+    </ng-container>
+
+    <!-- Progreso -->
+    <ng-container matColumnDef="secuencia">
+      <mat-header-cell *matHeaderCellDef>Facturas emitidas</mat-header-cell>
+      <mat-cell *matCellDef="let r" class="mono">{{ progreso(r) }}</mat-cell>
+    </ng-container>
+
+    <!-- Fecha Límite -->
+    <ng-container matColumnDef="fechaLim">
+      <mat-header-cell *matHeaderCellDef>Fecha Límite</mat-header-cell>
+      <mat-cell *matCellDef="let r" [class.vencido-text]="!r.activo">
+        {{ formatFecha(r.fechaLim) }}
+      </mat-cell>
+    </ng-container>
+
+    <!-- ISV -->
+    <ng-container matColumnDef="isv">
+      <mat-header-cell *matHeaderCellDef>ISV</mat-header-cell>
+      <mat-cell *matCellDef="let r">{{ (r.impuestoSar * 100) | number:'1.0-0' }}%</mat-cell>
+    </ng-container>
+
+
+<mat-header-row *matHeaderRowDef="columns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: columns;" [class.row-activo]="row.activo"></mat-row>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell no-data" [attr.colspan]="columns.length">
+        No hay autorizaciones SAR registradas.
+      </td>
+    </tr>
+  </mat-table>
+
+  <div class="leyenda">
+    <mat-icon class="icon-info">info</mat-icon>
+    El CAI <strong>ACTIVO</strong> con la fecha límite más próxima es el que se usa al emitir facturas.
+    No se puede eliminar un CAI que ya tenga facturas emitidas.
+  </div>
+</div>
