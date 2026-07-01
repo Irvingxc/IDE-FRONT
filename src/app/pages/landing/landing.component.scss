@@ -227,9 +227,14 @@ $sub     : #666;
     background: linear-gradient(135deg, #0d0002, #200308);
     color: #fff;
 
-    h2 { color: #fff; }
+    h2 { color: #fff; em { color: $gold; } }
     p  { color: rgba(255,255,255,.7); }
     .chip { background: rgba($gold,.15); color: $gold; border-color: rgba($gold,.3); }
+
+    .seccion-header {
+      h2 { color: #fff; em { color: $gold; } }
+      p  { color: rgba(255,255,255,.7); }
+    }
   }
 
   &--accent {
