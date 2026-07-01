@@ -17,7 +17,7 @@ import { SessionWarningDialogComponent } from './session-warning-dialog.componen
 })
 export class AppComponent implements OnInit, OnDestroy {
   showSpinner = false;
-  title = 'client-inmueble-app';
+  title = 'danli-ide';
 
   user$!: Observable<fromUser.UserResponse>;
   isAuthorized$!: Observable<boolean>;
