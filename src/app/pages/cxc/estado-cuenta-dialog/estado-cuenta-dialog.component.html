@@ -43,6 +43,14 @@
         </td>
       </ng-container>
 
+      <ng-container matColumnDef="descuento">
+        <th mat-header-cell *matHeaderCellDef>Descuento</th>
+        <td mat-cell *matCellDef="let row" class="descuento-cell">
+          <span *ngIf="row.descuento > 0" class="chip-descuento">{{ row.descuento }}%</span>
+          <span *ngIf="row.descuento === 0">—</span>
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="monto">
         <th mat-header-cell *matHeaderCellDef>Monto</th>
         <td mat-cell *matCellDef="let row" class="monto-cell">{{ formatLps(row.monto) }}</td>

@@ -20,7 +20,7 @@ export class EstadoCuentaDialogComponent implements OnInit {
 
   detalle: CxcDetalleSeleccionable[] = [];
   cargando = true;
-  columns  = ['seleccion', 'tipoCuota', 'mes', 'fechaVence', 'monto', 'estado', 'fechaPago', 'acciones'];
+  columns  = ['seleccion', 'tipoCuota', 'mes', 'fechaVence', 'descuento', 'monto', 'estado', 'fechaPago', 'acciones'];
 
   nombreTutor = '';
 
