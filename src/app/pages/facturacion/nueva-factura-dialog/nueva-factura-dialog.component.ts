@@ -56,6 +56,7 @@ export class NuevaFacturaDialogComponent implements OnInit {
   facturadosSet: Set<string> = new Set();
   mesesConCxc: Set<number> = new Set();
   cxcMontos: Map<number, number> = new Map();
+  cxcProductoMontos: Map<number, number> = new Map();
   descuentoAlumno = 0;
 
   get productosSimples(): GradoPrecio[] {
@@ -125,9 +126,10 @@ export class NuevaFacturaDialogComponent implements OnInit {
     this.busquedaAlumno   = alumno.nombreCompleto;
     this.alumnosSugeridos = [];
     this.items            = [];
-    this.catalogoProductos = [];
-    this.facturadosSet     = new Set();
-    this.mesesConCxc       = new Set();
+    this.catalogoProductos  = [];
+    this.facturadosSet      = new Set();
+    this.mesesConCxc        = new Set();
+    this.cxcProductoMontos  = new Map();
 
     const anio = this.fechaEmision.getFullYear();
 
@@ -150,8 +152,12 @@ export class NuevaFacturaDialogComponent implements OnInit {
           )
         );
         const mensualidadesCxc = cxcPendientes.filter(c => c.idProducto === 2);
-        this.mesesConCxc  = new Set(mensualidadesCxc.map(c => c.mes));
-        this.cxcMontos    = new Map(mensualidadesCxc.map(c => [c.mes, c.monto]));
+        this.mesesConCxc       = new Set(mensualidadesCxc.map(c => c.mes));
+        this.cxcMontos         = new Map(mensualidadesCxc.map(c => [c.mes, c.monto]));
+        this.descuentoAlumno   = mensualidadesCxc[0]?.descuento ?? alumno.descuento ?? 0;
+
+        const productosCxc = cxcPendientes.filter(c => c.idProducto !== 2);
+        this.cxcProductoMontos = new Map(productosCxc.map(c => [c.idProducto, c.monto]));
       });
     }
   }
@@ -164,12 +170,13 @@ export class NuevaFacturaDialogComponent implements OnInit {
   agregarProducto(producto: GradoPrecio): void {
     const yaEnLista = this.items.some(i => i.idProducto === String(producto.idProducto));
     if (yaEnLista) return;
-    const anio = this.fechaEmision.getFullYear();
+    const anio  = this.fechaEmision.getFullYear();
+    const precio = this.cxcProductoMontos.get(producto.idProducto) ?? producto.precio;
     this.items = [...this.items, {
       concepto:         producto.productoNombre,
       mes:              'N/A',
       idProducto:       String(producto.idProducto),
-      precio:           producto.precio,
+      precio,
       cantidad:         1,
       fechaMensualidad: `${anio}-01-01`,
     }];

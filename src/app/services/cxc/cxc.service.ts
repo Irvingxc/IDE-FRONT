@@ -25,6 +25,7 @@ export interface CxcDetalle {
   idProducto:     number;
   fechaVence:     string | null;
   monto:          number;
+  descuento:      number;
   estado:         string;
   fechaPago:      string | null;
   observacion:    string | null;
