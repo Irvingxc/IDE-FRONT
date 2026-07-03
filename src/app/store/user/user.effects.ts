@@ -64,7 +64,10 @@ export class UserEffects {
             tap((response: UserResponse) => {
               localStorage.setItem('token', response.token);
               localStorage.setItem(USER_KEY, JSON.stringify(response));
-              const destino = response.sucursalId == null ? '/seleccionar-sucursal' : '/';
+              const esCliente = response.roles?.includes('Cliente') ?? false;
+              const destino = esCliente
+                ? '/portal-cliente'
+                : (response.sucursalId == null ? '/seleccionar-sucursal' : '/');
               this.router.navigate([destino]);
             }),
             map((response: UserResponse) => new fromActions.SignInEmailSuccess(response.email, response || null)),
@@ -94,7 +97,8 @@ export class UserEffects {
         return this.httpClient.get<UserResponse>(`${environment.url}api/Usuario`).pipe(
           tap((user: UserResponse) => {
             localStorage.setItem(USER_KEY, JSON.stringify(user));
-            if (user.sucursalId == null) {
+            const esCliente = user.roles?.includes('Cliente') ?? false;
+            if (!esCliente && user.sucursalId == null) {
               this.router.navigate(['/seleccionar-sucursal']);
             }
           }),

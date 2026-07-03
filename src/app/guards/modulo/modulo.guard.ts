@@ -42,7 +42,8 @@ export class ModuloGuard implements CanActivate, CanActivateChild, CanLoad {
         const tieneAcceso = !modulo || modulos.includes(modulo);
 
         if (!tieneAcceso) {
-          this.router.navigate(['static/welcome']);
+          const destino = state.entity.roles?.includes('Cliente') ? 'portal-cliente' : 'static/welcome';
+          this.router.navigate([destino]);
         }
 
         return tieneAcceso;

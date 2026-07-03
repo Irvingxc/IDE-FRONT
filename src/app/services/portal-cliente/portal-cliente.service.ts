@@ -56,7 +56,7 @@ export interface PortalCxcDto {
 
 @Injectable({ providedIn: 'root' })
 export class PortalClienteService {
-  private base = `${environment.url}/api/PortalCliente`;
+  private base = `${environment.url}api/PortalCliente`;
 
   constructor(private http: HttpClient) {}
 

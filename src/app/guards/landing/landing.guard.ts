@@ -14,10 +14,11 @@ export class LandingGuard implements CanLoad {
     return this.store.pipe(
       select(fromUser.getUserState),
       filter(state => !state.loading),
-      map(state => state.email
-        ? this.router.createUrlTree(['/static/welcome'])
-        : true
-      )
+      map(state => {
+        if (!state.email) return true;
+        const destino = state.entity?.roles?.includes('Cliente') ? '/portal-cliente' : '/static/welcome';
+        return this.router.createUrlTree([destino]);
+      })
     );
   }
 }

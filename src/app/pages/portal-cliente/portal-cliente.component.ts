@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -36,6 +37,7 @@ export class PortalClienteComponent implements OnInit {
 
   constructor(
     private store: Store<fromRoot.State>,
+    private router: Router,
     public svc: PortalClienteService
   ) {}
 
@@ -56,8 +58,14 @@ export class PortalClienteComponent implements OnInit {
 
   seleccionar(hijo: HijoDto): void {
     this.hijoSeleccionado = hijo;
-    this.cargarFacturas();
     this.cargarCxc();
+  }
+
+  cerrarSesion(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_session');
+    this.store.dispatch(new fromUser.SignOut());
+    this.router.navigate(['/']);
   }
 
   cargarFacturas(): void {

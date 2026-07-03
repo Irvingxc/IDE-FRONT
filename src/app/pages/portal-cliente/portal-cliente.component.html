@@ -12,6 +12,9 @@
     <div class="portal-user" *ngIf="user$ | async as u">
       <span class="avatar">{{ u.nombre?.charAt(0) }}{{ u.apellido?.charAt(0) }}</span>
       <span>{{ u.nombre }} {{ u.apellido }}</span>
+      <button mat-icon-button title="Cerrar sesión" (click)="cerrarSesion()">
+        <mat-icon>logout</mat-icon>
+      </button>
     </div>
   </div>
 
@@ -118,40 +121,6 @@
             <tr mat-row *matRowDef="let row; columns: cxcColumns;"></tr>
             <tr class="mat-row" *matNoDataRow>
               <td class="mat-cell" colspan="6" style="text-align:center;padding:24px">Sin registros para este año.</td>
-            </tr>
-          </table>
-        </mat-tab>
-
-        <!-- Facturas -->
-        <mat-tab label="Facturas">
-          <div *ngIf="cargandoFacturas" class="loading-row">
-            <mat-spinner diameter="28"></mat-spinner>
-          </div>
-          <table mat-table [dataSource]="facturas" class="portal-table" *ngIf="!cargandoFacturas">
-            <ng-container matColumnDef="noFactura">
-              <th mat-header-cell *matHeaderCellDef>N° Factura</th>
-              <td mat-cell *matCellDef="let r">{{ r.noFactura }}</td>
-            </ng-container>
-            <ng-container matColumnDef="fecha">
-              <th mat-header-cell *matHeaderCellDef>Fecha</th>
-              <td mat-cell *matCellDef="let r">{{ r.fecha | date:'dd/MM/yyyy' }}</td>
-            </ng-container>
-            <ng-container matColumnDef="total">
-              <th mat-header-cell *matHeaderCellDef>Total</th>
-              <td mat-cell *matCellDef="let r">{{ svc.formatLps(r.total) }}</td>
-            </ng-container>
-            <ng-container matColumnDef="estado">
-              <th mat-header-cell *matHeaderCellDef>Estado</th>
-              <td mat-cell *matCellDef="let r">
-                <span class="estado-badge" [class.anulada]="r.anulada === '1'" [class.pagado]="r.anulada !== '1'">
-                  {{ r.anulada === '1' ? 'Anulada' : 'Válida' }}
-                </span>
-              </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="facColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: facColumns;"></tr>
-            <tr class="mat-row" *matNoDataRow>
-              <td class="mat-cell" colspan="4" style="text-align:center;padding:24px">Sin facturas registradas.</td>
             </tr>
           </table>
         </mat-tab>
