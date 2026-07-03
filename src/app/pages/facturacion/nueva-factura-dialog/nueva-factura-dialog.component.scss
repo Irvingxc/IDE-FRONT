@@ -17,6 +17,21 @@ $guinda: #6B0F1A;
   margin-left: 4px;
 }
 
+.descuento-col { text-align: center; }
+
+.chip-desc {
+  background: rgba(201, 162, 39, 0.15);
+  color: #8a6d00;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  white-space: nowrap;
+}
+
+.sin-desc { color: #bbb; }
+
 .loading-sar {
   display: flex;
   align-items: center;

@@ -35,6 +35,7 @@ export interface ItemDetalle {
   fechaMensualidad: string | null;
   cantidad:         number;
   total:            number;
+  descuento:        number;
 }
 
 export interface PagoDetalle {
@@ -63,6 +64,7 @@ export interface ItemFacturaRequest {
   idProducto:       string;
   fechaMensualidad: string | null;
   cantidad:         number;
+  descuento:        number;
 }
 
 export interface CrearFacturaRequest {
@@ -194,18 +196,26 @@ export class FacturacionService {
     const fechaLimStr = p.fechaLim ? parseLocalDate(p.fechaLim).toLocaleDateString('es-HN') : '—';
     const cliente     = p.nombreCliente || p.nombreAlumno;
 
+    let totalDescuentos = 0;
+    let totalBruto      = 0;
+
     const filas = p.items.map((i, idx) => {
       const anioMens = i.fechaMensualidad ? parseLocalDate(i.fechaMensualidad).getFullYear() : null;
       const sufijo   = i.mes && i.mes !== 'N/A' ? ` ${this.escHtml(i.mes)}${anioMens ? ' ' + anioMens : ''}` : '';
       const concepto = i.nombreProducto
         ? (sufijo ? `${this.escHtml(i.nombreProducto)}${sufijo}` : this.escHtml(i.nombreProducto))
         : (sufijo ? `Mensualidad${sufijo}` : `Producto ${this.escHtml(i.idProducto)}`);
+      const desc       = i.descuento ?? 0;
+      const precioOrig = desc > 0 && desc < 100 ? Math.round((i.precio / (1 - desc / 100)) * 100) / 100 : i.precio;
+      const montoDesc  = Math.round((precioOrig - i.precio) * i.cantidad * 100) / 100;
+      totalBruto      += precioOrig * i.cantidad;
+      totalDescuentos += montoDesc;
       return `
       <tr class="${idx % 2 === 1 ? 'fila-alt' : ''}">
         <td>${concepto}</td>
-        <td class="monto">${this.formatLps(i.precio)}</td>
+        <td class="monto">${this.formatLps(precioOrig)}</td>
         <td class="center">${i.cantidad}</td>
-        <td class="monto">0.00</td>
+        <td class="monto">${montoDesc > 0 ? this.formatLps(montoDesc) : '0.00'}</td>
         <td class="monto">${this.formatLps(i.precio * i.cantidad)}</td>
       </tr>`;
     }).join('');
@@ -267,7 +277,7 @@ export class FacturacionService {
     table.items td { padding: 5px 7px; font-size: 8.5pt; border-bottom: 1px solid #eee; }
     table.items tr.fila-alt td { background: #fdf0f0; }
     table.items tbody tr:last-child td { border-bottom: 2px solid #6B0F1A; }
-    .valor-letras {
+.valor-letras {
       font-size: 8.5pt; padding: 5px 8px; margin-bottom: 8px;
       border: 1px solid #ddd; border-radius: 3px; background: #fafafa;
     }
@@ -280,6 +290,7 @@ export class FacturacionService {
     .t-row label { color: #444; white-space: nowrap; }
     .t-val { font-family: 'Courier New', monospace; white-space: nowrap; }
     .t-row.grand { font-size: 12pt; font-weight: bold; color: #c62828; border-top: 2px solid #6B0F1A; border-bottom: 2px solid #6B0F1A; padding: 5px 0; margin-top: 3px; }
+    .t-row.subtotal-row { font-weight: 700; border-bottom: 1px solid #6B0F1A; padding-bottom: 4px; margin-bottom: 2px; }
     .footer {
       text-align: center; margin-top: 16px; padding-top: 8px;
       border-top: 2px solid #6B0F1A; font-size: 8.5pt; color: #6B0F1A;
@@ -334,6 +345,8 @@ export class FacturacionService {
       <span>Nº Correlativo del registro de la SAG &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
     </div>
     <div class="totales-tabla">
+      <div class="t-row subtotal-row"><label>Subtotal</label><span class="t-val">${this.formatLps(totalBruto)}</span></div>
+      <div class="t-row"><label>Descuentos y Rebajas</label><span class="t-val">${totalDescuentos > 0 ? this.formatLps(totalDescuentos) : 'L. 0.00'}</span></div>
       <div class="t-row"><label>Importe Exonerado</label><span class="t-val">L. 0.00</span></div>
       <div class="t-row"><label>Importe Exento</label><span class="t-val">${this.formatLps(totalExento)}</span></div>
       <div class="t-row"><label>Importe Gravado 15%</label><span class="t-val">${this.formatLps(p.impuestoGravado)}</span></div>

@@ -6,6 +6,7 @@ import { AlumnoService, AlumnoResponse } from '@app/services/alumno/alumno.servi
 @Component({
   selector: 'app-descuento-alumno-dialog',
   templateUrl: './descuento-alumno-dialog.component.html',
+  styleUrls: ['./descuento-alumno-dialog.component.scss'],
 })
 export class DescuentoAlumnoDialogComponent {
   form: FormGroup;
@@ -21,6 +22,11 @@ export class DescuentoAlumnoDialogComponent {
       descuento:       [alumno.descuento ?? 0, [Validators.required, Validators.min(0), Validators.max(100)]],
       motivoDescuento: [alumno.motivoDescuento ?? ''],
     });
+  }
+
+  get descuentoCambio(): boolean {
+    const actual = this.form.get('descuento')?.value ?? 0;
+    return actual !== (this.alumno.descuento ?? 0);
   }
 
   guardar(): void {

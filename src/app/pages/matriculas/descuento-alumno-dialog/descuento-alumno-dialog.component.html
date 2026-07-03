@@ -19,6 +19,11 @@
 
 </mat-dialog-content>
 
+<div *ngIf="descuentoCambio" class="alerta-cxc">
+  <mat-icon>warning</mat-icon>
+  <span>Este cambio actualizará el monto de <strong>todos los CXC pendientes</strong> de este alumno.</span>
+</div>
+
 <mat-dialog-actions align="end">
   <button mat-stroked-button mat-dialog-close [disabled]="loading">Cancelar</button>
   <button mat-raised-button color="primary" (click)="guardar()" [disabled]="loading || form.invalid">

@@ -111,6 +111,7 @@ export class EstadoCuentaDialogComponent implements OnInit {
         cantidad:         1,
         fechaMensualidad: d.mes > 0 ? `${d.anio}-${String(d.mes).padStart(2, '0')}-01` : `${d.anio}-01-01`,
         idCxc:            d.id,
+        descuento:        d.descuento,
       })),
     };
 

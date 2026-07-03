@@ -15,6 +15,7 @@ export interface ItemFacturaLocal {
   cantidad:        number;
   fechaMensualidad: string | null;
   idCxc?:          number;
+  descuento?:      number;
 }
 
 export interface NuevaFacturaDialogData {
@@ -76,7 +77,7 @@ export class NuevaFacturaDialogComponent implements OnInit {
                                'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
   items: ItemFacturaLocal[] = [];
-  itemColumns = ['concepto', 'precio', 'cantidad', 'total', 'acciones'];
+  itemColumns = ['concepto', 'descuento', 'precio', 'cantidad', 'total', 'acciones'];
 
   constructor(
     public  dialogRef: MatDialogRef<NuevaFacturaDialogComponent>,
@@ -129,6 +130,7 @@ export class NuevaFacturaDialogComponent implements OnInit {
     this.catalogoProductos  = [];
     this.facturadosSet      = new Set();
     this.mesesConCxc        = new Set();
+    this.cxcMontos          = new Map();
     this.cxcProductoMontos  = new Map();
 
     const anio = this.fechaEmision.getFullYear();
@@ -171,14 +173,15 @@ export class NuevaFacturaDialogComponent implements OnInit {
     const yaEnLista = this.items.some(i => i.idProducto === String(producto.idProducto));
     if (yaEnLista) return;
     const anio  = this.fechaEmision.getFullYear();
-    const precio = this.cxcProductoMontos.get(producto.idProducto) ?? producto.precio;
+    const cxcMonto  = this.cxcProductoMontos.get(producto.idProducto);
     this.items = [...this.items, {
       concepto:         producto.productoNombre,
       mes:              'N/A',
       idProducto:       String(producto.idProducto),
-      precio,
+      precio:           cxcMonto ?? producto.precio,
       cantidad:         1,
       fechaMensualidad: `${anio}-01-01`,
+      descuento:        0,
     }];
   }
 
@@ -190,7 +193,8 @@ export class NuevaFacturaDialogComponent implements OnInit {
     this.items = [...this.items, {
       concepto: `Mensualidad ${mesNombre}`, mes: mesNombre.toLowerCase(), idProducto: '2',
       precio: this.cxcMontos.get(mes) ?? this.precioMensualidad, cantidad: 1,
-      fechaMensualidad: `${anio}-${String(mes).padStart(2, '0')}-01`
+      fechaMensualidad: `${anio}-${String(mes).padStart(2, '0')}-01`,
+      descuento: this.descuentoAlumno,
     }];
   }
 
@@ -239,6 +243,7 @@ export class NuevaFacturaDialogComponent implements OnInit {
         idProducto:       i.idProducto,
         fechaMensualidad: i.fechaMensualidad,
         cantidad:         i.cantidad,
+        descuento:        i.descuento ?? 0,
       })),
       idsCxc: this.data.idsCxc?.length ? this.data.idsCxc : undefined,
     };

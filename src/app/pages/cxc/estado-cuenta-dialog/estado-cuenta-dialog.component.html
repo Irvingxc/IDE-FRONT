@@ -47,7 +47,7 @@
         <th mat-header-cell *matHeaderCellDef>Descuento</th>
         <td mat-cell *matCellDef="let row" class="descuento-cell">
           <span *ngIf="row.descuento > 0" class="chip-descuento">{{ row.descuento }}%</span>
-          <span *ngIf="row.descuento === 0">—</span>
+          <span *ngIf="!row.descuento">—</span>
         </td>
       </ng-container>
 
