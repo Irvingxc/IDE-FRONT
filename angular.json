@@ -42,7 +42,9 @@
             "assets": [
               "src/favicon.ico",
               "src/favicon.svg",
-              "src/assets"
+              "src/apple-touch-icon.png",
+              "src/assets",
+              "src/sitemap.xml"
             ],
             "styles": [
               "src/styles.scss"
