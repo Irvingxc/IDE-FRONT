@@ -41,8 +41,8 @@
             ],
             "assets": [
               "src/favicon.ico",
-              "src/favicon.svg",
-              "src/apple-touch-icon.png",
+              "src/favicon-v2.svg",
+              "src/apple-touch-icon-v2.png",
               "src/assets",
               "src/sitemap.xml"
             ],
