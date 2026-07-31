@@ -1,14 +1,29 @@
 <h2 mat-dialog-title>
-  <mat-icon style="vertical-align:middle;color:#25D366;margin-right:8px">chat</mat-icon>
+  <mat-icon style="vertical-align:middle;color:#25D366;margin-right:8px">send</mat-icon>
   Enviar mensaje masivo
 </h2>
 
 <mat-dialog-content>
 
+  <mat-button-toggle-group class="canal-toggle" [value]="canal" [disabled]="enviando || enviado">
+    <mat-button-toggle value="whatsapp" (click)="cambiarCanal('whatsapp')">
+      <mat-icon style="color:#25D366">chat</mat-icon> WhatsApp
+    </mat-button-toggle>
+    <mat-button-toggle value="email" (click)="cambiarCanal('email')">
+      <mat-icon>mail</mat-icon> Correo
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+
   <div class="destinatarios-info">
     <mat-icon>group</mat-icon>
-    <span>Se enviará a <strong>{{ totalDestinatarios }}</strong> cliente(s) con teléfono registrado</span>
+    <span *ngIf="canal === 'whatsapp'">Se enviará a <strong>{{ totalDestinatarios }}</strong> cliente(s) con teléfono registrado</span>
+    <span *ngIf="canal === 'email'">Se enviará a <strong>{{ totalDestinatarios }}</strong> cliente(s) con correo registrado</span>
   </div>
+
+  <mat-form-field appearance="outline" class="mensaje-field" *ngIf="canal === 'email'">
+    <mat-label>Asunto</mat-label>
+    <input matInput [(ngModel)]="asunto" placeholder="Asunto del correo" [disabled]="enviando || enviado">
+  </mat-form-field>
 
   <mat-form-field appearance="outline" class="mensaje-field">
     <mat-label>Mensaje</mat-label>
@@ -19,14 +34,24 @@
     <mat-hint align="end">{{ mensaje.length }} caracteres</mat-hint>
   </mat-form-field>
 
-  <div *ngIf="enviando" class="progreso-container">
+  <div *ngIf="enviando && canal === 'whatsapp'" class="progreso-container">
     <mat-progress-bar mode="determinate" [value]="progreso" color="primary"></mat-progress-bar>
     <span class="progreso-label">Enviando... {{ progreso }}%</span>
   </div>
 
-  <div *ngIf="enviado" class="enviado-msg">
+  <div *ngIf="enviando && canal === 'email'" class="progreso-container">
+    <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
+    <span class="progreso-label">Enviando correos, esto puede tardar unos minutos...</span>
+  </div>
+
+  <div *ngIf="enviado && canal === 'whatsapp'" class="enviado-msg">
     <mat-icon>check_circle</mat-icon>
     <span>Mensajes enviados correctamente</span>
+  </div>
+
+  <div *ngIf="enviado && canal === 'email' && resultadoCorreo" class="enviado-msg">
+    <mat-icon>check_circle</mat-icon>
+    <span>{{ resultadoCorreo.enviados }} correo(s) enviado(s)<span *ngIf="resultadoCorreo.fallidos > 0"> — {{ resultadoCorreo.fallidos }} fallido(s)</span></span>
   </div>
 
 </mat-dialog-content>
@@ -35,7 +60,7 @@
   <button mat-stroked-button (click)="cerrar()" [disabled]="enviando">Cancelar</button>
   <button mat-raised-button color="primary"
     (click)="enviar()"
-    [disabled]="!mensaje.trim() || enviando || enviado">
+    [disabled]="!puedeEnviar || enviando || enviado">
     <mat-icon>send</mat-icon> Enviar
   </button>
 </mat-dialog-actions>

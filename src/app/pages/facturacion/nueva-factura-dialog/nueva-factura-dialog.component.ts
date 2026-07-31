@@ -263,11 +263,7 @@ export class NuevaFacturaDialogComponent implements OnInit {
 
   private imprimirFactura(_noFactura: string, idPago: number): void {
     this.facturacionService.getDetalle(idPago).subscribe(detalle => {
-      const win = window.open('', '_blank');
-      if (!win) return;
-      win.document.write(this.facturacionService.buildFacturaHtml(detalle));
-      win.document.close();
-      setTimeout(() => { win.focus(); win.print(); }, 500);
+      this.facturacionService.imprimirHtml(this.facturacionService.buildFacturaHtml(detalle));
     });
   }
 

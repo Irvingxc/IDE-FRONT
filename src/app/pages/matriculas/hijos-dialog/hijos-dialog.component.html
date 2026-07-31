@@ -1,6 +1,6 @@
 <h2 mat-dialog-title>
   <mat-icon>family_restroom</mat-icon>
-  Alumnos de {{ cliente.nombreCompleto }}
+  Estudiantes de {{ cliente.nombreCompleto }}
 </h2>
 
 <mat-dialog-content>
@@ -13,7 +13,7 @@
   <ng-container *ngIf="!cargando">
     <div *ngIf="alumnos.length === 0" class="sin-hijos">
       <mat-icon>person_off</mat-icon>
-      <span>Este cliente no tiene alumnos matriculados.</span>
+      <span>Este cliente no tiene estudiantes matriculados.</span>
     </div>
 
     <table mat-table [dataSource]="alumnos" class="hijos-table" *ngIf="alumnos.length > 0">

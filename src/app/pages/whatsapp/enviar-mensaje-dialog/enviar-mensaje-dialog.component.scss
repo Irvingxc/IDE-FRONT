@@ -1,3 +1,22 @@
+.canal-toggle {
+  display: flex;
+  width: 100%;
+  margin-bottom: 16px;
+
+  ::ng-deep .mat-button-toggle {
+    flex: 1;
+    text-align: center;
+  }
+
+  mat-icon {
+    vertical-align: middle;
+    margin-right: 4px;
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+  }
+}
+
 .destinatarios-info {
   display: flex;
   align-items: center;

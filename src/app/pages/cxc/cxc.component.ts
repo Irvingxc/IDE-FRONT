@@ -114,7 +114,7 @@ export class CxcComponent implements OnInit {
 
   exportarExcel(): void {
     const lps = (v: number) => v.toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const headers = ['Alumno', 'Padre/Tutor', 'Grado', 'Cuotas Pendientes', 'Total Vencido', 'Total Pagado', 'Total Año'];
+    const headers = ['Estudiante', 'Padre/Tutor', 'Grado', 'Cuotas Pendientes', 'Total Vencido', 'Total Pagado', 'Total Año'];
     const rows = this.datos.map(r => [
       r.nombreCompleto,
       r.nombreTutor,

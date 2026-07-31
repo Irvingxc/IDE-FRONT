@@ -202,6 +202,8 @@ $sub     : #666;
     .stat-num {
       font-size: 36px; font-weight: 900; color: $gold;
       line-height: 1;
+
+      &--sm { font-size: 20px; white-space: nowrap; }
     }
 
     .stat-lbl {
@@ -484,6 +486,10 @@ $sub     : #666;
 // ─── Diferenciadores ──────────────────────────────────────────
 .dif-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+
+  @media (min-width: 961px) {
+    .dif-card:nth-child(7) { grid-column: 2; }
+  }
 }
 
 .dif-card {

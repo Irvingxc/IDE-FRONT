@@ -40,6 +40,10 @@ export class UsuarioService {
     return this.http.put<UsuarioLista>(`${environment.url}api/Usuario/${id}`, datos);
   }
 
+  cambiarPassword(passwordActual: string, passwordNueva: string): Observable<void> {
+    return this.http.put<void>(`${environment.url}api/Usuario/cambiar-password`, { passwordActual, passwordNueva });
+  }
+
   getRoles(): Observable<string[]> {
     return this.http.get<string[]>(`${environment.url}api/Usuario/roles`);
   }

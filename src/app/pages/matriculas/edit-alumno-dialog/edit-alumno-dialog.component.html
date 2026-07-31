@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Editar alumno — {{ data.nombreCompleto }}</h2>
+<h2 mat-dialog-title>Editar estudiante — {{ data.nombreCompleto }}</h2>
 
 <mat-dialog-content>
   <form [formGroup]="form" class="form-grid">
@@ -90,7 +90,7 @@
     </mat-form-field>
 
     <div class="full-width foto-upload-row">
-      <img *ngIf="fotoBase64" [src]="fotoBase64" class="foto-preview" alt="Foto alumno">
+      <img *ngIf="fotoBase64" [src]="fotoBase64" class="foto-preview" alt="Foto estudiante">
       <div *ngIf="!fotoBase64" class="foto-placeholder">
         <mat-icon>person</mat-icon>
       </div>

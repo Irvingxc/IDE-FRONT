@@ -16,7 +16,7 @@
     <mat-tab>
       <ng-template mat-tab-label>
         <mat-icon class="tab-icon">people</mat-icon>
-        Alumnos
+        Estudiantes
       </ng-template>
 
       <div class="tab-content">
@@ -64,7 +64,7 @@
         <!-- Loading -->
         <div *ngIf="alumnosLoading" class="loading-row">
           <mat-icon class="spin-icon">sync</mat-icon>
-          <span>Cargando alumnos...</span>
+          <span>Cargando estudiantes...</span>
         </div>
 
         <table mat-table [dataSource]="alumnos" class="data-table" *ngIf="!alumnosLoading">
@@ -123,7 +123,7 @@
           <tr mat-row *matRowDef="let row; columns: alumnosColumns;"></tr>
           <tr class="mat-row no-data-row" *matNoDataRow>
             <td class="mat-cell" [attr.colspan]="alumnosColumns.length">
-              <span>No hay alumnos registrados.</span>
+              <span>No hay estudiantes registrados.</span>
             </td>
           </tr>
         </table>

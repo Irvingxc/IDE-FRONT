@@ -134,11 +134,11 @@ export class EditAlumnoDialogComponent implements OnInit {
       foto:               this.fotoBase64       ?? undefined,
     }).subscribe({
       next: () => {
-        this.notification.success('Alumno actualizado correctamente');
+        this.notification.success('Estudiante actualizado correctamente');
         this.dialogRef.close(true);
       },
       error: () => {
-        this.notification.error('Error al actualizar el alumno');
+        this.notification.error('Error al actualizar el estudiante');
         this.guardando = false;
       }
     });

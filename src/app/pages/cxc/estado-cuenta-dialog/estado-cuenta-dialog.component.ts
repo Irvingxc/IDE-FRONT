@@ -182,7 +182,7 @@ export class EstadoCuentaDialogComponent implements OnInit {
     <p>Institute for the Development of Excellence (IDE) — Danlí, El Paraíso, Honduras</p>
   </div>
   <div class="alumno-info">
-    <strong>Alumno:</strong> ${this.escHtml(this.data.nombre)}<br>
+    <strong>Estudiante:</strong> ${this.escHtml(this.data.nombre)}<br>
     <strong>Identidad:</strong> ${this.escHtml(this.data.identidad)}<br>
     <strong>Año lectivo:</strong> ${this.data.anio}
   </div>

@@ -40,7 +40,7 @@
   <!-- Filtros -->
   <div class="filtros-row">
     <mat-form-field appearance="outline" class="filtro-nombre">
-      <mat-label>Buscar alumno</mat-label>
+      <mat-label>Buscar estudiante</mat-label>
       <input matInput [(ngModel)]="filtroNombre" (keyup.enter)="cargar()" placeholder="Nombre o apellido">
       <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
@@ -69,7 +69,7 @@
 
   <div class="hint-row">
     <mat-icon>touch_app</mat-icon>
-    <span>Doble clic en un alumno para ver su estado de cuenta completo</span>
+    <span>Doble clic en un estudiante para ver su estado de cuenta completo</span>
     <span class="totales-global" *ngIf="datos.length > 0">
       <span>Total vencido: <strong class="monto-rojo">{{ formatLps(totalPendienteGlobal) }}</strong></span>
       <span>Total pagado: <strong class="monto-verde">{{ formatLps(totalPagadoGlobal) }}</strong></span>
@@ -85,9 +85,9 @@
   <div class="table-wrapper" *ngIf="!cargando">
     <table mat-table [dataSource]="datos" class="mat-elevation-z1">
 
-      <!-- Alumno -->
+      <!-- Estudiante -->
       <ng-container matColumnDef="nombre">
-        <th mat-header-cell *matHeaderCellDef>Alumno</th>
+        <th mat-header-cell *matHeaderCellDef>Estudiante</th>
         <td mat-cell *matCellDef="let row">
           <span class="nombre-cell">{{ row.nombreCompleto }}</span>
         </td>

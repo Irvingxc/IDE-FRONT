@@ -1,0 +1,49 @@
+.loading-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 24px;
+  color: #666;
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.notas-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    padding: 8px;
+    color: #666;
+    font-weight: 500;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  td {
+    padding: 4px 8px;
+    vertical-align: middle;
+  }
+}
+
+.nota-field {
+  width: 90px;
+
+  ::ng-deep .mat-form-field-infix {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+
+.sin-alumnos {
+  text-align: center;
+  color: #999;
+  padding: 24px !important;
+}

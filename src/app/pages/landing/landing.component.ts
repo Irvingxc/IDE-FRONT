@@ -41,7 +41,7 @@ export class LandingComponent implements OnInit, OnDestroy {
   readonly nivelesEducativos = [
     {
       nivel: 'Prebásica',
-      ingles: 'Pre-Basic Education',
+      ingles: 'Preschool',
       icon: 'child_care',
       desc: 'Formamos los cimientos del aprendizaje con estimulación temprana, juego educativo e inmersión bilingüe desde los primeros años de vida.',
       grados: [
@@ -51,9 +51,9 @@ export class LandingComponent implements OnInit, OnDestroy {
     },
     {
       nivel: 'Educación Básica',
-      ingles: 'Basic Education',
+      ingles: 'Elementary School',
       icon: 'menu_book',
-      desc: 'Currículo nacional enriquecido con enfoque bilingüe, pensamiento científico, tecnología y sólida formación en valores en todos los grados.',
+      desc: 'Currículo nacional enriquecido con enfoque bilingüe, pensamiento científico, tecnología y sólida formación etica en todos los grados.',
       grados: [
         { grado: 'Primaria',   rango: '1° – 6° Grado', detalle: 'Ciencias, matemáticas, historia y artes con instrucción bilingüe integrada.' },
         { grado: 'Secundaria', rango: '7° – 9° Grado', detalle: 'Ciencias naturales, humanidades, inglés intermedio-avanzado y tecnología aplicada.' },
@@ -65,7 +65,7 @@ export class LandingComponent implements OnInit, OnDestroy {
       icon: 'workspace_premium',
       desc: 'Formación de alto nivel con orientación universitaria, inglés avanzado y preparación para el mercado laboral y el mundo globalizado.',
       grados: [
-        { grado: 'Bachillerato', rango: '10° – 12° Grado', detalle: 'Inglés avanzado, orientación vocacional, proyecto de graduación y preparación universitaria.' },
+        { grado: 'Bachillerato en Ciencias y Humanidades', rango: '10° – 12° Grado', detalle: 'Inglés avanzado, orientación vocacional, proyecto de graduación y preparación universitaria.' },
       ]
     },
   ];
@@ -75,14 +75,15 @@ export class LandingComponent implements OnInit, OnDestroy {
     { icon: 'translate',        texto: 'Inmersión bilingüe',        sub: 'Español e inglés desde Pre-Kínder' },
     { icon: 'how_to_reg',       texto: 'Docentes certificados',     sub: 'Maestros calificados y en formación continua' },
     { icon: 'emoji_events',     texto: 'Excelencia académica',      sub: 'Altos estándares y seguimiento de resultados' },
-    { icon: 'family_restroom',  texto: 'Comunidad familiar',        sub: 'Vínculo cercano entre padres, alumnos y escuela' },
+    { icon: 'family_restroom',  texto: 'Comunidad familiar',        sub: 'Vínculo cercano entre padres, estudiantes y escuela' },
     { icon: 'computer',         texto: 'Aulas tecnológicas',        sub: 'Recursos digitales integrados al aprendizaje' },
+    { icon: 'school',           texto: 'Portal académico',          sub: 'Calificaciones, asistencia y comunicación en línea para padres' },
   ];
 
   readonly pasos = [
     { num: '01', titulo: 'Solicitud',   desc: 'Contáctenos por teléfono, correo o visítenos en el campus.' },
     { num: '02', titulo: 'Entrevista',  desc: 'Reunión con dirección para conocer al estudiante y a su familia.' },
-    { num: '03', titulo: 'Evaluación',  desc: 'Prueba de ubicación adaptada al nivel del alumno.' },
+    { num: '03', titulo: 'Evaluación',  desc: 'Prueba de ubicación adaptada al nivel del estudiante.' },
     { num: '04', titulo: 'Matrícula',   desc: 'Entrega de documentos y formalización de la inscripción.' },
   ];
 

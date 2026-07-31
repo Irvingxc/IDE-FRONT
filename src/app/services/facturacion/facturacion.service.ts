@@ -189,6 +189,32 @@ export class FacturacionService {
                     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  /**
+   * Imprime HTML sin usar window.open(): varias facturas encoladas seguidas
+   * disparan el bloqueador de pop-ups del navegador ("ventana bloqueada" / error)
+   * a partir de la 2da o 3ra ventana. Un iframe oculto no cuenta como pop-up,
+   * así que se puede encolar cuantas impresiones se quiera sin ese límite.
+   */
+  imprimirHtml(html: string): void {
+    const iframe = document.createElement('iframe');
+    Object.assign(iframe.style, { position: 'fixed', right: '0', bottom: '0', width: '0', height: '0', border: '0' });
+    document.body.appendChild(iframe);
+
+    iframe.onload = () => {
+      const win = iframe.contentWindow;
+      if (!win) { iframe.remove(); return; }
+
+      const limpiar = () => iframe.remove();
+      win.addEventListener('afterprint', limpiar, { once: true });
+      setTimeout(limpiar, 60000); // red de seguridad si el navegador no dispara afterprint
+
+      win.focus();
+      win.print();
+    };
+
+    iframe.srcdoc = html;
+  }
+
   buildFacturaHtml(p: PagoDetalle): string {
     const logoUrl     = window.location.origin + '/assets/logo.png';
     const totalExento = p.total - p.impuestoGravado;

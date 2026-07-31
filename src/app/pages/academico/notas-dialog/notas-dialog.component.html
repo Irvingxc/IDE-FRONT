@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;color:#6B0F1A;margin-right:8px">grade</mat-icon>
+  Notas — {{ data.evaluacion.nombre }}
+</h2>
+
+<mat-dialog-content>
+
+  <div *ngIf="loading" class="loading-row">
+    <mat-icon class="spin-icon">sync</mat-icon>
+    <span>Cargando alumnos...</span>
+  </div>
+
+  <table *ngIf="!loading" class="notas-table">
+    <thead>
+      <tr><th>Alumno</th><th>Nota</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let a of alumnos">
+        <td>{{ a.nombreCompleto }}</td>
+        <td>
+          <mat-form-field appearance="outline" class="nota-field">
+            <input matInput type="number" min="0" max="100" [(ngModel)]="a.nota">
+          </mat-form-field>
+        </td>
+      </tr>
+      <tr *ngIf="alumnos.length === 0">
+        <td colspan="2" class="sin-alumnos">No hay alumnos activos en el grado de esta clase.</td>
+      </tr>
+    </tbody>
+  </table>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cerrar()" [disabled]="guardando">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="loading || guardando || alumnos.length === 0">
+    <mat-icon>save</mat-icon> Guardar
+  </button>
+</mat-dialog-actions>

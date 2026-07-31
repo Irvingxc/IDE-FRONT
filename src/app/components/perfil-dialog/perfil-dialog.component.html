@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;color:#6B0F1A;margin-right:8px">account_circle</mat-icon>
+  Mi perfil
+</h2>
+
+<mat-dialog-content>
+  <div class="perfil-campo">
+    <span class="perfil-label">Nombre</span>
+    <span class="perfil-valor">{{ data.user.nombre }} {{ data.user.apellido }}</span>
+  </div>
+
+  <div class="perfil-campo">
+    <span class="perfil-label">Usuario</span>
+    <span class="perfil-valor">{{ data.user.username }}</span>
+  </div>
+
+  <div class="perfil-campo">
+    <span class="perfil-label">Correo</span>
+    <span class="perfil-valor">{{ data.user.email }}</span>
+  </div>
+
+  <div class="perfil-campo" *ngIf="data.user.telefono">
+    <span class="perfil-label">Teléfono</span>
+    <span class="perfil-valor">{{ data.user.telefono }}</span>
+  </div>
+
+  <div class="perfil-campo" *ngIf="data.user.sucursalNombre">
+    <span class="perfil-label">Sucursal</span>
+    <span class="perfil-valor">{{ data.user.sucursalNombre }}</span>
+  </div>
+
+  <div class="perfil-campo" *ngIf="data.user.aula">
+    <span class="perfil-label">Aula</span>
+    <span class="perfil-valor">{{ data.user.aula }}</span>
+  </div>
+
+  <div class="perfil-campo" *ngIf="data.user.roles?.length">
+    <span class="perfil-label">Rol</span>
+    <span class="perfil-valor">{{ data.user.roles?.join(', ') }}</span>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="primary" (click)="cerrar()">Cerrar</button>
+</mat-dialog-actions>

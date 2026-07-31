@@ -28,8 +28,15 @@ import { MenuListComponent } from './components/menu-list/menu-list.component';
 import {MatListModule} from '@angular/material/list';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDialogModule} from '@angular/material/dialog';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {ReactiveFormsModule} from '@angular/forms';
 import { HeaderComponent } from './components/header/header.component';
 import { SessionWarningDialogComponent } from './session-warning-dialog.component';
+import { PerfilDialogComponent } from './components/perfil-dialog/perfil-dialog.component';
+import { CambiarPasswordDialogComponent } from './components/cambiar-password-dialog/cambiar-password-dialog.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { StoreModule } from '@ngrx/store';
@@ -46,6 +53,8 @@ const StoreDevtools = !environment.production ? StoreDevtoolsModule.instrument({
     MenuListComponent,
     HeaderComponent,
     SessionWarningDialogComponent,
+    PerfilDialogComponent,
+    CambiarPasswordDialogComponent,
   ],
   imports: [
     FlexLayoutModule,
@@ -70,6 +79,11 @@ const StoreDevtools = !environment.production ? StoreDevtoolsModule.instrument({
     MatListModule,
     MatButtonModule,
     MatDialogModule,
+    MatMenuModule,
+    MatDividerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
     StoreDevtools,
     StoreModule.forRoot(reducers, {
       runtimeChecks: {

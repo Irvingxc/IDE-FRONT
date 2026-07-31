@@ -1,0 +1,10 @@
+.full-width {
+  width: 100%;
+}
+
+.fechas-row {
+  display: flex;
+  gap: 12px;
+
+  mat-form-field { flex: 1; }
+}

@@ -54,6 +54,12 @@ const routes: Routes = [
         loadChildren: () => import('./pages/whatsapp/whatsapp.module').then(m => m.WhatsappModule)
       },
       {
+        path: 'academico',
+        canLoad: [AuthGuard, ModuloGuard],
+        data: { modulo: 'ACADEMICO' },
+        loadChildren: () => import('./pages/academico/academico.module').then(m => m.AcademicoModule)
+      },
+      {
         path: 'cxc',
         canLoad: [AuthGuard, ModuloGuard],
         data: { modulo: 'CXC' },

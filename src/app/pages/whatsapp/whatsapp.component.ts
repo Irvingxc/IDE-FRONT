@@ -10,6 +10,7 @@ import { EnviarMensajeDialogComponent } from './enviar-mensaje-dialog/enviar-men
 })
 export class WhatsappComponent implements OnInit {
   clientes: ClienteResponse[] = [];
+  clientesConCorreo: ClienteResponse[] = [];
   loading = true;
   columnas = ['nombre', 'telefono', 'acciones'];
 
@@ -27,6 +28,7 @@ export class WhatsappComponent implements OnInit {
     this.clienteService.getClientes(1, 1000).subscribe({
       next: (data) => {
         this.clientes = data.filter(c => c.telefono && c.telefono.trim() !== '');
+        this.clientesConCorreo = data.filter(c => c.correoElectronico && c.correoElectronico.trim() !== '');
         this.loading = false;
       },
       error: () => { this.loading = false; }
@@ -37,7 +39,7 @@ export class WhatsappComponent implements OnInit {
     this.dialog.open(EnviarMensajeDialogComponent, {
       width: '520px',
       disableClose: true,
-      data: { clientes: this.clientes }
+      data: { clientesTelefono: this.clientes, clientesCorreo: this.clientesConCorreo }
     });
   }
 

@@ -350,7 +350,7 @@ export class NuevaMatriculaComponent implements OnInit {
         this.router.navigate(['/matriculas']);
       },
       error: () => {
-        this.notification.error('Error al registrar el alumno');
+        this.notification.error('Error al registrar el estudiante');
         this.guardando = false;
       }
     });

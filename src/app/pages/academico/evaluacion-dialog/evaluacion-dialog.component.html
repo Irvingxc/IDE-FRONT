@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;color:#6B0F1A;margin-right:8px">assignment</mat-icon>
+  Nueva evaluación
+</h2>
+
+<mat-dialog-content [formGroup]="form">
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Nombre de la evaluación</mat-label>
+    <input matInput formControlName="nombre" placeholder="Ej. Tarea 1, Examen corto">
+    <mat-error>Requerido</mat-error>
+  </mat-form-field>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cerrar()" [disabled]="loading">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="loading || form.invalid">
+    <mat-icon>save</mat-icon> Guardar
+  </button>
+</mat-dialog-actions>

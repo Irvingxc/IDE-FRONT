@@ -1,0 +1,191 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Académico</h1>
+      <p class="breadcrumb">Inicio / Académico</p>
+    </div>
+  </div>
+
+  <mat-tab-group>
+
+    <!-- ═══ PERIODOS ═══ -->
+    <mat-tab label="Periodos">
+      <div class="tab-content">
+
+        <div class="tab-toolbar">
+          <span>Periodos / Parciales — Año lectivo {{ anioLectivo }}</span>
+          <button mat-raised-button color="primary" (click)="nuevoPeriodo()">
+            <mat-icon>add</mat-icon> Nuevo periodo
+          </button>
+        </div>
+
+        <div *ngIf="loadingPeriodos" class="loading-row">
+          <mat-icon class="spin-icon">sync</mat-icon>
+          <span>Cargando periodos...</span>
+        </div>
+
+        <table mat-table [dataSource]="periodos" class="data-table" *ngIf="!loadingPeriodos">
+
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Periodo</th>
+            <td mat-cell *matCellDef="let row">{{ row.nombre }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="fechaDesde">
+            <th mat-header-cell *matHeaderCellDef>Desde</th>
+            <td mat-cell *matCellDef="let row">{{ row.fechaDesde | date:'dd/MM/yyyy' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="fechaHasta">
+            <th mat-header-cell *matHeaderCellDef>Hasta</th>
+            <td mat-cell *matCellDef="let row">{{ row.fechaHasta | date:'dd/MM/yyyy' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="anioLectivo">
+            <th mat-header-cell *matHeaderCellDef>Año lectivo</th>
+            <td mat-cell *matCellDef="let row">{{ row.anioLectivo }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button title="Editar" (click)="editarPeriodo(row)"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button color="warn" title="Inactivar" (click)="inactivarPeriodo(row)">
+                <mat-icon>block</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columnasPeriodos"></tr>
+          <tr mat-row *matRowDef="let row; columns: columnasPeriodos;"></tr>
+          <tr class="mat-row no-data-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="columnasPeriodos.length">
+              <span>No hay periodos registrados para este año lectivo.</span>
+            </td>
+          </tr>
+        </table>
+
+      </div>
+    </mat-tab>
+
+    <!-- ═══ CLASES ═══ -->
+    <mat-tab label="Clases">
+      <div class="tab-content">
+
+        <div class="tab-toolbar">
+          <span>Clases — Año lectivo {{ anioLectivo }}</span>
+          <button mat-raised-button color="primary" (click)="nuevaClase()">
+            <mat-icon>add</mat-icon> Nueva clase
+          </button>
+        </div>
+
+        <div *ngIf="loadingClases" class="loading-row">
+          <mat-icon class="spin-icon">sync</mat-icon>
+          <span>Cargando clases...</span>
+        </div>
+
+        <table mat-table [dataSource]="clases" class="data-table" *ngIf="!loadingClases">
+
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Clase</th>
+            <td mat-cell *matCellDef="let row">{{ row.nombre }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="gradoNombre">
+            <th mat-header-cell *matHeaderCellDef>Grado</th>
+            <td mat-cell *matCellDef="let row">{{ row.gradoNombre }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="maestroNombre">
+            <th mat-header-cell *matHeaderCellDef>Maestro asignado</th>
+            <td mat-cell *matCellDef="let row">
+              <span *ngIf="row.maestroNombre">{{ row.maestroNombre }}</span>
+              <span *ngIf="!row.maestroNombre" class="sin-maestro">Sin asignar</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button title="Editar" (click)="editarClase(row)"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button color="warn" title="Inactivar" (click)="inactivarClase(row)">
+                <mat-icon>block</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columnasClases"></tr>
+          <tr mat-row *matRowDef="let row; columns: columnasClases;"></tr>
+          <tr class="mat-row no-data-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="columnasClases.length">
+              <span>No hay clases registradas para este año lectivo.</span>
+            </td>
+          </tr>
+        </table>
+
+      </div>
+    </mat-tab>
+
+    <!-- ═══ NOTAS ═══ -->
+    <mat-tab label="Notas">
+      <div class="tab-content">
+
+        <div class="notas-filtros">
+          <mat-form-field appearance="outline">
+            <mat-label>Clase</mat-label>
+            <mat-select [(ngModel)]="notasIdClase" (selectionChange)="onNotasFiltroChange()">
+              <mat-option *ngFor="let c of clases" [value]="c.id">{{ c.nombre }} ({{ c.gradoNombre }})</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Periodo</mat-label>
+            <mat-select [(ngModel)]="notasIdPeriodo" (selectionChange)="onNotasFiltroChange()">
+              <mat-option *ngFor="let p of periodos" [value]="p.id">{{ p.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div *ngIf="!notasIdClase || !notasIdPeriodo" class="no-data-row">
+          <span>Selecciona una clase y un periodo para ver las semanas.</span>
+        </div>
+
+        <div *ngIf="loadingSemanas" class="loading-row">
+          <mat-icon class="spin-icon">sync</mat-icon>
+          <span>Cargando semanas...</span>
+        </div>
+
+        <div *ngIf="notasIdClase && notasIdPeriodo && !loadingSemanas" class="semanas-list">
+          <div class="semana-card" *ngFor="let s of semanas">
+            <div class="semana-header">
+              <span class="semana-titulo">
+                Semana {{ s.numeroSemana }} — {{ s.fechaDesde | date:'dd/MM/yyyy' }} al {{ s.fechaHasta | date:'dd/MM/yyyy' }}
+              </span>
+              <button mat-stroked-button (click)="nuevaEvaluacion(s)">
+                <mat-icon>add</mat-icon> Nueva evaluación
+              </button>
+            </div>
+
+            <div class="evaluaciones-chips">
+              <span *ngIf="!evaluacionesPorSemana[s.id]?.length" class="sin-evaluaciones">
+                Sin evaluaciones registradas.
+              </span>
+              <div class="evaluacion-chip" *ngFor="let e of evaluacionesPorSemana[s.id]">
+                <span (click)="abrirNotas(e)">{{ e.nombre }}</span>
+                <mat-icon (click)="inactivarEvaluacion(e)" title="Inactivar">close</mat-icon>
+              </div>
+            </div>
+          </div>
+
+          <div class="no-data-row" *ngIf="semanas.length === 0">
+            <span>Este periodo no tiene semanas generadas.</span>
+          </div>
+        </div>
+
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+
+</div>

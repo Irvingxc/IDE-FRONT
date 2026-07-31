@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;color:#6B0F1A;margin-right:8px">school</mat-icon>
+  {{ esEdicion ? 'Editar clase' : 'Nueva clase' }}
+</h2>
+
+<mat-dialog-content [formGroup]="form">
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Nombre de la clase</mat-label>
+    <input matInput formControlName="nombre" placeholder="Ej. Matemáticas">
+    <mat-error>Requerido</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Grado</mat-label>
+    <mat-select formControlName="idGrado">
+      <mat-option *ngFor="let g of grados" [value]="g.idGrado">{{ g.gradoNombre }}</mat-option>
+    </mat-select>
+    <mat-error>Requerido</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Maestro asignado</mat-label>
+    <mat-select formControlName="idMaestro">
+      <mat-option [value]="null">Sin asignar</mat-option>
+      <mat-option *ngFor="let m of maestros" [value]="m.id">{{ m.nombre }} {{ m.apellido }}</mat-option>
+    </mat-select>
+    <mat-hint *ngIf="maestros.length === 0">No hay empleados registrados todavía.</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Año lectivo</mat-label>
+    <input matInput type="number" formControlName="anioLectivo">
+    <mat-error>Requerido</mat-error>
+  </mat-form-field>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cerrar()" [disabled]="loading">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="loading || form.invalid">
+    <mat-icon>save</mat-icon> Guardar
+  </button>
+</mat-dialog-actions>

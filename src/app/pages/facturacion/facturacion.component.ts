@@ -108,11 +108,7 @@ export class FacturacionComponent implements OnInit, AfterViewInit {
   }
 
   private abrirVentanaImpresion(p: PagoDetalle): void {
-    const win = window.open('', '_blank');
-    if (!win) return;
-    win.document.write(this.facturacionService.buildFacturaHtml(p));
-    win.document.close();
-    setTimeout(() => { win.focus(); win.print(); }, 500);
+    this.facturacionService.imprimirHtml(this.facturacionService.buildFacturaHtml(p));
   }
 
 }

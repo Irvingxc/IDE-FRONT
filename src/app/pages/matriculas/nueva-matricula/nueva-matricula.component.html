@@ -270,10 +270,10 @@
          STEP 2 — DATOS DEL ALUMNO
     ══════════════════════════════════════════ -->
     <mat-step [completed]="alumnoForm.valid">
-      <ng-template matStepLabel>Datos del Alumno</ng-template>
+      <ng-template matStepLabel>Datos del Estudiante</ng-template>
 
       <div class="step-content">
-        <h3 class="sub-title">Información del alumno</h3>
+        <h3 class="sub-title">Información del estudiante</h3>
 
         <form [formGroup]="alumnoForm">
 
@@ -307,10 +307,10 @@
             </mat-form-field>
           </div>
 
-          <p class="section-label">Foto del alumno</p>
+          <p class="section-label">Foto del estudiante</p>
           <div class="form-grid">
             <div class="foto-upload">
-              <img *ngIf="fotoBase64" [src]="fotoBase64" class="foto-preview" alt="Foto alumno">
+              <img *ngIf="fotoBase64" [src]="fotoBase64" class="foto-preview" alt="Foto estudiante">
               <div *ngIf="!fotoBase64" class="foto-placeholder-new">
                 <mat-icon>person</mat-icon>
               </div>
