@@ -149,7 +149,7 @@ export class CatalogoComponent implements OnInit {
         this.cargar();
       },
       error: (err) => {
-        this.snack.open(err?.error?.message ?? 'Error al inactivar', 'OK', { duration: 4000 });
+        this.snack.open(err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al inactivar', 'OK', { duration: 4000 });
       }
     });
   }

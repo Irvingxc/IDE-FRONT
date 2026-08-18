@@ -42,6 +42,7 @@ export class NuevaMatriculaComponent implements OnInit {
   paises: PaisTelefono[] = PAISES_TELEFONO;
   tiposId = ['DNI / Identidad', 'Pasaporte'];
   grados: GradoDto[] = [];
+  secciones: string[] = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
 
   nacionalidades = [
     'Hondureño/a', 'Guatemalteco/a', 'Salvadoreño/a', 'Nicaragüense',
@@ -132,6 +133,7 @@ export class NuevaMatriculaComponent implements OnInit {
       apellidos:          ['', Validators.required],
       segundoApellido:    [''],
       idGrado:            [null, Validators.required],
+      seccion:            ['A', Validators.required],
       fechaInicioClases:  [null, Validators.required],
       descuento:          [null, Validators.min(0)],
       motivoDescuento:    [''],
@@ -280,6 +282,7 @@ export class NuevaMatriculaComponent implements OnInit {
         primerApellidoAlumno:      up(a.apellidos)!,
         segundoApellidoAlumno:     up(a.segundoApellido),
         idGrado:                   a.idGrado,
+        seccion:                   up(a.seccion),
         fechaInicioClases:         a.fechaInicioClases
                                      ? new Date(a.fechaInicioClases).toISOString().split('T')[0]
                                      : null,
@@ -325,6 +328,7 @@ export class NuevaMatriculaComponent implements OnInit {
       cliente:            idCliente,
       estado:             'Activo',
       idGrado:            a.idGrado,
+      seccion:            up(a.seccion),
       fechaInicioClases:  a.fechaInicioClases
                             ? new Date(a.fechaInicioClases).toISOString().split('T')[0]
                             : null,

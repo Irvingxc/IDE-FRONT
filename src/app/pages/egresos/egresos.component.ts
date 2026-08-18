@@ -71,7 +71,7 @@ export class EgresosComponent implements OnInit {
     if (!confirm(`¿Eliminar "${egreso.concepto}" por ${this.formatLps(egreso.monto)}?`)) return;
     this.egresosService.eliminar(egreso.id).subscribe({
       next: () => { this.snack.open('Egreso eliminado', '', { duration: 3000 }); this.cargar(); },
-      error: (err) => this.snack.open(err?.error?.message ?? 'Error al eliminar', '', { duration: 4000 })
+      error: (err) => this.snack.open(err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al eliminar', '', { duration: 4000 })
     });
   }
 

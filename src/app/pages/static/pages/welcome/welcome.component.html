@@ -5,7 +5,7 @@
     <p class="date-info">{{ currentDate }} · Año escolar {{ schoolYear }}</p>
   </div>
 
-  <div class="stats-grid">
+  <div class="stats-grid" *ngIf="mostrarStats$ | async">
     <mat-card class="stat-card" *ngFor="let stat of stats">
       <div class="stat-icon-wrap">
         <mat-icon>{{ stat.icon }}</mat-icon>

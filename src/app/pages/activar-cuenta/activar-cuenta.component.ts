@@ -63,7 +63,7 @@ export class ActivarCuentaComponent implements OnInit {
           setTimeout(() => this.router.navigate(['/portal-cliente']), 2000);
         },
         error: (err) => {
-          this.errorMsg = err?.error?.errors?.mensaje ?? 'Error al activar la cuenta.';
+          this.errorMsg = err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al activar la cuenta.';
           this.estado = 'valido';
         }
       });

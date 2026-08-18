@@ -60,18 +60,153 @@
   color: #999;
 }
 
+.notas-grid-wrapper {
+  overflow-x: auto;
+}
+
+.notas-grid {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+
+  th, td {
+    border: 1px solid #e0e0e0;
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 13px;
+  }
+
+  thead th {
+    background: #f2e6e8;
+    color: #6B0F1A;
+    font-weight: 600;
+
+    input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: #6B0F1A;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 2px 4px;
+      border-radius: 4px;
+
+      &:hover, &:focus {
+        background: #ffffff;
+        outline: 1px solid #6B0F1A;
+      }
+    }
+  }
+
+  .col-codigo { width: 80px; }
+  .col-nombre { min-width: 220px; }
+  .col-total { width: 110px; text-align: center; font-weight: 600; }
+
+  .th-concepto { text-align: center; }
+
+  .th-actividad {
+    input[type="text"] {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: #6B0F1A;
+      font-weight: 600;
+      font-size: 12px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      text-align: center;
+
+      &:hover, &:focus {
+        background: #ffffff;
+        outline: 1px solid #6B0F1A;
+      }
+    }
+
+    .th-actividad-pct {
+      display: block;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 400;
+      color: #8a5a60;
+    }
+  }
+
+  tbody td.col-total {
+    background: #faf3f0;
+  }
+
+  tbody td input[type="number"] {
+    width: 70px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 13px;
+
+    &:focus {
+      outline: 1px solid #6B0F1A;
+      border-color: #6B0F1A;
+    }
+  }
+}
+
+.cambios-flotante {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #6B0F1A;
+  border-radius: 8px;
+  padding: 10px 16px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  z-index: 1000;
+
+  mat-icon { color: #d4a017; }
+  span { font-size: 13px; font-weight: 500; color: #6B0F1A; }
+}
+
+.en-construccion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 24px;
+  color: #999;
+
+  mat-icon { font-size: 40px; width: 40px; height: 40px; color: #d4a017; }
+  span { font-size: 15px; font-weight: 500; }
+}
+
 .notas-filtros {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 16px;
 
   mat-form-field { width: 260px; }
+
+  .filtro-ancho { width: 320px; }
 }
 
 .no-data-row {
   padding: 24px;
   text-align: center;
   color: #999;
+}
+
+.tipo-toggle {
+  display: flex;
+  margin-bottom: 16px;
+  width: fit-content;
+}
+
+.nivel-row {
+  align-items: center;
+
+  button { margin-bottom: 16px; }
 }
 
 .semanas-list {
@@ -120,4 +255,97 @@
   span { cursor: pointer; }
   mat-icon { font-size: 16px; width: 16px; height: 16px; cursor: pointer; opacity: 0.6; }
   mat-icon:hover { opacity: 1; }
+}
+
+.conceptos-wrapper {
+  max-width: 720px;
+}
+
+.concepto-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.concepto-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+
+  .concepto-nombre-input {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6B0F1A;
+
+    &:focus {
+      outline: 1px solid #6B0F1A;
+      border-color: #6B0F1A;
+    }
+  }
+
+  .concepto-subtotal {
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+  }
+}
+
+.agregar-actividad-btn {
+  margin-top: 8px;
+}
+
+.conceptos-grid {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    border: 1px solid #e0e0e0;
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 13px;
+  }
+
+  thead th {
+    background: #f2e6e8;
+    color: #6B0F1A;
+    font-weight: 600;
+  }
+
+  .col-concepto-nombre { width: auto; }
+  .col-concepto-pct { width: 100px; }
+  .col-concepto-acc { width: 48px; }
+
+  td input[type="text"], td input[type="number"] {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 13px;
+
+    &:focus {
+      outline: 1px solid #6B0F1A;
+      border-color: #6B0F1A;
+    }
+  }
+}
+
+.conceptos-acciones {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.conceptos-total {
+  font-size: 13px;
+  font-weight: 600;
+
+  &.total-ok { color: #2e7d32; }
+  &.total-error { color: #c62828; }
 }

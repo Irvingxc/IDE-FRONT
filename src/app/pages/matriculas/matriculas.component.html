@@ -79,6 +79,11 @@
             <td mat-cell *matCellDef="let row">{{ row.grado || '—' }}</td>
           </ng-container>
 
+          <ng-container matColumnDef="seccion">
+            <th mat-header-cell *matHeaderCellDef>Sección</th>
+            <td mat-cell *matCellDef="let row">{{ row.seccion || '—' }}</td>
+          </ng-container>
+
           <ng-container matColumnDef="estado">
             <th mat-header-cell *matHeaderCellDef>Estado</th>
             <td mat-cell *matCellDef="let row">

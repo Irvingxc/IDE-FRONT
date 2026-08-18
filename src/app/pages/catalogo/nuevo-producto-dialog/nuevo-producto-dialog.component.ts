@@ -84,7 +84,7 @@ export class NuevoProductoDialogComponent implements OnInit {
       },
       error: (err) => {
         this.guardando = false;
-        this.snack.open(err?.error?.message ?? 'Error al crear el producto', '', { duration: 4000 });
+        this.snack.open(err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al crear el producto', '', { duration: 4000 });
       }
     });
   }

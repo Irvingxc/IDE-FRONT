@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AlumnoResponse, AlumnoService } from '@app/services/alumno/alumno.service';
 import { ClienteService, ClienteResponse } from '@app/services/cliente/cliente.service';
-import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.service';
+import { CatalogoService, GradoDto, NivelIngles } from '@app/services/catalogo/catalogo.service';
 import { NotificationService } from '@app/services';
 
 @Component({
@@ -27,6 +27,7 @@ export class EditAlumnoDialogComponent implements OnInit {
   tiposId = ['DNI / Identidad', 'Pasaporte'];
   sexos = ['Masculino', 'Femenino'];
   estados = ['Activo', 'Inactivo'];
+  secciones: string[] = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
   nacionalidades = [
     'Hondureño/a', 'Guatemalteco/a', 'Salvadoreño/a', 'Nicaragüense',
     'Costarricense', 'Beliceño/a', 'Panameño/a', 'Mexicano/a', 'Otro'
@@ -38,6 +39,7 @@ export class EditAlumnoDialogComponent implements OnInit {
     'Santa Bárbara', 'Valle', 'Yoro'
   ];
   grados: GradoDto[] = [];
+  niveles: NivelIngles[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -51,6 +53,7 @@ export class EditAlumnoDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.catalogoService.getGrados().subscribe({ next: (data) => this.grados = data ?? [] });
+    this.catalogoService.getNivelesIngles().subscribe({ next: (data) => this.niveles = data ?? [] });
     this.alumnoService.getFoto(this.data.identidad).subscribe({
       next: ({ foto }) => { if (!this.fotoManual) this.fotoBase64 = foto ?? null; }
     });
@@ -62,6 +65,8 @@ export class EditAlumnoDialogComponent implements OnInit {
       segundoApellido:    [this.data.segundoApellido || ''],
       tipoIdentificacion: [this.data.tipoIdentificacion],
       idGrado:            [this.data.idGrado,          Validators.required],
+      seccion:            [this.data.seccion || 'A',   Validators.required],
+      idNivelIngles:      [this.data.idNivelIngles ?? null],
       estado:             [this.data.estado],
       valorMatricula:     [this.data.valorMatricula,   [Validators.required, Validators.min(0)]],
       valorMensualidad:   [this.data.valorMensualidad, [Validators.required, Validators.min(0)]],
@@ -118,6 +123,8 @@ export class EditAlumnoDialogComponent implements OnInit {
       segundoApellido:    up(f.segundoApellido),
       cliente:            this.clienteSeleccionado?.id ?? undefined,
       idGrado:            f.idGrado             ?? undefined,
+      seccion:            up(f.seccion),
+      idNivelIngles:      f.idNivelIngles == null ? 0 : f.idNivelIngles,
       estado:             f.estado              || undefined,
       valorMatricula:     f.valorMatricula      ?? undefined,
       valorMensualidad:   f.valorMensualidad    ?? undefined,

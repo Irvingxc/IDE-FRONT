@@ -8,6 +8,7 @@ import { PeriodoDialogComponent } from './periodo-dialog/periodo-dialog.componen
 import { ClaseDialogComponent } from './clase-dialog/clase-dialog.component';
 import { EvaluacionDialogComponent } from './evaluacion-dialog/evaluacion-dialog.component';
 import { NotasDialogComponent } from './notas-dialog/notas-dialog.component';
+import { NivelInglesDialogComponent } from './nivel-ingles-dialog/nivel-ingles-dialog.component';
 
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
@@ -17,6 +18,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, MAT_DATE_LOCALE, DateAdapter, NativeDateAdapter } from '@angular/material/core';
 
@@ -43,6 +46,7 @@ class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
     ClaseDialogComponent,
     EvaluacionDialogComponent,
     NotasDialogComponent,
+    NivelInglesDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -57,6 +61,8 @@ class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatAutocompleteModule,
+    MatButtonToggleModule,
     MatDatepickerModule,
     MatNativeDateModule,
   ],

@@ -30,6 +30,16 @@
             <span class="modulo-clave">{{ m.clave }}</span>
           </div>
         </mat-checkbox>
+
+        <div class="submodulos-list" *ngIf="subModulosDe(m.id).length > 0">
+          <mat-checkbox
+            *ngFor="let sm of subModulosDe(m.id)"
+            [checked]="sm.seleccionado"
+            (change)="toggleSubModulo(sm, $event.checked)"
+            class="submodulo-checkbox">
+            <span class="submodulo-nombre">{{ sm.nombre }}</span>
+          </mat-checkbox>
+        </div>
       </div>
     </div>
   </ng-container>

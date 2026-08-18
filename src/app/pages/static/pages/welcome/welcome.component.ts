@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { DashboardService } from '@app/services/dashboard/dashboard.service';
 import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
@@ -50,6 +50,7 @@ export class WelcomeComponent implements OnInit {
 
   nombreUsuario$!: Observable<string>;
   modules$!: Observable<ModuleCard[]>;
+  mostrarStats$!: Observable<boolean>;
 
   stats: StatCard[] = [
     { icon: 'people',        label: 'Estudiantes activos', value: '—', sub: '' },
@@ -83,7 +84,19 @@ export class WelcomeComponent implements OnInit {
       })
     );
 
-    this.loadStats();
+    this.mostrarStats$ = this.store.pipe(
+      select(fromUser.getUser),
+      map(u => {
+        const modulos = u?.modulos;
+        if (!modulos) return true;
+        return modulos.includes('MATRICULAS') || modulos.includes('PAGOS');
+      })
+    );
+
+    this.mostrarStats$.pipe(take(1)).subscribe(mostrar => {
+      if (mostrar) this.loadStats();
+      else this.loadingStats = false;
+    });
   }
 
   private loadStats(): void {

@@ -22,7 +22,7 @@ import { NotificationService } from '@app/services';
 export class MatriculasComponent implements OnInit {
 
   // ── Alumnos ──
-  alumnosColumns = ['nombre', 'grado', 'estado', 'descuento', 'tutor', 'acciones'];
+  alumnosColumns = ['nombre', 'grado', 'seccion', 'estado', 'descuento', 'tutor', 'acciones'];
   alumnos: AlumnoResponse[] = [];
   alumnosLoading = false;
   totalAlumnos = 0;

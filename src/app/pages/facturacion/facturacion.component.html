@@ -5,9 +5,27 @@
       <h1>Facturación</h1>
       <p class="breadcrumb">Inicio / Facturación</p>
     </div>
-    <button mat-raised-button color="primary" (click)="nuevaFactura()">
+    <button mat-raised-button color="primary" (click)="nuevaFactura()" [disabled]="sar?.bloqueada">
       <mat-icon>add</mat-icon> Nueva Factura
     </button>
+  </div>
+
+  <!-- CAI agotado/vencido: bloquea de verdad -->
+  <div class="alerta-sar bloqueo" *ngIf="sar?.bloqueada">
+    <mat-icon class="alerta-icono">block</mat-icon>
+    <div class="alerta-texto">
+      <span class="alerta-titulo">Facturación bloqueada</span>
+      <span class="alerta-detalle">{{ sar!.motivoBloqueo }}</span>
+    </div>
+  </div>
+
+  <!-- CAI por agotarse/vencer: solo aviso, no bloquea -->
+  <div class="alerta-sar aviso" *ngIf="sar?.alerta && !sar!.bloqueada">
+    <mat-icon class="alerta-icono">warning</mat-icon>
+    <div class="alerta-texto">
+      <span class="alerta-titulo">Renueva pronto tu CAI</span>
+      <span class="alerta-detalle">{{ sar!.mensajeAlerta }}</span>
+    </div>
   </div>
 
   <!-- Filtros -->

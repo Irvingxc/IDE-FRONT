@@ -39,7 +39,7 @@
       <ng-container matColumnDef="fechaVence">
         <th mat-header-cell *matHeaderCellDef>Vence</th>
         <td mat-cell *matCellDef="let row">
-          {{ row.fechaVence ? (row.fechaVence + 'T00:00:00' | date:'dd/MM/yyyy') : '—' }}
+          {{ fechaLabel(row.fechaVence) }}
         </td>
       </ng-container>
 
@@ -71,7 +71,7 @@
       <ng-container matColumnDef="fechaPago">
         <th mat-header-cell *matHeaderCellDef>Fecha Pago</th>
         <td mat-cell *matCellDef="let row">
-          {{ row.fechaPago ? (row.fechaPago + 'T00:00:00' | date:'dd/MM/yyyy') : '—' }}
+          {{ fechaLabel(row.fechaPago) }}
         </td>
       </ng-container>
 

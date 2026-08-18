@@ -74,7 +74,7 @@ export class ProveedorDialogComponent implements OnInit {
     };
     const ko = (err: any) => {
       this.guardando = false;
-      this.snack.open(err?.error?.message ?? 'Error al guardar', '', { duration: 4000 });
+      this.snack.open(err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al guardar', '', { duration: 4000 });
     };
 
     if (this.esEdicion) {

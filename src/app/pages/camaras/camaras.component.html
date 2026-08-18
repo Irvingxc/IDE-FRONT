@@ -1,0 +1,23 @@
+<div class="camaras-container">
+  <h2>Cámaras</h2>
+
+  <div class="estado-carga" *ngIf="cargando">
+    <mat-spinner diameter="40"></mat-spinner>
+    <span>Cargando cámaras...</span>
+  </div>
+
+  <div class="estado-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <div class="estado-vacio" *ngIf="!cargando && !error && camaras.length === 0">
+    No hay cámaras configuradas todavía.
+  </div>
+
+  <div class="camaras-grid" *ngIf="!cargando && !error">
+    <div class="camara-item" *ngFor="let camara of camaras; let i = index">
+      <h3>{{ camara.nombre }}</h3>
+      <div class="video-wrapper" [id]="'camara-' + i" #videoContainer></div>
+    </div>
+  </div>
+</div>

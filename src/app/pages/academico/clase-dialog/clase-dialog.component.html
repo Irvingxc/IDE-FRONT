@@ -11,10 +11,35 @@
     <mat-error>Requerido</mat-error>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="full-width">
+  <mat-button-toggle-group formControlName="tipo" class="tipo-toggle full-width">
+    <mat-button-toggle value="grado">Por grado</mat-button-toggle>
+    <mat-button-toggle value="nivel">Por nivel de inglés</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <mat-form-field appearance="outline" class="full-width" *ngIf="!esPorNivel">
     <mat-label>Grado</mat-label>
     <mat-select formControlName="idGrado">
       <mat-option *ngFor="let g of grados" [value]="g.idGrado">{{ g.gradoNombre }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div class="nivel-row" *ngIf="esPorNivel">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nivel de inglés</mat-label>
+      <mat-select formControlName="idNivelIngles">
+        <mat-option *ngFor="let n of niveles" [value]="n.id">{{ n.nombre }}</mat-option>
+      </mat-select>
+      <mat-hint *ngIf="niveles.length === 0">No hay niveles creados todavía.</mat-hint>
+    </mat-form-field>
+    <button mat-icon-button type="button" title="Nuevo nivel" (click)="nuevoNivel()">
+      <mat-icon>add_circle</mat-icon>
+    </button>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Sección</mat-label>
+    <mat-select formControlName="seccion">
+      <mat-option *ngFor="let s of secciones" [value]="s">{{ s }}</mat-option>
     </mat-select>
     <mat-error>Requerido</mat-error>
   </mat-form-field>

@@ -72,6 +72,12 @@ const routes: Routes = [
         loadChildren: () => import('./pages/bitacora/bitacora.module').then(m => m.BitacoraModule)
       },
       {
+        path: 'camaras',
+        canLoad: [AuthGuard, ModuloGuard],
+        data: { modulo: 'CAMARAS' },
+        loadChildren: () => import('./pages/camaras/camaras.module').then(m => m.CamarasModule)
+      },
+      {
         path: 'catalogo',
         canLoad: [AuthGuard, ModuloGuard],
         data: { modulo: 'EMPLEADOS' },

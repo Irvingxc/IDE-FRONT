@@ -30,6 +30,7 @@ export interface GuardarMatriculaDto {
   primerApellidoAlumno:         string;
   segundoApellidoAlumno?:       string;
   idGrado:                      number;
+  seccion?:                     string;
   valorMatricula?:              number;
   valorMensualidad?:            number;
   fechaInicioClases?:           string | null;

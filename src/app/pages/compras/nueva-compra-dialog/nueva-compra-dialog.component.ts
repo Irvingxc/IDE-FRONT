@@ -139,7 +139,7 @@ export class NuevaCompraDialogComponent implements OnInit {
       },
       error: (err: any) => {
         this.guardando = false;
-        this.errorMsg = err?.error?.errores ?? err?.error?.message ?? 'Error al guardar la compra.';
+        this.errorMsg = err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al guardar la compra.';
       }
     });
   }

@@ -12,6 +12,12 @@ export interface Sar {
   fechaLim:     string;
   impuestoSar:  number;
   secuenciaSar: string;
+  facturasRestantes?: number;
+  diasParaVencer?:    number;
+  alerta:             boolean;
+  mensajeAlerta?:     string;
+  bloqueada:          boolean;
+  motivoBloqueo?:     string;
 }
 
 export interface PagoResumen {

@@ -288,6 +288,14 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline">
+              <mat-label>Sección *</mat-label>
+              <mat-select formControlName="seccion">
+                <mat-option *ngFor="let s of secciones" [value]="s">{{ s }}</mat-option>
+              </mat-select>
+              <mat-error>Requerido</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
               <mat-label>Fecha inicio de clases *</mat-label>
               <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicioClases">
               <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>

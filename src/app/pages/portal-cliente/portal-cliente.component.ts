@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
 import {
-  PortalClienteService, HijoDto, PortalFacturaDto, PortalCxcDto
+  PortalClienteService, HijoDto, PortalFacturaDto, PortalCxcDto, PortalPeriodo, PortalClaseNota
 } from '@app/services/portal-cliente/portal-cliente.service';
 
 @Component({
@@ -26,9 +26,14 @@ export class PortalClienteComponent implements OnInit {
   anio = new Date().getFullYear();
   anios: number[] = [];
 
+  notas: PortalClaseNota[] = [];
+  periodos: PortalPeriodo[] = [];
+  periodoSeleccionadoId: number | null = null;
+
   cargandoHijos    = true;
   cargandoFacturas = false;
   cargandoCxc      = false;
+  cargandoNotas    = false;
 
   tabActiva = 0;
 
@@ -54,11 +59,23 @@ export class PortalClienteComponent implements OnInit {
       },
       error: () => { this.cargandoHijos = false; }
     });
+
+    this.svc.periodos().subscribe({
+      next: (p) => {
+        this.periodos = p;
+        if (p.length > 0) {
+          this.periodoSeleccionadoId = p[0].id;
+          this.cargarNotas();
+        }
+      },
+      error: () => {}
+    });
   }
 
   seleccionar(hijo: HijoDto): void {
     this.hijoSeleccionado = hijo;
     this.cargarCxc();
+    this.cargarNotas();
   }
 
   cerrarSesion(): void {
@@ -87,6 +104,26 @@ export class PortalClienteComponent implements OnInit {
   cambiarAnio(a: number): void {
     this.anio = a;
     this.cargarCxc();
+  }
+
+  cargarNotas(): void {
+    if (!this.hijoSeleccionado || !this.periodoSeleccionadoId) { this.notas = []; return; }
+    this.cargandoNotas = true;
+    this.svc.misNotas(this.hijoSeleccionado.identidad, this.periodoSeleccionadoId).subscribe({
+      next: (n) => { this.notas = n; this.cargandoNotas = false; },
+      error: () => { this.notas = []; this.cargandoNotas = false; }
+    });
+  }
+
+  cambiarPeriodo(idPeriodo: number): void {
+    this.periodoSeleccionadoId = idPeriodo;
+    this.cargarNotas();
+  }
+
+  totalClase(clase: PortalClaseNota): number {
+    return clase.conceptos.reduce((sumaConceptos, concepto) =>
+      sumaConceptos + concepto.actividades.reduce((sumaActividades, actividad) =>
+        sumaActividades + (actividad.nota ?? 0), 0), 0);
   }
 
   get pendientes(): PortalCxcDto[] { return this.cxc.filter(c => c.estado === 'Pendiente'); }

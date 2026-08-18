@@ -72,7 +72,7 @@ export class ComprasComponent implements OnInit {
     if (!confirm(`¿Anular la compra ${compra.noFactura ?? '#' + compra.id} de ${compra.proveedor}? Los ítems de inventario se marcarán como "Dado de baja".`)) return;
     this.comprasService.anular(compra.id).subscribe({
       next: () => { this.snack.open('Compra anulada', '', { duration: 3000 }); this.cargar(); },
-      error: (err: any) => this.snack.open(err?.error?.message ?? 'Error al anular', '', { duration: 4000 })
+      error: (err: any) => this.snack.open(err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al anular', '', { duration: 4000 })
     });
   }
 

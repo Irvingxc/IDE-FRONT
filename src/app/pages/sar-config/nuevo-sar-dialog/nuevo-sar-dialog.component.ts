@@ -65,7 +65,7 @@ export class NuevoSarDialogComponent {
       impuestoSar: this.impuestoPct / 100,
     }).subscribe({
       next:  () => { this.snack.open('CAI registrado correctamente', '', { duration: 3000 }); this.dialogRef.close(true); },
-      error: (err) => { this.snack.open(err?.error?.message ?? 'Error al guardar', '', { duration: 4000 }); this.guardando = false; }
+      error: (err) => { this.snack.open(err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al guardar', '', { duration: 4000 }); this.guardando = false; }
     });
   }
 

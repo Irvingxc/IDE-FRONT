@@ -89,6 +89,10 @@ export class EstadoCuentaDialogComponent implements OnInit {
     return mes === 0 ? 'Única' : (this.meses[mes] ?? `Mes ${mes}`);
   }
 
+  fechaLabel(f: string | null | undefined): string {
+    return f ? parseLocalDate(f).toLocaleDateString('es-HN') : '—';
+  }
+
   formatLps(v: number): string {
     return 'L. ' + v.toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
@@ -214,7 +218,7 @@ export class EstadoCuentaDialogComponent implements OnInit {
         this.snack.open('Cuota cancelada', 'OK', { duration: 3000 });
         this.cargarDetalle();
       },
-      error: (err) => this.snack.open(err?.error?.message ?? 'Error al cancelar', '', { duration: 4000 })
+      error: (err) => this.snack.open(err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al cancelar', '', { duration: 4000 })
     });
   }
 

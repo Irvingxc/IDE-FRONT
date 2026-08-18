@@ -59,7 +59,7 @@ export class InventarioComponent implements OnInit {
     if (item.estado === estado) return;
     this.invService.actualizarEstado(item.id, estado).subscribe({
       next: () => { this.snack.open(`Estado actualizado a "${estado}"`, '', { duration: 3000 }); this.cargar(); },
-      error: (err) => this.snack.open(err?.error?.message ?? 'Error al actualizar', '', { duration: 4000 })
+      error: (err) => this.snack.open(err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al actualizar', '', { duration: 4000 })
     });
   }
 

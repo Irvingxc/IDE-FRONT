@@ -16,6 +16,10 @@
       <mat-icon>school</mat-icon>
       <span class="navegacion-list-label">Matrículas</span>
     </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/academico" *ngIf="tieneModulo('ACADEMICO')">
+      <mat-icon>grade</mat-icon>
+      <span class="navegacion-list-label">Académico</span>
+    </a>
     <a mat-list-item (click)="closeMenu()" routerLink="/facturacion" *ngIf="tieneModulo('PAGOS')">
       <mat-icon>receipt_long</mat-icon>
       <span class="navegacion-list-label">Facturación SAR</span>
@@ -67,6 +71,10 @@
     <a mat-list-item (click)="closeMenu()" routerLink="/bitacora" *ngIf="tieneModulo('BITACORA')">
       <mat-icon>history</mat-icon>
       <span class="navegacion-list-label">Bitácora</span>
+    </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/camaras" *ngIf="tieneModulo('CAMARAS')">
+      <mat-icon>videocam</mat-icon>
+      <span class="navegacion-list-label">Cámaras</span>
     </a>
     <mat-divider></mat-divider>
     <a mat-list-item (click)="onSignOut(); closeMenu()">

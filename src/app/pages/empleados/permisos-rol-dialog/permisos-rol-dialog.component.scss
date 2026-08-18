@@ -30,3 +30,16 @@
   .modulo-clave  { font-size: 11px; color: #999; background: #f0f0f0;
                    padding: 1px 6px; border-radius: 4px; }
 }
+
+.submodulos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0 4px 32px;
+  padding-left: 12px;
+  border-left: 2px solid #f0f0f0;
+}
+
+.submodulo-checkbox {
+  .submodulo-nombre { font-size: 13px; color: #555; }
+}

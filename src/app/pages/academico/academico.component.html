@@ -10,7 +10,7 @@
   <mat-tab-group>
 
     <!-- ═══ PERIODOS ═══ -->
-    <mat-tab label="Periodos">
+    <mat-tab label="Periodos" *ngIf="!soloMaestro">
       <div class="tab-content">
 
         <div class="tab-toolbar">
@@ -70,7 +70,7 @@
     </mat-tab>
 
     <!-- ═══ CLASES ═══ -->
-    <mat-tab label="Clases">
+    <mat-tab label="Clases" *ngIf="!soloMaestro">
       <div class="tab-content">
 
         <div class="tab-toolbar">
@@ -93,8 +93,13 @@
           </ng-container>
 
           <ng-container matColumnDef="gradoNombre">
-            <th mat-header-cell *matHeaderCellDef>Grado</th>
-            <td mat-cell *matCellDef="let row">{{ row.gradoNombre }}</td>
+            <th mat-header-cell *matHeaderCellDef>Grado / Nivel</th>
+            <td mat-cell *matCellDef="let row">{{ row.gradoNombre || row.nivelInglesNombre }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="seccion">
+            <th mat-header-cell *matHeaderCellDef>Sección</th>
+            <td mat-cell *matCellDef="let row">{{ row.seccion }}</td>
           </ng-container>
 
           <ng-container matColumnDef="maestroNombre">
@@ -132,55 +137,266 @@
       <div class="tab-content">
 
         <div class="notas-filtros">
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="filtro-ancho">
             <mat-label>Clase</mat-label>
-            <mat-select [(ngModel)]="notasIdClase" (selectionChange)="onNotasFiltroChange()">
-              <mat-option *ngFor="let c of clases" [value]="c.id">{{ c.nombre }} ({{ c.gradoNombre }})</mat-option>
-            </mat-select>
+            <input matInput
+                   [(ngModel)]="notasMateriaBusqueda"
+                   (focus)="onFocusMateria(); seleccionarTexto($event)"
+                   (click)="seleccionarTexto($event)"
+                   [matAutocomplete]="autoMateria"
+                   placeholder="Buscar clase...">
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #autoMateria="matAutocomplete">
+              <mat-option *ngFor="let nombre of materiasFiltradas" [value]="nombre" (onSelectionChange)="onMateriaSeleccionada(nombre)">
+                {{ nombre }}
+              </mat-option>
+            </mat-autocomplete>
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="filtro-ancho">
+            <mat-label>Grado / Nivel</mat-label>
+            <input matInput
+                   [(ngModel)]="notasGradoBusqueda"
+                   (focus)="onFocusMateria(); seleccionarTexto($event)"
+                   (click)="seleccionarTexto($event)"
+                   [matAutocomplete]="autoGradoNotas"
+                   [disabled]="!notasMateriaSeleccionada"
+                   [placeholder]="notasMateriaSeleccionada ? 'Buscar grado o nivel...' : 'Primero selecciona una clase'">
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #autoGradoNotas="matAutocomplete">
+              <mat-option *ngFor="let g of gruposDeMateriaFiltrados; trackBy: trackByGrupo" [value]="g.nombre" (onSelectionChange)="onGrupoDeMateriaSeleccionado(g)">
+                {{ g.nombre }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-ancho">
+            <mat-label>Sección</mat-label>
+            <input matInput
+                   [(ngModel)]="notasSeccionBusqueda"
+                   (focus)="seleccionarTexto($event)"
+                   (click)="seleccionarTexto($event)"
+                   [matAutocomplete]="autoSeccionNotas"
+                   [disabled]="!notasGradoId"
+                   [placeholder]="notasGradoId ? 'Buscar sección...' : 'Primero selecciona grado o nivel'">
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #autoSeccionNotas="matAutocomplete">
+              <mat-option *ngFor="let s of seccionesDeClaseFiltradas" [value]="s" (onSelectionChange)="onSeccionDeClaseSeleccionada(s)">
+                {{ s }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-ancho">
             <mat-label>Periodo</mat-label>
-            <mat-select [(ngModel)]="notasIdPeriodo" (selectionChange)="onNotasFiltroChange()">
-              <mat-option *ngFor="let p of periodos" [value]="p.id">{{ p.nombre }}</mat-option>
-            </mat-select>
+            <input matInput
+                   [(ngModel)]="periodoBusqueda"
+                   (focus)="onFocusPeriodo(); seleccionarTexto($event)"
+                   (click)="seleccionarTexto($event)"
+                   [matAutocomplete]="autoPeriodo"
+                   placeholder="Buscar periodo...">
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #autoPeriodo="matAutocomplete">
+              <mat-option *ngFor="let p of periodosFiltrados" [value]="p.nombre" (onSelectionChange)="onPeriodoSeleccionadoNotas(p)">
+                {{ p.nombre }}
+              </mat-option>
+            </mat-autocomplete>
           </mat-form-field>
         </div>
 
-        <div *ngIf="!notasIdClase || !notasIdPeriodo" class="no-data-row">
-          <span>Selecciona una clase y un periodo para ver las semanas.</span>
+        <div *ngIf="!notasSimpleIdClase || !notasSimpleIdPeriodo" class="no-data-row">
+          <span>Selecciona clase, grado, sección y periodo para ver los alumnos.</span>
         </div>
 
-        <div *ngIf="loadingSemanas" class="loading-row">
+        <div *ngIf="loadingAlumnosNotas" class="loading-row">
           <mat-icon class="spin-icon">sync</mat-icon>
-          <span>Cargando semanas...</span>
+          <span>Cargando alumnos...</span>
         </div>
 
-        <div *ngIf="notasIdClase && notasIdPeriodo && !loadingSemanas" class="semanas-list">
-          <div class="semana-card" *ngFor="let s of semanas">
-            <div class="semana-header">
-              <span class="semana-titulo">
-                Semana {{ s.numeroSemana }} — {{ s.fechaDesde | date:'dd/MM/yyyy' }} al {{ s.fechaHasta | date:'dd/MM/yyyy' }}
-              </span>
-              <button mat-stroked-button (click)="nuevaEvaluacion(s)">
-                <mat-icon>add</mat-icon> Nueva evaluación
+        <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && estructuraNotas.length === 0" class="no-data-row">
+          <span>Este grado/nivel no tiene conceptos de evaluación configurados. Ve a la pestaña "Parámetros de Evaluación" para configurarlos.</span>
+        </div>
+
+        <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && estructuraNotas.length > 0" class="notas-grid-wrapper">
+          <table class="notas-grid">
+            <thead>
+              <tr>
+                <th class="col-codigo" rowspan="2">Código</th>
+                <th class="col-nombre" rowspan="2">Alumno</th>
+                <th *ngFor="let concepto of estructuraNotas" [attr.colspan]="concepto.actividades.length" class="th-concepto">
+                  {{ concepto.nombre }} ({{ sumaPorcentajes(concepto.actividades) }}%)
+                </th>
+                <th rowspan="2" class="col-total">Total del parcial</th>
+              </tr>
+              <tr>
+                <ng-container *ngFor="let concepto of estructuraNotas">
+                  <th *ngFor="let actividad of concepto.actividades" class="th-actividad">
+                    <input type="text" [(ngModel)]="actividad.nombre" (ngModelChange)="marcarCambioNotas()" maxlength="150" title="Puedes renombrar esta actividad, solo se aplica a tu clase">
+                    <span class="th-actividad-pct">{{ actividad.porcentaje }}%</span>
+                  </th>
+                </ng-container>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let a of alumnosNotas">
+                <td>{{ a.codigo }}</td>
+                <td class="col-nombre">{{ a.nombreCompleto }}</td>
+                <td *ngFor="let actividad of actividadesPlanas">
+                  <input type="number" min="0" [max]="actividad.porcentaje" step="0.01" [(ngModel)]="a.notas[actividad.id]" (ngModelChange)="marcarCambioNotas()" [title]="'Máximo ' + actividad.porcentaje + ' puntos'">
+                </td>
+                <td class="col-total">{{ totalAlumno(a) }}</td>
+              </tr>
+              <tr *ngIf="alumnosNotas.length === 0">
+                <td [attr.colspan]="3 + actividadesPlanas.length" class="no-data-row"><span>No hay alumnos activos en el grado de esta clase.</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="cambios-flotante" *ngIf="hayCambiosNotas">
+          <mat-icon>edit_note</mat-icon>
+          <span>Tienes cambios sin guardar</span>
+          <button mat-raised-button color="primary" (click)="guardarNotasActividad()" [disabled]="guardandoNotas">
+            <mat-icon>save</mat-icon> Guardar
+          </button>
+        </div>
+
+      </div>
+    </mat-tab>
+
+    <!-- ═══ NOTAS DETALLADAS ═══ -->
+    <mat-tab label="Notas detalladas" *ngIf="!soloMaestro">
+      <div class="tab-content">
+
+        <div class="en-construccion">
+          <mat-icon>construction</mat-icon>
+          <span>Notas detalladas — En construcción</span>
+        </div>
+
+      </div>
+    </mat-tab>
+
+    <!-- ═══ GRADOS ═══ -->
+    <mat-tab label="Parámetros de Evaluación" *ngIf="!soloMaestro">
+      <div class="tab-content">
+
+        <mat-button-toggle-group class="tipo-toggle" [(ngModel)]="tipoEstructura" (change)="onTipoEstructuraChange()">
+          <mat-button-toggle value="grado">Por grado</mat-button-toggle>
+          <mat-button-toggle value="nivel">Por nivel de inglés</mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <div class="notas-filtros" *ngIf="tipoEstructura === 'grado'">
+          <mat-form-field appearance="outline" class="filtro-ancho">
+            <mat-label>Grado</mat-label>
+            <input matInput
+                   [(ngModel)]="gradoBusqueda"
+                   (focus)="onFocusGrado(); seleccionarTexto($event)"
+                   (click)="seleccionarTexto($event)"
+                   [matAutocomplete]="autoGrado"
+                   placeholder="Buscar grado...">
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #autoGrado="matAutocomplete">
+              <mat-option *ngFor="let g of gradosFiltrados" [value]="g.gradoNombre" (onSelectionChange)="onGradoSeleccionadoAutocomplete(g)">
+                {{ g.gradoNombre }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+
+        <div class="notas-filtros nivel-row" *ngIf="tipoEstructura === 'nivel'">
+          <mat-form-field appearance="outline" class="filtro-ancho">
+            <mat-label>Nivel de inglés</mat-label>
+            <input matInput
+                   [(ngModel)]="nivelBusqueda"
+                   (focus)="onFocusNivel(); seleccionarTexto($event)"
+                   (click)="seleccionarTexto($event)"
+                   [matAutocomplete]="autoNivel"
+                   placeholder="Buscar nivel...">
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #autoNivel="matAutocomplete">
+              <mat-option *ngFor="let n of nivelesFiltrados" [value]="n.nombre" (onSelectionChange)="onNivelSeleccionadoAutocomplete(n)">
+                {{ n.nombre }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+          <button mat-icon-button type="button" title="Nuevo nivel" (click)="nuevoNivelDesdeGrados()">
+            <mat-icon>add_circle</mat-icon>
+          </button>
+        </div>
+
+        <div *ngIf="tipoEstructura === 'grado' && !gradoSeleccionadoId" class="no-data-row">
+          <span>Selecciona un grado para configurar sus conceptos de evaluación.</span>
+        </div>
+
+        <div *ngIf="tipoEstructura === 'nivel' && !nivelSeleccionadoId" class="no-data-row">
+          <span>Selecciona un nivel de inglés para configurar sus conceptos de evaluación.</span>
+        </div>
+
+        <div *ngIf="loadingConceptos" class="loading-row">
+          <mat-icon class="spin-icon">sync</mat-icon>
+          <span>Cargando conceptos...</span>
+        </div>
+
+        <div *ngIf="(tipoEstructura === 'grado' ? gradoSeleccionadoId : nivelSeleccionadoId) && !loadingConceptos" class="conceptos-wrapper">
+
+          <div class="no-data-row" *ngIf="conceptosPrincipales.length === 0">
+            <span>Todavía no hay conceptos. Agrega el primero con el botón de abajo.</span>
+          </div>
+
+          <div class="concepto-card" *ngFor="let concepto of conceptosPrincipales; let ci = index">
+            <div class="concepto-card-header">
+              <input type="text" [(ngModel)]="concepto.nombre" maxlength="150"
+                     placeholder="Nombre del concepto principal (ej. Actividades dentro del aula)"
+                     class="concepto-nombre-input">
+              <span class="concepto-subtotal">Subtotal: {{ subtotalConcepto(concepto) }}%</span>
+              <button mat-icon-button color="warn" title="Quitar concepto" (click)="quitarConceptoPrincipal(ci)">
+                <mat-icon>delete</mat-icon>
               </button>
             </div>
 
-            <div class="evaluaciones-chips">
-              <span *ngIf="!evaluacionesPorSemana[s.id]?.length" class="sin-evaluaciones">
-                Sin evaluaciones registradas.
-              </span>
-              <div class="evaluacion-chip" *ngFor="let e of evaluacionesPorSemana[s.id]">
-                <span (click)="abrirNotas(e)">{{ e.nombre }}</span>
-                <mat-icon (click)="inactivarEvaluacion(e)" title="Inactivar">close</mat-icon>
-              </div>
-            </div>
+            <table class="conceptos-grid">
+              <thead>
+                <tr>
+                  <th class="col-concepto-nombre">Actividad</th>
+                  <th class="col-concepto-pct">%</th>
+                  <th class="col-concepto-acc"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let actividad of concepto.actividades; let ai = index">
+                  <td><input type="text" [(ngModel)]="actividad.nombre" maxlength="150" placeholder="Ej. Actividad 1"></td>
+                  <td><input type="number" min="0" max="100" step="0.01" [(ngModel)]="actividad.porcentaje"></td>
+                  <td>
+                    <button mat-icon-button color="warn" title="Quitar actividad" (click)="quitarActividad(concepto, ai)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="concepto.actividades.length === 0">
+                  <td colspan="3" class="no-data-row"><span>Sin actividades. Agrega al menos una.</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <button mat-stroked-button (click)="agregarActividad(concepto)" class="agregar-actividad-btn">
+              <mat-icon>add</mat-icon> Agregar actividad
+            </button>
           </div>
 
-          <div class="no-data-row" *ngIf="semanas.length === 0">
-            <span>Este periodo no tiene semanas generadas.</span>
+          <div class="conceptos-acciones">
+            <button mat-stroked-button (click)="agregarConceptoPrincipal()">
+              <mat-icon>add</mat-icon> Agregar concepto principal
+            </button>
+
+            <span class="conceptos-total" [class.total-ok]="totalPorcentajeConceptos === 100" [class.total-error]="totalPorcentajeConceptos !== 100">
+              Total: {{ totalPorcentajeConceptos }}% de 100%
+            </span>
+
+            <button mat-raised-button color="primary" (click)="guardarConceptos()" [disabled]="guardandoConceptos || conceptosPrincipales.length === 0">
+              <mat-icon>save</mat-icon> Guardar
+            </button>
           </div>
+
         </div>
 
       </div>

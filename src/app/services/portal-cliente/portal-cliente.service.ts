@@ -54,6 +54,38 @@ export interface PortalCxcDto {
   producto:     string | null;
 }
 
+export interface PortalPeriodo {
+  id:            number;
+  nombre:        string;
+  fechaDesde:    string;
+  fechaHasta:    string;
+  anioLectivo:   number;
+  activo:        boolean;
+  fechaCreacion: string;
+}
+
+export interface PortalActividadNota {
+  id:         number;
+  nombre:     string;
+  porcentaje: number;
+  orden:      number;
+  nota:       number | null;
+}
+
+export interface PortalConceptoNota {
+  id:          number;
+  nombre:      string;
+  orden:       number;
+  actividades: PortalActividadNota[];
+}
+
+export interface PortalClaseNota {
+  idClase:       number;
+  claseNombre:   string;
+  maestroNombre: string | null;
+  conceptos:     PortalConceptoNota[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class PortalClienteService {
   private base = `${environment.url}api/PortalCliente`;
@@ -87,6 +119,17 @@ export class PortalClienteService {
     if (identidad) params = params.set('identidad', identidad);
     if (anio)      params = params.set('anio', anio.toString());
     return this.http.get<PortalCxcDto[]>(`${this.base}/mi-cxc`, { params });
+  }
+
+  periodos(anioLectivo?: number): Observable<PortalPeriodo[]> {
+    let params = new HttpParams();
+    if (anioLectivo) params = params.set('anioLectivo', anioLectivo.toString());
+    return this.http.get<PortalPeriodo[]>(`${this.base}/periodos`, { params });
+  }
+
+  misNotas(identidad: string, idPeriodo: number): Observable<PortalClaseNota[]> {
+    const params = new HttpParams().set('identidad', identidad).set('idPeriodo', idPeriodo.toString());
+    return this.http.get<PortalClaseNota[]>(`${this.base}/mis-notas`, { params });
   }
 
   readonly MESES = ['', 'Enero','Febrero','Marzo','Abril','Mayo','Junio',

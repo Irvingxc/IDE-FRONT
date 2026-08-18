@@ -67,7 +67,7 @@ export class NuevoItemDialogComponent implements OnInit {
       },
       error: (err) => {
         this.guardando = false;
-        this.errorMsg = err?.error?.errores ?? err?.error?.message ?? 'Error al guardar el ítem.';
+        this.errorMsg = err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al guardar el ítem.';
       }
     });
   }

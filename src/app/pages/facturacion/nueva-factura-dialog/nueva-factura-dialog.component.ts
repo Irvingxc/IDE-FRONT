@@ -223,7 +223,7 @@ export class NuevaFacturaDialogComponent implements OnInit {
   }
 
   get puedeGuardar(): boolean {
-    return !!this.sar && !!this.alumnoIdentidad && this.items.length > 0
+    return !!this.sar && !this.sar.bloqueada && !!this.alumnoIdentidad && this.items.length > 0
       && this.items.every(i => i.precio > 0);
   }
 
@@ -255,7 +255,7 @@ export class NuevaFacturaDialogComponent implements OnInit {
       },
       error: (err) => {
         this.guardando = false;
-        const msg = err?.error?.message ?? 'Error al guardar la factura';
+        const msg = err?.error?.errores?.mensaje ?? 'Error al guardar la factura';
         this.snack.open(msg, '', { duration: 5000 });
       }
     });

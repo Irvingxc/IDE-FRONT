@@ -40,6 +40,22 @@
       <span>No hay un CAI vigente registrado para esta sucursal. Registre uno antes de facturar.</span>
     </div>
 
+    <div class="alerta-sar-dialog bloqueo" *ngIf="sar?.bloqueada">
+      <mat-icon class="alerta-icono">block</mat-icon>
+      <div class="alerta-texto">
+        <span class="alerta-titulo">Facturación bloqueada</span>
+        <span class="alerta-detalle">{{ sar!.motivoBloqueo }}</span>
+      </div>
+    </div>
+
+    <div class="alerta-sar-dialog aviso" *ngIf="sar?.alerta && !sar!.bloqueada">
+      <mat-icon class="alerta-icono">warning</mat-icon>
+      <div class="alerta-texto">
+        <span class="alerta-titulo">Renueva pronto tu CAI</span>
+        <span class="alerta-detalle">{{ sar!.mensajeAlerta }}</span>
+      </div>
+    </div>
+
     <!-- ═══ RECEPTOR ═══ -->
     <div class="seccion-titulo">Receptor</div>
 

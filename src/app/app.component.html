@@ -10,6 +10,7 @@
     (menuToggle)="menu.toggle()"
     [isAuthorized]="isAuthorized$ | async"
     [user]="user$ | async"
+    [modulos]="(user$ | async)?.modulos"
     (signOut)="onSignOut()"></app-header>
     <main [class.no-header]="isLanding$ | async">
       <router-outlet></router-outlet>

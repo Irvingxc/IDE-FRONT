@@ -4,7 +4,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { FacturacionService, PagoResumen, PagoDetalle } from '@app/services/facturacion/facturacion.service';
+import { FacturacionService, PagoResumen, PagoDetalle, Sar } from '@app/services/facturacion/facturacion.service';
 import { NuevaFacturaDialogComponent, NuevaFacturaDialogData } from './nueva-factura-dialog/nueva-factura-dialog.component';
 
 @Component({
@@ -23,6 +23,7 @@ export class FacturacionComponent implements OnInit, AfterViewInit {
   mes       = 0;
   filtroAlumno  = '';
   filtroEstado  = '';
+  sar: Sar | null = null;
 
   readonly meses = [
     { val: 0,  label: 'Todos' },
@@ -47,6 +48,10 @@ export class FacturacionComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.cargar();
+    this.facturacionService.getSar().subscribe({
+      next:  (s) => { this.sar = s; },
+      error: ()  => { this.sar = null; }
+    });
     // Si viene desde CXC (navegación con estado), abrir dialog pre-cargado
     const state = history.state as NuevaFacturaDialogData & { fromCxc?: boolean };
     if (state?.fromCxc) {
@@ -65,6 +70,7 @@ export class FacturacionComponent implements OnInit, AfterViewInit {
   }
 
   nuevaFactura(): void {
+    if (this.sar?.bloqueada) return;
     this.abrirDialog({ fromCxc: false, alumnoIdentidad: '', alumnoNombre: '', alumnoTutor: '', gradoNombre: '', items: [], idsCxc: [] });
   }
 
@@ -86,7 +92,7 @@ export class FacturacionComponent implements OnInit, AfterViewInit {
         this.cargar();
       },
       error: (err) => {
-        const msg = err?.error?.message ?? 'Error al anular la factura';
+        const msg = err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al anular la factura';
         this.snack.open(msg, '', { duration: 4000 });
       }
     });

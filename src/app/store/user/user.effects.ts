@@ -74,7 +74,7 @@ export class UserEffects {
             catchError(err => {
               const mensaje = err.status === 0
                 ? 'No se pudo conectar con el servidor. Verifique su conexión.'
-                : (err.error?.errors?.mensaje ?? err.error?.mensaje ?? 'Credenciales incorrectas.');
+                : (err.error?.errores?.mensaje ?? err.error?.errores ?? 'Credenciales incorrectas.');
               return of(new fromActions.SignInEmailError(mensaje));
             })
           )

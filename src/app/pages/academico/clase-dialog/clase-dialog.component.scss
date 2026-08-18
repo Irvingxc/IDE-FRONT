@@ -1,3 +1,18 @@
 .full-width {
   width: 100%;
 }
+
+.tipo-toggle {
+  display: flex;
+  margin-bottom: 16px;
+
+  mat-button-toggle { flex: 1; }
+}
+
+.nivel-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  mat-form-field { flex: 1; }
+}

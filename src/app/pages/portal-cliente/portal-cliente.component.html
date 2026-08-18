@@ -73,6 +73,60 @@
       <!-- Tabs -->
       <mat-tab-group [(selectedIndex)]="tabActiva" class="portal-tabs">
 
+        <!-- Notas -->
+        <mat-tab label="Notas">
+          <div class="tab-toolbar" *ngIf="periodos.length > 0">
+            <mat-form-field appearance="outline" class="periodo-select">
+              <mat-label>Período</mat-label>
+              <mat-select [value]="periodoSeleccionadoId" (selectionChange)="cambiarPeriodo($event.value)">
+                <mat-option *ngFor="let p of periodos" [value]="p.id">{{ p.nombre }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div *ngIf="cargandoNotas" class="loading-row">
+            <mat-spinner diameter="28"></mat-spinner>
+          </div>
+
+          <div *ngIf="!cargandoNotas && periodos.length === 0" class="notas-empty">
+            <mat-icon>info</mat-icon>
+            <p>No hay períodos académicos disponibles.</p>
+          </div>
+
+          <div *ngIf="!cargandoNotas && periodos.length > 0 && notas.length === 0" class="notas-empty">
+            <mat-icon>info</mat-icon>
+            <p>Sin clases o notas registradas para este período.</p>
+          </div>
+
+          <div class="notas-clase-card" *ngFor="let clase of notas">
+            <div class="notas-clase-header">
+              <strong>{{ clase.claseNombre }}</strong>
+              <span class="notas-clase-maestro" *ngIf="clase.maestroNombre">{{ clase.maestroNombre }}</span>
+              <span class="notas-clase-total">Total: {{ totalClase(clase) | number:'1.0-2' }}</span>
+            </div>
+
+            <div class="notas-concepto" *ngFor="let concepto of clase.conceptos">
+              <div class="notas-concepto-nombre">{{ concepto.nombre }}</div>
+              <table class="notas-actividades-table">
+                <thead>
+                  <tr>
+                    <th>Actividad</th>
+                    <th>%</th>
+                    <th>Nota</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let actividad of concepto.actividades">
+                    <td>{{ actividad.nombre }}</td>
+                    <td>{{ actividad.porcentaje }}</td>
+                    <td>{{ actividad.nota !== null ? actividad.nota : '—' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </mat-tab>
+
         <!-- Estado de cuenta -->
         <mat-tab label="Estado de cuenta">
           <div class="tab-toolbar">

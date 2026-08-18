@@ -12,6 +12,14 @@ export interface ModuloDto {
   seleccionado: boolean;
 }
 
+export interface SubModuloDto {
+  id:           number;
+  idModulo:     number;
+  clave:        string;
+  nombre:       string;
+  seleccionado: boolean;
+}
+
 export interface UsuarioLista {
   id:         string;
   nombre:     string;
@@ -66,6 +74,14 @@ export class UsuarioService {
 
   actualizarModulosDeRol(rolNombre: string, moduloIds: number[]): Observable<void> {
     return this.http.put<void>(`${environment.url}api/Usuario/roles/${encodeURIComponent(rolNombre)}/modulos`, moduloIds);
+  }
+
+  getSubModulosDeRol(rolNombre: string): Observable<SubModuloDto[]> {
+    return this.http.get<SubModuloDto[]>(`${environment.url}api/Usuario/roles/${encodeURIComponent(rolNombre)}/submodulos`);
+  }
+
+  actualizarSubModulosDeRol(rolNombre: string, subModuloIds: number[]): Observable<void> {
+    return this.http.put<void>(`${environment.url}api/Usuario/roles/${encodeURIComponent(rolNombre)}/submodulos`, subModuloIds);
   }
 
   getSucursales(): Observable<{ id: number; nombre: string }[]> {

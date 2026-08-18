@@ -14,6 +14,9 @@ export interface AlumnoResponse {
   segundoApellido:    string;
   idGrado:            number | null;
   grado:              string;
+  seccion:            string | null;
+  idNivelIngles:      number | null;
+  nivelIngles:        string | null;
   foto:               string | null;
   estado:             string;
   valorMatricula:     number;
@@ -45,6 +48,8 @@ export interface GuardarAlumnoDto {
   segundoApellido?:   string;
   cliente:            number;
   idGrado:            number;
+  seccion?:           string;
+  idNivelIngles?:     number;
   valorMatricula?:    number;
   valorMensualidad?:  number;
   fechaMatricula?:      string | null;
@@ -73,6 +78,9 @@ export interface ActualizarAlumnoDto {
   segundoApellido?:    string;
   cliente?:            number;
   idGrado?:            number;
+  seccion?:            string;
+  /** Id del nivel de inglés; enviar 0 para desasignarlo. */
+  idNivelIngles?:      number;
   valorMatricula?:     number;
   valorMensualidad?:   number;
   estado?:             string;

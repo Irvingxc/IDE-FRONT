@@ -53,11 +53,11 @@
 
   <nav class="header-nav" *ngIf="isAuthorized">
     <a routerLink="/static/welcome" routerLinkActive="active">Inicio</a>
-    <a routerLink="/matriculas" routerLinkActive="active">Estudiantes</a>
-    <a routerLink="/facturacion" routerLinkActive="active">Facturación</a>
-    <a routerLink="/academico" routerLinkActive="active">Académico</a>
-    <a routerLink="/empleados" routerLinkActive="active">Empleados</a>
-    <a routerLink="/reportes" routerLinkActive="active">Reportes</a>
+    <a routerLink="/matriculas" routerLinkActive="active" *ngIf="tieneModulo('MATRICULAS')">Estudiantes</a>
+    <a routerLink="/facturacion" routerLinkActive="active" *ngIf="tieneModulo('PAGOS')">Facturación</a>
+    <a routerLink="/academico" routerLinkActive="active" *ngIf="tieneModulo('ACADEMICO')">Académico</a>
+    <a routerLink="/empleados" routerLinkActive="active" *ngIf="tieneModulo('EMPLEADOS')">Empleados</a>
+    <a routerLink="/reportes" routerLinkActive="active" *ngIf="tieneModulo('REPORTES')">Reportes</a>
   </nav>
 
 </div>

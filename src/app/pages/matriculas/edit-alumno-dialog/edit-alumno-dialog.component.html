@@ -71,6 +71,22 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
+      <mat-label>Sección *</mat-label>
+      <mat-select formControlName="seccion">
+        <mat-option *ngFor="let s of secciones" [value]="s">{{ s }}</mat-option>
+      </mat-select>
+      <mat-error>Requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nivel de inglés</mat-label>
+      <mat-select formControlName="idNivelIngles">
+        <mat-option [value]="null">Sin asignar</mat-option>
+        <mat-option *ngFor="let n of niveles" [value]="n.id">{{ n.nombre }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
       <mat-label>Estado</mat-label>
       <mat-select formControlName="estado">
         <mat-option *ngFor="let e of estados" [value]="e">{{ e }}</mat-option>

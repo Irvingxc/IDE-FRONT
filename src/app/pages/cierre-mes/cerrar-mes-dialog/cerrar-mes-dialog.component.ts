@@ -57,7 +57,7 @@ export class CerrarMesDialogComponent implements OnInit {
         this.dialogRef.close(true);
       },
       error: (err) => {
-        this.snack.open(err?.error?.message ?? 'Error al cerrar el período', '', { duration: 4000 });
+        this.snack.open(err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al cerrar el período', '', { duration: 4000 });
         this.guardando = false;
       }
     });
