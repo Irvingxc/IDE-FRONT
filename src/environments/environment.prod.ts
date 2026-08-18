@@ -11,5 +11,5 @@ export const environment = {
       appId: "1:198825047659:web:247117caa8d461370aa32e"
     }
   },
-  url: 'http://100.110.3.19:5294/'
+  url: 'https://api.developmentofexcellence.com/'
 };
