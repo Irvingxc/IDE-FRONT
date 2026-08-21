@@ -120,6 +120,12 @@ const routes: Routes = [
         loadChildren: () => import('./pages/sar-config/sar-config.module').then(m => m.SarConfigModule)
       },
       {
+        path: 'reportes',
+        canLoad: [AuthGuard, ModuloGuard],
+        data: { modulo: 'REPORTES' },
+        loadChildren: () => import('./pages/reportes/reportes.module').then(m => m.ReportesModule)
+      },
+      {
         path: 'inmueble',
         canLoad: [AuthGuard],
         loadChildren: () => import('./pages/inmueble/inmueble.module').then(m => m.InmuebleModule)

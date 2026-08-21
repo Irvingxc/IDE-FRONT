@@ -4,6 +4,7 @@ import { UsuarioService, UsuarioLista } from '@app/services/usuario/usuario.serv
 import { RegistrarUsuarioDialogComponent } from './registrar-usuario-dialog/registrar-usuario-dialog.component';
 import { EditarUsuarioDialogComponent } from './editar-usuario-dialog/editar-usuario-dialog.component';
 import { GestionRolesDialogComponent } from './gestion-roles-dialog/gestion-roles-dialog.component';
+import { ResetPasswordDialogComponent } from './reset-password-dialog/reset-password-dialog.component';
 
 @Component({
   selector: 'app-empleados',
@@ -15,6 +16,14 @@ export class EmpleadosComponent implements OnInit {
   columns = ['nombre', 'username', 'email', 'telefono', 'rol', 'acciones'];
   usuarios: UsuarioLista[] = [];
   loading = false;
+
+  filtroTipo: '' | 'empleados' | 'clientes' = '';
+
+  get usuariosFiltrados(): UsuarioLista[] {
+    if (this.filtroTipo === 'clientes')  return this.usuarios.filter(u => u.rol === 'Cliente');
+    if (this.filtroTipo === 'empleados') return this.usuarios.filter(u => u.rol !== 'Cliente');
+    return this.usuarios;
+  }
 
   constructor(
     private usuarioService: UsuarioService,
@@ -58,6 +67,14 @@ export class EmpleadosComponent implements OnInit {
     });
     ref.afterClosed().subscribe((actualizado) => {
       if (actualizado) this.cargarUsuarios();
+    });
+  }
+
+  cambiarPassword(usuario: UsuarioLista): void {
+    this.dialog.open(ResetPasswordDialogComponent, {
+      width: '480px',
+      disableClose: true,
+      data: { id: usuario.id, nombreCompleto: `${usuario.nombre} ${usuario.apellido}` }
     });
   }
 }

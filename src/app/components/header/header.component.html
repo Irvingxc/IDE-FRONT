@@ -55,6 +55,7 @@
     <a routerLink="/static/welcome" routerLinkActive="active">Inicio</a>
     <a routerLink="/matriculas" routerLinkActive="active" *ngIf="tieneModulo('MATRICULAS')">Estudiantes</a>
     <a routerLink="/facturacion" routerLinkActive="active" *ngIf="tieneModulo('PAGOS')">Facturación</a>
+    <a routerLink="/cxc" routerLinkActive="active" *ngIf="tieneModulo('CXC')">CXC</a>
     <a routerLink="/academico" routerLinkActive="active" *ngIf="tieneModulo('ACADEMICO')">Académico</a>
     <a routerLink="/empleados" routerLinkActive="active" *ngIf="tieneModulo('EMPLEADOS')">Empleados</a>
     <a routerLink="/reportes" routerLinkActive="active" *ngIf="tieneModulo('REPORTES')">Reportes</a>

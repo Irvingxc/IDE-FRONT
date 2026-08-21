@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ActivarCuentaComponent } from './activar-cuenta.component';
+import { PasswordRequisitosModule } from '@app/shared/password-requisitos/password-requisitos.module';
 
 @NgModule({
   declarations: [ActivarCuentaComponent],
@@ -17,7 +18,8 @@ import { ActivarCuentaComponent } from './activar-cuenta.component';
     ReactiveFormsModule,
     RouterModule.forChild([{ path: '', component: ActivarCuentaComponent }]),
     MatButtonModule, MatFormFieldModule, MatInputModule,
-    MatIconModule, MatProgressSpinnerModule, MatProgressBarModule
+    MatIconModule, MatProgressSpinnerModule, MatProgressBarModule,
+    PasswordRequisitosModule
   ]
 })
 export class ActivarCuentaModule {}

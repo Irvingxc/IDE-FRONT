@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { PortalClienteService, ValidarInvitacionResponse } from '@app/services/portal-cliente/portal-cliente.service';
+import { passwordRequisitosValidator } from '@app/utils/password.utils';
 import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
 
@@ -30,7 +31,7 @@ export class ActivarCuentaComponent implements OnInit {
   ngOnInit(): void {
     this.token = this.route.snapshot.paramMap.get('token') ?? '';
     this.form = this.fb.group({
-      password:  ['', [Validators.required, Validators.minLength(6)]],
+      password:  ['', [Validators.required, passwordRequisitosValidator()]],
       confirmar: ['', Validators.required]
     }, { validators: this.passwordsIguales });
 

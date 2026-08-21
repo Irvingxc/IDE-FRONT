@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
 import {
-  PortalClienteService, HijoDto, PortalFacturaDto, PortalCxcDto, PortalPeriodo, PortalClaseNota
+  PortalClienteService, HijoDto, PortalFacturaDto, PortalCxcDto, PortalPeriodo, PortalClaseNota, PortalAsistenciaDto
 } from '@app/services/portal-cliente/portal-cliente.service';
 
 @Component({
@@ -30,15 +30,23 @@ export class PortalClienteComponent implements OnInit {
   periodos: PortalPeriodo[] = [];
   periodoSeleccionadoId: number | null = null;
 
+  asistencia: PortalAsistenciaDto[] = [];
+  anioAsistencia = new Date().getFullYear();
+  mesAsistencia = new Date().getMonth() + 1;
+  readonly meses = Array.from({ length: 12 }, (_, i) => i + 1);
+
   cargandoHijos    = true;
   cargandoFacturas = false;
   cargandoCxc      = false;
   cargandoNotas    = false;
+  cargandoAsistencia = false;
 
   tabActiva = 0;
 
   readonly cxcColumns  = ['mes', 'producto', 'monto', 'vence', 'estado', 'fechaPago'];
   readonly facColumns  = ['noFactura', 'fecha', 'total', 'estado'];
+  readonly notasResumenColumns = ['claseNombre', 'maestroNombre', 'total'];
+  readonly asistenciaColumns = ['fecha', 'estado', 'horaMarca'];
 
   constructor(
     private store: Store<fromRoot.State>,
@@ -76,6 +84,7 @@ export class PortalClienteComponent implements OnInit {
     this.hijoSeleccionado = hijo;
     this.cargarCxc();
     this.cargarNotas();
+    this.cargarAsistencia();
   }
 
   cerrarSesion(): void {
@@ -118,6 +127,33 @@ export class PortalClienteComponent implements OnInit {
   cambiarPeriodo(idPeriodo: number): void {
     this.periodoSeleccionadoId = idPeriodo;
     this.cargarNotas();
+  }
+
+  cargarAsistencia(): void {
+    if (!this.hijoSeleccionado) { this.asistencia = []; return; }
+    this.cargandoAsistencia = true;
+    this.svc.miAsistencia(this.hijoSeleccionado.identidad, this.anioAsistencia, this.mesAsistencia).subscribe({
+      next: (a) => { this.asistencia = a; this.cargandoAsistencia = false; },
+      error: () => { this.asistencia = []; this.cargandoAsistencia = false; }
+    });
+  }
+
+  cambiarMesAsistencia(mes: number): void {
+    this.mesAsistencia = mes;
+    this.cargarAsistencia();
+  }
+
+  cambiarAnioAsistencia(anio: number): void {
+    this.anioAsistencia = anio;
+    this.cargarAsistencia();
+  }
+
+  get totalPresentesAsistencia(): number {
+    return this.asistencia.filter(a => a.estado === 'Presente').length;
+  }
+
+  get totalAusentesAsistencia(): number {
+    return this.asistencia.filter(a => a.estado === 'Ausente').length;
   }
 
   totalClase(clase: PortalClaseNota): number {

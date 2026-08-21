@@ -73,58 +73,132 @@
       <!-- Tabs -->
       <mat-tab-group [(selectedIndex)]="tabActiva" class="portal-tabs">
 
-        <!-- Notas -->
-        <mat-tab label="Notas">
-          <div class="tab-toolbar" *ngIf="periodos.length > 0">
-            <mat-form-field appearance="outline" class="periodo-select">
-              <mat-label>Período</mat-label>
-              <mat-select [value]="periodoSeleccionadoId" (selectionChange)="cambiarPeriodo($event.value)">
-                <mat-option *ngFor="let p of periodos" [value]="p.id">{{ p.nombre }}</mat-option>
+        <!-- Notas vista general -->
+        <mat-tab label="Notas vista general">
+          <ng-container *ngTemplateOutlet="periodoToolbar"></ng-container>
+          <ng-container *ngTemplateOutlet="notasEstados"></ng-container>
+
+          <table mat-table [dataSource]="notas" class="portal-table notas-resumen-table"
+                 *ngIf="!cargandoNotas && notas.length > 0">
+            <ng-container matColumnDef="claseNombre">
+              <th mat-header-cell *matHeaderCellDef>Materia</th>
+              <td mat-cell *matCellDef="let c">{{ c.claseNombre }}</td>
+            </ng-container>
+            <ng-container matColumnDef="maestroNombre">
+              <th mat-header-cell *matHeaderCellDef>Maestro</th>
+              <td mat-cell *matCellDef="let c">{{ c.maestroNombre || '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>Nota total</th>
+              <td mat-cell *matCellDef="let c">
+                <span class="notas-clase-total"
+                      [class.total-bien]="totalClase(c) >= 70"
+                      [class.total-alerta]="totalClase(c) < 70">
+                  {{ totalClase(c) | number:'1.0-2' }} / 100
+                </span>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="notasResumenColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: notasResumenColumns;"></tr>
+          </table>
+        </mat-tab>
+
+        <!-- Notas detalladas -->
+        <mat-tab label="Notas detalladas">
+          <ng-container *ngTemplateOutlet="periodoToolbar"></ng-container>
+          <ng-container *ngTemplateOutlet="notasEstados"></ng-container>
+
+          <mat-accordion class="notas-acordeon" multi="false">
+            <mat-expansion-panel class="notas-clase-card" *ngFor="let clase of notas; let primera = first" [expanded]="primera">
+              <mat-expansion-panel-header class="notas-clase-header">
+                <mat-panel-title>
+                  <strong>{{ clase.claseNombre }}</strong>
+                  <span class="notas-clase-maestro" *ngIf="clase.maestroNombre">{{ clase.maestroNombre }}</span>
+                </mat-panel-title>
+                <mat-panel-description>
+                  <span class="notas-clase-total"
+                        [class.total-bien]="totalClase(clase) >= 70"
+                        [class.total-alerta]="totalClase(clase) < 70">
+                    {{ totalClase(clase) | number:'1.0-2' }} / 100
+                  </span>
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <div class="notas-concepto" *ngFor="let concepto of clase.conceptos">
+                <div class="notas-concepto-nombre">{{ concepto.nombre }}</div>
+                <table class="notas-actividades-table">
+                  <thead>
+                    <tr>
+                      <th>Actividad</th>
+                      <th>Puntos posibles</th>
+                      <th>Nota obtenida</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let actividad of concepto.actividades">
+                      <td>{{ actividad.nombre }}</td>
+                      <td>{{ actividad.porcentaje }}</td>
+                      <td [class.sin-calificar]="actividad.nota === null">{{ actividad.nota ?? 0 }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </mat-tab>
+
+        <!-- Asistencia -->
+        <mat-tab label="Asistencia">
+          <div class="tab-toolbar asistencia-toolbar">
+            <mat-form-field appearance="outline" class="mes-select">
+              <mat-label>Mes</mat-label>
+              <mat-select [value]="mesAsistencia" (selectionChange)="cambiarMesAsistencia($event.value)">
+                <mat-option *ngFor="let m of meses" [value]="m">{{ svc.nombreMes(m) }}</mat-option>
               </mat-select>
             </mat-form-field>
+
+            <mat-form-field appearance="outline" class="anio-select">
+              <mat-label>Año</mat-label>
+              <mat-select [value]="anioAsistencia" (selectionChange)="cambiarAnioAsistencia($event.value)">
+                <mat-option *ngFor="let a of anios" [value]="a">{{ a }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div class="resumen-chips" *ngIf="!cargandoAsistencia && asistencia.length > 0">
+              <span class="estado-badge presente">{{ totalPresentesAsistencia }} presentes</span>
+              <span class="estado-badge ausente">{{ totalAusentesAsistencia }} ausentes</span>
+            </div>
           </div>
 
-          <div *ngIf="cargandoNotas" class="loading-row">
+          <div *ngIf="cargandoAsistencia" class="loading-row">
             <mat-spinner diameter="28"></mat-spinner>
           </div>
 
-          <div *ngIf="!cargandoNotas && periodos.length === 0" class="notas-empty">
+          <div *ngIf="!cargandoAsistencia && asistencia.length === 0" class="notas-empty">
             <mat-icon>info</mat-icon>
-            <p>No hay períodos académicos disponibles.</p>
+            <p>Sin días hábiles registrados para este mes.</p>
           </div>
 
-          <div *ngIf="!cargandoNotas && periodos.length > 0 && notas.length === 0" class="notas-empty">
-            <mat-icon>info</mat-icon>
-            <p>Sin clases o notas registradas para este período.</p>
-          </div>
-
-          <div class="notas-clase-card" *ngFor="let clase of notas">
-            <div class="notas-clase-header">
-              <strong>{{ clase.claseNombre }}</strong>
-              <span class="notas-clase-maestro" *ngIf="clase.maestroNombre">{{ clase.maestroNombre }}</span>
-              <span class="notas-clase-total">Total: {{ totalClase(clase) | number:'1.0-2' }}</span>
-            </div>
-
-            <div class="notas-concepto" *ngFor="let concepto of clase.conceptos">
-              <div class="notas-concepto-nombre">{{ concepto.nombre }}</div>
-              <table class="notas-actividades-table">
-                <thead>
-                  <tr>
-                    <th>Actividad</th>
-                    <th>%</th>
-                    <th>Nota</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let actividad of concepto.actividades">
-                    <td>{{ actividad.nombre }}</td>
-                    <td>{{ actividad.porcentaje }}</td>
-                    <td>{{ actividad.nota !== null ? actividad.nota : '—' }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <table mat-table [dataSource]="asistencia" class="portal-table" *ngIf="!cargandoAsistencia && asistencia.length > 0">
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef>Fecha</th>
+              <td mat-cell *matCellDef="let r">{{ r.fecha | date:'dd/MM/yyyy' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let r">
+                <span class="estado-badge" [class.presente]="r.estado === 'Presente'" [class.ausente]="r.estado === 'Ausente'">
+                  {{ r.estado }}
+                </span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="horaMarca">
+              <th mat-header-cell *matHeaderCellDef>Hora de entrada</th>
+              <td mat-cell *matCellDef="let r">{{ r.horaMarca ? (r.horaMarca | date:'shortTime') : '—' }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="asistenciaColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: asistenciaColumns;"></tr>
+          </table>
         </mat-tab>
 
         <!-- Estado de cuenta -->
@@ -180,6 +254,33 @@
         </mat-tab>
 
       </mat-tab-group>
+
+      <ng-template #periodoToolbar>
+        <div class="tab-toolbar" *ngIf="periodos.length > 0">
+          <mat-form-field appearance="outline" class="periodo-select">
+            <mat-label>Período</mat-label>
+            <mat-select [value]="periodoSeleccionadoId" (selectionChange)="cambiarPeriodo($event.value)">
+              <mat-option *ngFor="let p of periodos" [value]="p.id">{{ p.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </ng-template>
+
+      <ng-template #notasEstados>
+        <div *ngIf="cargandoNotas" class="loading-row">
+          <mat-spinner diameter="28"></mat-spinner>
+        </div>
+
+        <div *ngIf="!cargandoNotas && periodos.length === 0" class="notas-empty">
+          <mat-icon>info</mat-icon>
+          <p>No hay períodos académicos disponibles.</p>
+        </div>
+
+        <div *ngIf="!cargandoNotas && periodos.length > 0 && notas.length === 0" class="notas-empty">
+          <mat-icon>info</mat-icon>
+          <p>Sin clases o notas registradas para este período.</p>
+        </div>
+      </ng-template>
     </main>
 
     <main class="main-content main-empty" *ngIf="!hijoSeleccionado && !cargandoHijos">

@@ -1,0 +1,95 @@
+.page-container {
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+
+  h1 { margin: 0; font-size: 24px; font-weight: 600; }
+  .breadcrumb { margin: 4px 0 0; font-size: 13px; color: #666; }
+}
+
+.tab-content {
+  padding: 20px 0;
+}
+
+.asistencia-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  .filtro-field-sm { width: 160px; }
+  .filtro-field-md { width: 220px; }
+}
+
+.resumen-chips {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.chip {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chip-presente {
+  background: #e3f3e6;
+  color: #2e7d32;
+}
+
+.chip-ausente {
+  background: #fdecea;
+  color: #c62828;
+}
+
+.loading-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 24px;
+  color: #666;
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.data-table {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.no-data-row td {
+  padding: 24px;
+  text-align: center;
+  color: #999;
+}
+
+.en-construccion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 24px;
+  color: #999;
+
+  mat-icon { font-size: 40px; width: 40px; height: 40px; color: #d4a017; }
+  span { font-size: 15px; font-weight: 500; }
+}

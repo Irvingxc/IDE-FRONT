@@ -2,6 +2,22 @@
   padding: 24px;
 }
 
+.bloqueado-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: #fdecea;
+  color: #c62828;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: middle;
+
+  mat-icon { font-size: 13px; width: 13px; height: 13px; }
+}
+
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -98,8 +114,20 @@
     }
   }
 
-  .col-codigo { width: 80px; }
-  .col-nombre { min-width: 220px; }
+  .col-nombre {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: #fff;
+    min-width: 220px;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.08);
+  }
+
+  thead .col-nombre {
+    z-index: 2;
+    background: #f2e6e8;
+  }
+
   .col-total { width: 110px; text-align: center; font-weight: 600; }
 
   .th-concepto { text-align: center; }

@@ -159,6 +159,18 @@ $cream:  #FAF6F0;
   &.pagado    { background: #e8f5e9; color: #2e7d32; }
   &.pendiente { background: #fff3e0; color: #e65100; }
   &.anulada   { background: #fce4ec; color: #c62828; }
+  &.presente  { background: #e8f5e9; color: #2e7d32; }
+  &.ausente   { background: #fdecea; color: #c62828; }
+}
+
+.asistencia-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+
+  .mes-select { width: 160px; }
+}
+
+.resumen-chips {
+  display: flex; gap: 8px; margin-left: auto;
 }
 
 .portal-tabs { margin-top: 4px; }
@@ -171,24 +183,45 @@ $cream:  #FAF6F0;
   p { font-size: 13px; }
 }
 
-.notas-clase-card {
-  background: #fff;
-  border: 1px solid #e8e0d8;
-  border-radius: 12px;
+.notas-acordeon {
+  display: block;
   margin: 16px 0;
+}
+
+.notas-clase-card {
+  background: #fff !important;
+  border: 1px solid #e8e0d8;
+  border-radius: 12px !important;
+  margin-bottom: 10px;
   overflow: hidden;
+  box-shadow: none !important;
+
+  &.mat-expanded .notas-clase-header {
+    border-bottom: 1px solid #e8e0d8;
+  }
 }
 
 .notas-clase-header {
-  display: flex; align-items: center; gap: 12px;
-  padding: 14px 18px;
   background: rgba($guinda, .06);
-  border-bottom: 1px solid #e8e0d8;
+  height: auto !important;
+  padding: 14px 18px !important;
 
-  strong { font-size: 14px; color: $guinda; flex: 1; }
-  .notas-clase-maestro { font-size: 12px; color: #888; }
-  .notas-clase-total   { font-size: 12px; font-weight: 700; color: $guinda;
-                          background: rgba($guinda, .08); padding: 3px 10px; border-radius: 20px; }
+  ::ng-deep .mat-content { align-items: center; }
+
+  strong { font-size: 14px; color: $guinda; }
+  .notas-clase-maestro { font-size: 12px; color: #888; margin-left: 10px; }
+}
+
+.notas-clase-total {
+  font-size: 12px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+
+  &.total-bien   { color: #2e7d32; background: #e8f5e9; }
+  &.total-alerta { color: #e65100; background: #fff3e0; }
+}
+
+.notas-resumen-table {
+  td, th { padding: 4px 10px; }
 }
 
 .notas-concepto {
@@ -215,6 +248,9 @@ $cream:  #FAF6F0;
     padding: 6px 8px;
     border-top: 1px solid #f2f2f2;
   }
-  th:last-child, td:last-child { text-align: right; }
-  th:nth-child(2), td:nth-child(2) { text-align: right; width: 60px; }
+  th:last-child, td:last-child { text-align: right; font-weight: 700; }
+  th:nth-child(2), td:nth-child(2) { text-align: right; width: 110px; }
+  th:last-child { width: 110px; }
+
+  .sin-calificar { color: #bbb; font-weight: 400; }
 }

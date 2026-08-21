@@ -8,6 +8,8 @@ import { RegistrarUsuarioDialogComponent } from './registrar-usuario-dialog/regi
 import { EditarUsuarioDialogComponent } from './editar-usuario-dialog/editar-usuario-dialog.component';
 import { GestionRolesDialogComponent } from './gestion-roles-dialog/gestion-roles-dialog.component';
 import { PermisosRolDialogComponent } from './permisos-rol-dialog/permisos-rol-dialog.component';
+import { ResetPasswordDialogComponent } from './reset-password-dialog/reset-password-dialog.component';
+import { PasswordRequisitosModule } from '@app/shared/password-requisitos/password-requisitos.module';
 
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,6 +29,7 @@ import { MatDividerModule } from '@angular/material/divider';
     EditarUsuarioDialogComponent,
     GestionRolesDialogComponent,
     PermisosRolDialogComponent,
+    ResetPasswordDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -43,6 +46,7 @@ import { MatDividerModule } from '@angular/material/divider';
     MatTooltipModule,
     MatCheckboxModule,
     MatDividerModule,
+    PasswordRequisitosModule,
   ]
 })
 export class EmpleadosModule {}

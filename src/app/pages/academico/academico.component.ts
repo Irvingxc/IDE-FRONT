@@ -164,6 +164,20 @@ export class AcademicoComponent implements OnInit {
     setTimeout(() => input.select(), 0);
   }
 
+  bloquearTeclaNoNumerica(event: KeyboardEvent): void {
+    if (event.ctrlKey || event.metaKey) return;
+
+    const teclasPermitidas = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', '.'];
+    if (teclasPermitidas.includes(event.key)) return;
+
+    if (!/^[0-9]$/.test(event.key)) event.preventDefault();
+  }
+
+  bloquearPegadoNoNumerico(event: ClipboardEvent): void {
+    const texto = event.clipboardData?.getData('text') ?? '';
+    if (!/^\d*\.?\d*$/.test(texto)) event.preventDefault();
+  }
+
   onFocusMateria(): void {
     this.cargarClases();
   }
@@ -365,6 +379,24 @@ export class AcademicoComponent implements OnInit {
     });
   }
 
+  bloquearPeriodo(periodo: PeriodoResponse): void {
+    const accion = periodo.bloqueado ? 'desbloquear' : 'bloquear';
+    const mensaje = periodo.bloqueado
+      ? `¿Desbloquear el periodo "${periodo.nombre}"? Los maestros podrán volver a editar notas de este periodo.`
+      : `¿Bloquear el periodo "${periodo.nombre}"? Nadie podrá editar notas de este periodo hasta que lo desbloquees.`;
+    if (!confirm(mensaje)) return;
+
+    this.academicoService.bloquearPeriodo(periodo.id, !periodo.bloqueado).subscribe({
+      next: () => {
+        this.notification.success(`Periodo ${periodo.bloqueado ? 'desbloqueado' : 'bloqueado'} correctamente`);
+        this.cargarPeriodos();
+      },
+      error: (err) => {
+        this.notification.error(err.error?.errores?.mensaje ?? `Error al ${accion} el periodo`);
+      }
+    });
+  }
+
   // ── Clases ────────────────────────────────────────────────
   cargarClases(): void {
     this.loadingClases = true;
@@ -509,7 +541,7 @@ export class AcademicoComponent implements OnInit {
         },
         error: (err) => {
           this.guardandoNotas = false;
-          this.notification.error(err.error?.errores ?? 'Error al guardar las notas');
+          this.notification.error(err.error?.errores?.mensaje ?? 'Error al guardar las notas');
         }
       });
     };

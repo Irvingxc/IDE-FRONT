@@ -41,6 +41,18 @@ $cream:  #FAF6F0;
   .record-count { font-size: 13px; color: #888; }
 }
 
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .filtro-tipo {
+    width: 160px;
+    // El form-field trae su propio padding vertical; se compacta para alinear con el texto del contador.
+    ::ng-deep .mat-form-field-wrapper { padding-bottom: 0; margin-top: -12px; }
+  }
+}
+
 .data-table {
   width: 100%;
   th.mat-header-cell { font-weight: 700; color: $guinda; font-size: 13px; padding-left: 20px; }

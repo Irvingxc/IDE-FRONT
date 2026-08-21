@@ -10,6 +10,7 @@ export interface PeriodoResponse {
   fechaHasta:    string;
   anioLectivo:   number;
   activo:        boolean;
+  bloqueado:     boolean;
   fechaCreacion: string;
 }
 
@@ -148,6 +149,10 @@ export class AcademicoService {
 
   inactivarPeriodo(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/periodos/${id}`);
+  }
+
+  bloquearPeriodo(id: number, bloqueado: boolean): Observable<PeriodoResponse> {
+    return this.http.patch<PeriodoResponse>(`${this.base}/periodos/${id}/bloqueo`, bloqueado);
   }
 
   listarClases(anioLectivo?: number, soloActivos = true): Observable<ClaseResponse[]> {

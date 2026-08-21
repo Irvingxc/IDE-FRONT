@@ -8,6 +8,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { PortalClienteComponent } from './portal-cliente.component';
 
 @NgModule({
@@ -16,7 +17,7 @@ import { PortalClienteComponent } from './portal-cliente.component';
     CommonModule,
     RouterModule.forChild([{ path: '', component: PortalClienteComponent }]),
     MatButtonModule, MatIconModule, MatTableModule, MatTabsModule,
-    MatSelectModule, MatFormFieldModule, MatProgressSpinnerModule
+    MatSelectModule, MatFormFieldModule, MatProgressSpinnerModule, MatExpansionModule
   ]
 })
 export class PortalClienteModule {}

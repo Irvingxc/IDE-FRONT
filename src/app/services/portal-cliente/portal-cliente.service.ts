@@ -86,6 +86,12 @@ export interface PortalClaseNota {
   conceptos:     PortalConceptoNota[];
 }
 
+export interface PortalAsistenciaDto {
+  fecha:     string;
+  estado:    'Presente' | 'Ausente';
+  horaMarca: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PortalClienteService {
   private base = `${environment.url}api/PortalCliente`;
@@ -130,6 +136,11 @@ export class PortalClienteService {
   misNotas(identidad: string, idPeriodo: number): Observable<PortalClaseNota[]> {
     const params = new HttpParams().set('identidad', identidad).set('idPeriodo', idPeriodo.toString());
     return this.http.get<PortalClaseNota[]>(`${this.base}/mis-notas`, { params });
+  }
+
+  miAsistencia(identidad: string, anio: number, mes: number): Observable<PortalAsistenciaDto[]> {
+    const params = new HttpParams().set('identidad', identidad).set('anio', anio.toString()).set('mes', mes.toString());
+    return this.http.get<PortalAsistenciaDto[]>(`${this.base}/mi-asistencia`, { params });
   }
 
   readonly MESES = ['', 'Enero','Febrero','Marzo','Abril','Mayo','Junio',

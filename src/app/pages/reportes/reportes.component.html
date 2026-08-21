@@ -1,0 +1,126 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Reportes</h1>
+      <p class="breadcrumb">Inicio / Reportes</p>
+    </div>
+  </div>
+
+  <mat-tab-group>
+
+    <!-- ═══ ASISTENCIA ═══ -->
+    <mat-tab label="Asistencia">
+      <div class="tab-content">
+
+        <div class="asistencia-filtros">
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Fecha</mat-label>
+            <input matInput [matDatepicker]="pickerFecha" [(ngModel)]="fechaAsistencia" (dateChange)="cargarAsistencia()">
+            <mat-datepicker-toggle matSuffix [for]="pickerFecha"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFecha></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-md">
+            <mat-label>Grado</mat-label>
+            <mat-select [(ngModel)]="filtroIdGrado" (selectionChange)="cargarAsistencia()">
+              <mat-option [value]="null">Todos</mat-option>
+              <mat-option *ngFor="let g of grados" [value]="g.idGrado">{{ g.gradoNombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Estado</mat-label>
+            <mat-select [(ngModel)]="filtroEstado">
+              <mat-option value="">Todos</mat-option>
+              <mat-option value="Presente">Presente</mat-option>
+              <mat-option value="Ausente">Ausente</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-stroked-button (click)="cargarAsistencia()">
+            <mat-icon>refresh</mat-icon> Actualizar
+          </button>
+
+          <div class="resumen-chips" *ngIf="!loadingAsistencia">
+            <span class="chip chip-presente">{{ totalPresentes }} presentes</span>
+            <span class="chip chip-ausente">{{ totalAusentes }} ausentes</span>
+          </div>
+        </div>
+
+        <div *ngIf="loadingAsistencia" class="loading-row">
+          <mat-icon class="spin-icon">sync</mat-icon>
+          <span>Cargando asistencia...</span>
+        </div>
+
+        <table mat-table [dataSource]="reporteFiltrado" class="data-table" *ngIf="!loadingAsistencia">
+
+          <ng-container matColumnDef="nombreCompleto">
+            <th mat-header-cell *matHeaderCellDef>Alumno</th>
+            <td mat-cell *matCellDef="let row">{{ row.nombreCompleto }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="grado">
+            <th mat-header-cell *matHeaderCellDef>Grado</th>
+            <td mat-cell *matCellDef="let row">{{ row.grado || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="seccion">
+            <th mat-header-cell *matHeaderCellDef>Sección</th>
+            <td mat-cell *matCellDef="let row">{{ row.seccion || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="chip" [class.chip-presente]="row.estado === 'Presente'" [class.chip-ausente]="row.estado === 'Ausente'">
+                {{ row.estado }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="horaMarca">
+            <th mat-header-cell *matHeaderCellDef>Hora de entrada</th>
+            <td mat-cell *matCellDef="let row">{{ row.horaMarca ? (row.horaMarca | date:'shortTime') : '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="nombrePadre">
+            <th mat-header-cell *matHeaderCellDef>Padre / Madre</th>
+            <td mat-cell *matCellDef="let row">{{ row.nombrePadre || '—' }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columnasAsistencia"></tr>
+          <tr mat-row *matRowDef="let row; columns: columnasAsistencia;"></tr>
+          <tr class="mat-row no-data-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="columnasAsistencia.length">
+              <span>No hay alumnos activos para estos filtros.</span>
+            </td>
+          </tr>
+        </table>
+
+      </div>
+    </mat-tab>
+
+    <!-- ═══ NOTAS ═══ -->
+    <mat-tab label="Notas">
+      <div class="tab-content">
+        <div class="en-construccion">
+          <mat-icon>construction</mat-icon>
+          <span>Reporte de notas — En construcción</span>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- ═══ FINANZAS ═══ -->
+    <mat-tab label="Finanzas">
+      <div class="tab-content">
+        <div class="en-construccion">
+          <mat-icon>construction</mat-icon>
+          <span>Reporte de finanzas — En construcción</span>
+        </div>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+
+</div>

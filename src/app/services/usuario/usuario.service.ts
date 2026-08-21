@@ -52,6 +52,10 @@ export class UsuarioService {
     return this.http.put<void>(`${environment.url}api/Usuario/cambiar-password`, { passwordActual, passwordNueva });
   }
 
+  resetPassword(idUsuario: string, passwordNueva: string): Observable<void> {
+    return this.http.put<void>(`${environment.url}api/Usuario/${idUsuario}/reset-password`, { passwordNueva });
+  }
+
   getRoles(): Observable<string[]> {
     return this.http.get<string[]>(`${environment.url}api/Usuario/roles`);
   }

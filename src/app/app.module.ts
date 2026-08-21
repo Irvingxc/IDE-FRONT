@@ -17,6 +17,7 @@ import { AppComponent } from './app.component';
 import { environment } from '@src/environments/environment';
 import { IndicatorsModule } from './shared/indicators';
 import { PopupsModule } from './shared/popups';
+import { PasswordRequisitosModule } from './shared/password-requisitos/password-requisitos.module';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { NotificationModule } from './services';
 
@@ -72,6 +73,7 @@ const StoreDevtools = !environment.production ? StoreDevtoolsModule.instrument({
     IndicatorsModule,
     BrowserAnimationsModule,
     PopupsModule,
+    PasswordRequisitosModule,
     NotificationModule.forRoot(),
     MatSidenavModule,
     MatToolbarModule,
