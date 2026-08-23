@@ -15,6 +15,25 @@ export interface AsistenciaReporteItem {
   correoPadre:    string | null;
 }
 
+export interface EmpleadoReporteItem {
+  empleadoId:     number;
+  codigoInterno:  string;
+  nombreCompleto: string | null;
+  departamento:   string | null;
+  estado:         'Presente' | 'Ausente';
+  horaPrimera:    string | null;
+  horaUltima:     string | null;
+  duracion:       number | null;
+  cantidadMarcas: number | null;
+}
+
+export interface ZlinkSyncResultDto {
+  totalRecibidos: number;
+  alumnos:        number;
+  empleados:      number;
+  omitidos:       number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AsistenciaService {
   private base = `${environment.url}api/Asistencia`;
@@ -25,5 +44,14 @@ export class AsistenciaService {
     let params = new HttpParams().set('fecha', fecha.toISOString().slice(0, 10));
     if (idGrado) params = params.set('idGrado', idGrado);
     return this.http.get<AsistenciaReporteItem[]>(`${this.base}/reporte`, { params });
+  }
+
+  getReporteEmpleados(fecha: Date): Observable<EmpleadoReporteItem[]> {
+    const params = new HttpParams().set('fecha', fecha.toISOString().slice(0, 10));
+    return this.http.get<EmpleadoReporteItem[]>(`${this.base}/empleados/reporte`, { params });
+  }
+
+  sincronizarZlink(): Observable<ZlinkSyncResultDto> {
+    return this.http.post<ZlinkSyncResultDto>(`${this.base}/zlink/sincronizar`, {});
   }
 }
