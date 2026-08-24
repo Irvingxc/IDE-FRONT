@@ -47,6 +47,43 @@ export class AcademicoComponent implements OnInit {
   loadingClases = true;
   columnasClases = ['nombre', 'gradoNombre', 'seccion', 'maestroNombre', 'acciones'];
 
+  // ── Filtros de Clases ────────────────────────────────────
+  filtroClaseMaestro = '';
+  filtroClaseGrado = '';
+  filtroClaseSeccion = '';
+
+  get maestrosDisponiblesClases(): string[] {
+    const nombres = this.clases.map(c => c.maestroNombre ?? 'Sin asignar');
+    return Array.from(new Set(nombres)).sort((a, b) => a.localeCompare(b));
+  }
+
+  get gradosDisponiblesClases(): string[] {
+    const nombres = this.clases.map(c => c.gradoNombre ?? c.nivelInglesNombre ?? '');
+    return Array.from(new Set(nombres.filter(n => n))).sort((a, b) => a.localeCompare(b));
+  }
+
+  get seccionesDisponiblesClases(): string[] {
+    const secciones = this.clases.map(c => c.seccion);
+    return Array.from(new Set(secciones)).sort((a, b) => a.localeCompare(b));
+  }
+
+  get clasesFiltradas(): ClaseResponse[] {
+    return this.clases.filter(c => {
+      const maestro = c.maestroNombre ?? 'Sin asignar';
+      const grado = c.gradoNombre ?? c.nivelInglesNombre ?? '';
+      if (this.filtroClaseMaestro && maestro !== this.filtroClaseMaestro) return false;
+      if (this.filtroClaseGrado && grado !== this.filtroClaseGrado) return false;
+      if (this.filtroClaseSeccion && c.seccion !== this.filtroClaseSeccion) return false;
+      return true;
+    });
+  }
+
+  limpiarFiltrosClases(): void {
+    this.filtroClaseMaestro = '';
+    this.filtroClaseGrado = '';
+    this.filtroClaseSeccion = '';
+  }
+
   // ── Notas ─────────────────────────────────────────────────
   notasSimpleIdClase: number | null = null;
   notasSimpleIdPeriodo: number | null = null;

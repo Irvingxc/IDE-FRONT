@@ -90,12 +90,43 @@
           </button>
         </div>
 
+        <div class="notas-filtros">
+          <mat-form-field appearance="outline">
+            <mat-label>Maestro</mat-label>
+            <mat-select [(ngModel)]="filtroClaseMaestro">
+              <mat-option value="">Todos</mat-option>
+              <mat-option *ngFor="let m of maestrosDisponiblesClases" [value]="m">{{ m }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Grado / Nivel</mat-label>
+            <mat-select [(ngModel)]="filtroClaseGrado">
+              <mat-option value="">Todos</mat-option>
+              <mat-option *ngFor="let g of gradosDisponiblesClases" [value]="g">{{ g }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Sección</mat-label>
+            <mat-select [(ngModel)]="filtroClaseSeccion">
+              <mat-option value="">Todas</mat-option>
+              <mat-option *ngFor="let s of seccionesDisponiblesClases" [value]="s">{{ s }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-stroked-button type="button" (click)="limpiarFiltrosClases()"
+                  [disabled]="!filtroClaseMaestro && !filtroClaseGrado && !filtroClaseSeccion">
+            <mat-icon>filter_alt_off</mat-icon> Limpiar filtros
+          </button>
+        </div>
+
         <div *ngIf="loadingClases" class="loading-row">
           <mat-icon class="spin-icon">sync</mat-icon>
           <span>Cargando clases...</span>
         </div>
 
-        <table mat-table [dataSource]="clases" class="data-table" *ngIf="!loadingClases">
+        <table mat-table [dataSource]="clasesFiltradas" class="data-table" *ngIf="!loadingClases">
 
           <ng-container matColumnDef="nombre">
             <th mat-header-cell *matHeaderCellDef>Clase</th>
@@ -134,7 +165,7 @@
           <tr mat-row *matRowDef="let row; columns: columnasClases;"></tr>
           <tr class="mat-row no-data-row" *matNoDataRow>
             <td class="mat-cell" [attr.colspan]="columnasClases.length">
-              <span>No hay clases registradas para este año lectivo.</span>
+              <span>No hay clases que coincidan con los filtros.</span>
             </td>
           </tr>
         </table>
