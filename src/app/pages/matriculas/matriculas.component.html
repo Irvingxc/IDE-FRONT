@@ -69,6 +69,11 @@
 
         <table mat-table [dataSource]="alumnos" class="data-table" *ngIf="!alumnosLoading">
 
+          <ng-container matColumnDef="codigo">
+            <th mat-header-cell *matHeaderCellDef>Código</th>
+            <td mat-cell *matCellDef="let row">{{ row.codigo || '—' }}</td>
+          </ng-container>
+
           <ng-container matColumnDef="nombre">
             <th mat-header-cell *matHeaderCellDef>Nombre completo</th>
             <td mat-cell *matCellDef="let row">{{ row.nombreCompleto }}</td>

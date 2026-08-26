@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Registrar usuario</h2>
+<h2 mat-dialog-title>Registrar empleado</h2>
 
 <mat-dialog-content>
   <form [formGroup]="form" class="form-grid">
@@ -77,6 +77,6 @@
   <button mat-stroked-button [mat-dialog-close]="false">Cancelar</button>
   <button mat-raised-button color="primary" (click)="guardar()" [disabled]="guardando">
     <mat-icon>person_add</mat-icon>
-    {{ guardando ? 'Guardando...' : 'Registrar' }}
+    {{ guardando ? 'Guardando...' : 'Registrar empleado' }}
   </button>
 </mat-dialog-actions>

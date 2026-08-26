@@ -61,11 +61,11 @@ export class RegistrarUsuarioDialogComponent implements OnInit {
 
     this.usuarioService.registrar(payload).subscribe({
       next: () => {
-        this.notification.success('Usuario registrado correctamente');
+        this.notification.success('Empleado registrado correctamente');
         this.dialogRef.close(true);
       },
       error: () => {
-        this.notification.error('Error al registrar el usuario');
+        this.notification.error('Error al registrar el empleado');
         this.guardando = false;
       }
     });
