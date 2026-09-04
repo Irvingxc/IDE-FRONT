@@ -189,6 +189,142 @@
       </div>
     </mat-tab>
 
+    <!-- ═══ REPORTE MENSUAL (PARA PAGO) ═══ -->
+    <mat-tab label="Reporte Mensual">
+      <div class="tab-content">
+
+        <div class="asistencia-filtros">
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Fecha desde</mat-label>
+            <input matInput [matDatepicker]="pickerMensualDesde" [(ngModel)]="mensualDesde">
+            <mat-datepicker-toggle matSuffix [for]="pickerMensualDesde"></mat-datepicker-toggle>
+            <mat-datepicker #pickerMensualDesde></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Fecha hasta</mat-label>
+            <input matInput [matDatepicker]="pickerMensualHasta" [(ngModel)]="mensualHasta">
+            <mat-datepicker-toggle matSuffix [for]="pickerMensualHasta"></mat-datepicker-toggle>
+            <mat-datepicker #pickerMensualHasta></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Hora de entrada</mat-label>
+            <input matInput type="time" [(ngModel)]="mensualHoraEntrada">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Tolerancia (min)</mat-label>
+            <input matInput type="number" min="0" [(ngModel)]="mensualTolerancia">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Hora de salida</mat-label>
+            <input matInput type="time" [(ngModel)]="mensualHoraSalida">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Jornada (horas/día)</mat-label>
+            <input matInput type="number" min="0" step="0.5" [(ngModel)]="mensualJornada">
+          </mat-form-field>
+
+          <button mat-flat-button color="primary" (click)="generarReporteMensual()" [disabled]="loadingMensual">
+            <mat-icon>assessment</mat-icon> Generar
+          </button>
+
+          <button mat-stroked-button (click)="abrirFeriados()">
+            <mat-icon>event_busy</mat-icon> Feriados
+          </button>
+
+          <button mat-stroked-button (click)="sincronizarZlink()" [disabled]="sincronizando">
+            <mat-icon [class.spin-icon]="sincronizando">cloud_sync</mat-icon> Sincronizar
+          </button>
+        </div>
+
+        <div class="resumen-chips resumen-chips--inline" *ngIf="mensualGenerado && !loadingMensual">
+          <span class="chip chip-neutro">{{ reporteMensual.length }} empleados</span>
+          <span class="chip chip-presente">{{ totalHorasTrabajadas | number:'1.0-2' }} h trabajadas</span>
+          <span class="chip chip-ausente">{{ totalHorasTarde | number:'1.0-2' }} h tarde</span>
+          <span class="chip chip-neutro">{{ totalHorasSalidaTemprana | number:'1.0-2' }} h salida temprana</span>
+          <span class="chip chip-extra">{{ totalHorasExtra | number:'1.0-2' }} h extra</span>
+        </div>
+
+        <div *ngIf="loadingMensual" class="loading-row">
+          <mat-icon class="spin-icon">sync</mat-icon>
+          <span>Generando reporte...</span>
+        </div>
+
+        <div *ngIf="!loadingMensual && !mensualGenerado" class="en-construccion">
+          <mat-icon>assessment</mat-icon>
+          <span>Selecciona un rango de fechas y presiona Generar.</span>
+        </div>
+
+        <div class="tabla-scroll" *ngIf="!loadingMensual && mensualGenerado">
+          <table mat-table [dataSource]="reporteMensual" class="data-table">
+
+            <ng-container matColumnDef="nombreCompleto">
+              <th mat-header-cell *matHeaderCellDef>Empleado</th>
+              <td mat-cell *matCellDef="let row">{{ row.nombreCompleto || '—' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="departamento">
+              <th mat-header-cell *matHeaderCellDef>Departamento</th>
+              <td mat-cell *matCellDef="let row">{{ row.departamento || '—' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="diasTrabajados">
+              <th mat-header-cell *matHeaderCellDef>Días trab.</th>
+              <td mat-cell *matCellDef="let row">{{ row.diasTrabajados }} / {{ row.diasLaborables }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="diasAusentes">
+              <th mat-header-cell *matHeaderCellDef>Días aus.</th>
+              <td mat-cell *matCellDef="let row">{{ row.diasAusentes }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="horasTrabajadas">
+              <th mat-header-cell *matHeaderCellDef>Horas trabajadas</th>
+              <td mat-cell *matCellDef="let row">{{ row.horasTrabajadas | number:'1.0-2' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="horasTarde">
+              <th mat-header-cell *matHeaderCellDef>Horas tarde</th>
+              <td mat-cell *matCellDef="let row">{{ row.horasTarde | number:'1.0-2' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="llegadasTarde">
+              <th mat-header-cell *matHeaderCellDef># Tardes</th>
+              <td mat-cell *matCellDef="let row">{{ row.llegadasTarde }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="horasSalidaTemprana">
+              <th mat-header-cell *matHeaderCellDef>Horas salida temprana</th>
+              <td mat-cell *matCellDef="let row">{{ row.horasSalidaTemprana | number:'1.0-2' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="salidasTempranas">
+              <th mat-header-cell *matHeaderCellDef># Salidas tempranas</th>
+              <td mat-cell *matCellDef="let row">{{ row.salidasTempranas }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="horasExtra">
+              <th mat-header-cell *matHeaderCellDef>Horas extra</th>
+              <td mat-cell *matCellDef="let row">{{ row.horasExtra | number:'1.0-2' }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columnasMensual"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnasMensual;"></tr>
+            <tr class="mat-row no-data-row" *matNoDataRow>
+              <td class="mat-cell" [attr.colspan]="columnasMensual.length">
+                <span>No hay empleados para este rango.</span>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+      </div>
+    </mat-tab>
+
     <!-- ═══ NOTAS ═══ -->
     <mat-tab label="Notas">
       <div class="tab-content">

@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { AsistenciaService, AsistenciaReporteItem, EmpleadoReporteItem } from '@app/services/asistencia/asistencia.service';
+import { AsistenciaService, AsistenciaReporteItem, EmpleadoReporteItem, EmpleadoReporteMensualItem } from '@app/services/asistencia/asistencia.service';
 import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { FeriadosDialogComponent } from './feriados-dialog/feriados-dialog.component';
 
 @Component({
   selector: 'app-reportes',
@@ -46,13 +48,40 @@ export class ReportesComponent implements OnInit {
     return this.reporteEmpleados.filter(e => e.estado === 'Ausente').length;
   }
 
-  // ── Sincronizacion con Zlink (compartida por ambos tabs) ──
+  // ── Reporte Mensual (para pago) ──────────────────────────
+  mensualDesde: Date = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  mensualHasta: Date = new Date();
+  mensualHoraEntrada = '08:00';
+  mensualTolerancia = 5;
+  mensualHoraSalida = '17:00';
+  mensualJornada = 8;
+
+  reporteMensual: EmpleadoReporteMensualItem[] = [];
+  loadingMensual = false;
+  mensualGenerado = false;
+  columnasMensual = [
+    'nombreCompleto', 'departamento', 'diasTrabajados', 'diasAusentes',
+    'horasTrabajadas', 'horasTarde', 'llegadasTarde',
+    'horasSalidaTemprana', 'salidasTempranas', 'horasExtra'
+  ];
+
+  private sumaMensual(campo: keyof EmpleadoReporteMensualItem): number {
+    return this.reporteMensual.reduce((acc, r) => acc + (Number(r[campo]) || 0), 0);
+  }
+
+  get totalHorasTrabajadas(): number { return this.sumaMensual('horasTrabajadas'); }
+  get totalHorasTarde(): number { return this.sumaMensual('horasTarde'); }
+  get totalHorasExtra(): number { return this.sumaMensual('horasExtra'); }
+  get totalHorasSalidaTemprana(): number { return this.sumaMensual('horasSalidaTemprana'); }
+
+  // ── Sincronizacion con Zlink (compartida por los tabs) ──
   sincronizando = false;
 
   constructor(
     private asistenciaService: AsistenciaService,
     private catalogoService: CatalogoService,
-    private snack: MatSnackBar
+    private snack: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -93,6 +122,41 @@ export class ReportesComponent implements OnInit {
     this.asistenciaService.getReporteEmpleados(this.fechaEmpleados).subscribe({
       next: (data) => { this.reporteEmpleados = data; this.loadingEmpleados = false; },
       error: () => { this.loadingEmpleados = false; }
+    });
+  }
+
+  abrirFeriados(): void {
+    this.dialog.open(FeriadosDialogComponent, { width: '560px' })
+      .afterClosed().subscribe((huboCambios: boolean) => {
+        if (huboCambios && this.mensualGenerado) {
+          this.generarReporteMensual();
+        }
+      });
+  }
+
+  generarReporteMensual(): void {
+    if (this.mensualHasta < this.mensualDesde) {
+      this.snack.open('La fecha hasta no puede ser anterior a la fecha desde', '', { duration: 3000 });
+      return;
+    }
+    this.loadingMensual = true;
+    this.asistenciaService.getReporteMensualEmpleados({
+      desde: this.mensualDesde,
+      hasta: this.mensualHasta,
+      horaEntrada: this.mensualHoraEntrada,
+      toleranciaMinutos: this.mensualTolerancia,
+      horaSalida: this.mensualHoraSalida,
+      jornadaHoras: this.mensualJornada
+    }).subscribe({
+      next: (data) => {
+        this.reporteMensual = data;
+        this.mensualGenerado = true;
+        this.loadingMensual = false;
+      },
+      error: () => {
+        this.loadingMensual = false;
+        this.snack.open('No se pudo generar el reporte mensual', '', { duration: 4000 });
+      }
     });
   }
 }

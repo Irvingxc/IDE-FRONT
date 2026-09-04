@@ -51,6 +51,26 @@
   color: #c62828;
 }
 
+.chip-neutro {
+  background: #eceff1;
+  color: #455a64;
+}
+
+.chip-extra {
+  background: #e8eaf6;
+  color: #3949ab;
+}
+
+.resumen-chips--inline {
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+
+.tabla-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
 .loading-row {
   display: flex;
   align-items: center;

@@ -1,0 +1,49 @@
+:host {
+  display: block;
+  min-width: 480px;
+}
+
+.ayuda {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #666;
+}
+
+.nuevo-feriado {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+
+  .campo-fecha { width: 150px; }
+  .campo-desc { flex: 1; }
+
+  button { margin-top: 4px; }
+}
+
+.loading-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  color: #666;
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.tabla-feriados {
+  width: 100%;
+}
+
+.no-data-row td {
+  padding: 24px;
+  text-align: center;
+  color: #999;
+}

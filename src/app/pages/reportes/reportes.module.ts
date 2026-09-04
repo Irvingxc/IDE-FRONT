@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 
 import { ReportesRoutingModule } from './reportes-routing.module';
 import { ReportesComponent } from './reportes.component';
+import { FeriadosDialogComponent } from './feriados-dialog/feriados-dialog.component';
 
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,12 +30,14 @@ class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
 @NgModule({
   declarations: [
     ReportesComponent,
+    FeriadosDialogComponent,
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReportesRoutingModule,
     MatTabsModule,
+    MatDialogModule,
     MatTableModule,
     MatButtonModule,
     MatIconModule,

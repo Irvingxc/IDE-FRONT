@@ -27,6 +27,38 @@ export interface EmpleadoReporteItem {
   cantidadMarcas: number | null;
 }
 
+export interface EmpleadoReporteMensualItem {
+  empleadoId:          number;
+  codigoInterno:       string;
+  nombreCompleto:      string | null;
+  departamento:        string | null;
+  diasLaborables:      number;
+  diasTrabajados:      number;
+  diasAusentes:        number;
+  horasTrabajadas:     number;
+  horasTarde:          number;
+  llegadasTarde:       number;
+  horasSalidaTemprana: number;
+  salidasTempranas:    number;
+  horasExtra:          number;
+}
+
+export interface ReporteMensualParams {
+  desde:             Date;
+  hasta:             Date;
+  horaEntrada:       string;   // 'HH:mm'
+  toleranciaMinutos: number;
+  horaSalida:        string;   // 'HH:mm'
+  jornadaHoras:      number;
+}
+
+export interface Feriado {
+  id:          number;
+  fecha:       string;   // 'yyyy-MM-dd'
+  descripcion: string;
+  idSucursal:  number | null;
+}
+
 export interface ZlinkSyncResultDto {
   totalRecibidos: number;
   alumnos:        number;
@@ -61,6 +93,33 @@ export class AsistenciaService {
   getReporteEmpleados(fecha: Date): Observable<EmpleadoReporteItem[]> {
     const params = new HttpParams().set('fecha', this.formatearFecha(fecha));
     return this.http.get<EmpleadoReporteItem[]>(`${this.base}/empleados/reporte`, { params });
+  }
+
+  getReporteMensualEmpleados(p: ReporteMensualParams): Observable<EmpleadoReporteMensualItem[]> {
+    const params = new HttpParams()
+      .set('desde', this.formatearFecha(p.desde))
+      .set('hasta', this.formatearFecha(p.hasta))
+      .set('horaEntrada', p.horaEntrada)
+      .set('toleranciaMinutos', p.toleranciaMinutos)
+      .set('horaSalida', p.horaSalida)
+      .set('jornadaHoras', p.jornadaHoras);
+    return this.http.get<EmpleadoReporteMensualItem[]>(`${this.base}/empleados/reporte-mensual`, { params });
+  }
+
+  // ── Feriados ──────────────────────────────────────────────
+  getFeriados(): Observable<Feriado[]> {
+    return this.http.get<Feriado[]>(`${this.base}/feriados`);
+  }
+
+  crearFeriado(fecha: Date, descripcion: string): Observable<Feriado> {
+    return this.http.post<Feriado>(`${this.base}/feriados`, {
+      fecha: this.formatearFecha(fecha),
+      descripcion
+    });
+  }
+
+  eliminarFeriado(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/feriados/${id}`);
   }
 
   sincronizarZlink(): Observable<ZlinkSyncResultDto> {
