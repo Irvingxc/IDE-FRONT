@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { UsuarioService } from '@app/services/usuario/usuario.service';
+import { TokenService } from '@app/services';
 import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
 
@@ -19,7 +20,8 @@ export class SeleccionarSucursalComponent implements OnInit {
   constructor(
     private usuarioService: UsuarioService,
     private store: Store<fromRoot.State>,
-    private router: Router
+    private router: Router,
+    private tokenService: TokenService
   ) {}
 
   ngOnInit(): void {
@@ -34,8 +36,7 @@ export class SeleccionarSucursalComponent implements OnInit {
     this.guardando = true;
     this.usuarioService.seleccionarSucursal(sucursalId).subscribe({
       next: (user) => {
-        localStorage.setItem('token', user.token);
-        localStorage.setItem('user_session', JSON.stringify(user));
+        this.tokenService.setToken(user.token, user);
         this.store.dispatch(new fromUser.InitAuthorized(user.email!, user));
         this.router.navigate(['/static/welcome']);
       },

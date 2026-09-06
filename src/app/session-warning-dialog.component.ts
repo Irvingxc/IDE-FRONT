@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
+import { TokenService } from './services/token/token.service';
 
 @Component({
   selector: 'app-session-warning-dialog',
@@ -47,7 +48,10 @@ export class SessionWarningDialogComponent implements OnInit, OnDestroy {
   segundosRestantes = 120;
   private timer?: ReturnType<typeof setInterval>;
 
-  constructor(private dialogRef: MatDialogRef<SessionWarningDialogComponent>) {}
+  constructor(
+    private dialogRef: MatDialogRef<SessionWarningDialogComponent>,
+    private tokenService: TokenService
+  ) {}
 
   ngOnInit(): void {
     this.timer = setInterval(() => {
@@ -63,12 +67,9 @@ export class SessionWarningDialogComponent implements OnInit, OnDestroy {
   }
 
   continuar(): void {
-    const token = localStorage.getItem('token');
-    if (!token || this.tokenExpirado(token)) {
-      this.dialogRef.close(true);
-    } else {
-      this.dialogRef.close(false);
-    }
+    // El interlocutor (app.component) se encarga de renovar el token al cerrar
+    // con `false`. Solo forzamos logout si el token ya vencio del todo.
+    this.dialogRef.close(this.tokenService.expirado());
   }
 
   cerrarSesion(): void {
@@ -81,12 +82,5 @@ export class SessionWarningDialogComponent implements OnInit, OnDestroy {
     const m = Math.floor(seg / 60);
     const s = seg % 60;
     return `${m}:${s.toString().padStart(2, '0')}`;
-  }
-
-  private tokenExpirado(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.exp ? payload.exp * 1000 < Date.now() : false;
-    } catch { return true; }
   }
 }

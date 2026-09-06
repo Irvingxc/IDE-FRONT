@@ -5,10 +5,10 @@ import { NotificationService } from '@app/services';
 import { select, Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
-import { distinctUntilChanged } from 'rxjs/operators';
 import * as fromRoot from './store';
 import * as fromUser from './store/user';
 import { SessionWarningDialogComponent } from './session-warning-dialog.component';
+import { TokenService } from './services/token/token.service';
 
 @Component({
   selector: 'app-root',
@@ -24,13 +24,14 @@ export class AppComponent implements OnInit, OnDestroy {
   isLanding$!: Observable<boolean>;
 
   private avisoTimer?: ReturnType<typeof setTimeout>;
-  private authSub?: Subscription;
+  private tokenSub?: Subscription;
 
   constructor(
     private notification: NotificationService,
     private store: Store<fromRoot.State>,
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private tokenService: TokenService
   ) {}
 
   ngOnInit(): void {
@@ -46,36 +47,31 @@ export class AppComponent implements OnInit, OnDestroy {
     );
     this.store.dispatch(new fromUser.Init());
 
-    this.authSub = this.isAuthorized$
-      .pipe(distinctUntilChanged())
-      .subscribe(isAuth => {
-        if (isAuth) {
-          this.programarAvisoExpiracion();
-        } else {
-          this.cancelarAvisoTimer();
-        }
-      });
+    // token$ emite en login, en cada renovacion silenciosa y en logout (null).
+    // Cada emision re-programa el aviso, asi el dialogo solo aparece cuando el
+    // usuario lleva rato inactivo y el token ya no se renovo.
+    this.tokenSub = this.tokenService.token$.subscribe(token => {
+      if (token) {
+        this.programarAvisoExpiracion(token);
+      } else {
+        this.cancelarAvisoTimer();
+        this.dialog.closeAll();
+      }
+    });
   }
 
   ngOnDestroy(): void {
     this.cancelarAvisoTimer();
-    this.authSub?.unsubscribe();
+    this.tokenSub?.unsubscribe();
   }
 
-  private programarAvisoExpiracion(): void {
+  private programarAvisoExpiracion(token: string): void {
     this.cancelarAvisoTimer();
-    const token = localStorage.getItem('token');
-    if (!token) return;
 
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      if (!payload.exp) return;
+    const msHastaAviso = this.tokenService.msParaExpirar(token) - 2 * 60 * 1000;
+    if (msHastaAviso <= 0) return;
 
-      const msHastaAviso = payload.exp * 1000 - Date.now() - 2 * 60 * 1000;
-      if (msHastaAviso <= 0) return;
-
-      this.avisoTimer = setTimeout(() => this.mostrarAviso(), msHastaAviso);
-    } catch { return; }
+    this.avisoTimer = setTimeout(() => this.mostrarAviso(), msHastaAviso);
   }
 
   private mostrarAviso(): void {
@@ -85,7 +81,12 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     ref.afterClosed().subscribe((cerrar: boolean) => {
-      if (cerrar) this.onSignOut();
+      if (cerrar) {
+        this.onSignOut();
+      } else {
+        // "Entendido" = actividad: renovar el token para extender la sesion.
+        this.tokenService.renovarSiHaceFalta();
+      }
     });
   }
 
@@ -115,8 +116,7 @@ export class AppComponent implements OnInit, OnDestroy {
   onSignOut(): void {
     this.cancelarAvisoTimer();
     this.dialog.closeAll();
-    localStorage.removeItem('token');
-    localStorage.removeItem('user_session');
+    this.tokenService.clear();
     this.store.dispatch(new fromUser.SignOut());
     this.router.navigate(['/']);
   }

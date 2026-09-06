@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { PortalClienteService, ValidarInvitacionResponse } from '@app/services/portal-cliente/portal-cliente.service';
+import { TokenService } from '@app/services';
 import { passwordRequisitosValidator } from '@app/utils/password.utils';
 import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
@@ -25,7 +26,8 @@ export class ActivarCuentaComponent implements OnInit {
     private router: Router,
     private fb: FormBuilder,
     private portalService: PortalClienteService,
-    private store: Store<fromRoot.State>
+    private store: Store<fromRoot.State>,
+    private tokenService: TokenService
   ) {}
 
   ngOnInit(): void {
@@ -57,8 +59,7 @@ export class ActivarCuentaComponent implements OnInit {
     this.portalService.activarCuenta({ token: this.token, password: this.form.value.password })
       .subscribe({
         next: (user) => {
-          localStorage.setItem('token', user.token);
-          localStorage.setItem('user_session', JSON.stringify(user));
+          this.tokenService.setToken(user.token, user);
           this.store.dispatch(new fromUser.InitAuthorized(user.email, user));
           this.estado = 'listo';
           setTimeout(() => this.router.navigate(['/portal-cliente']), 2000);

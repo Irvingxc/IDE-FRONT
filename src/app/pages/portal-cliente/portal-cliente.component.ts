@@ -8,6 +8,7 @@ import * as fromUser from '@app/store/user';
 import {
   PortalClienteService, HijoDto, PortalFacturaDto, PortalCxcDto, PortalPeriodo, PortalClaseNota, PortalAsistenciaDto
 } from '@app/services/portal-cliente/portal-cliente.service';
+import { TokenService } from '@app/services';
 
 @Component({
   selector: 'app-portal-cliente',
@@ -51,7 +52,8 @@ export class PortalClienteComponent implements OnInit {
   constructor(
     private store: Store<fromRoot.State>,
     private router: Router,
-    public svc: PortalClienteService
+    public svc: PortalClienteService,
+    private tokenService: TokenService
   ) {}
 
   ngOnInit(): void {
@@ -88,8 +90,7 @@ export class PortalClienteComponent implements OnInit {
   }
 
   cerrarSesion(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user_session');
+    this.tokenService.clear();
     this.store.dispatch(new fromUser.SignOut());
     this.router.navigate(['/']);
   }

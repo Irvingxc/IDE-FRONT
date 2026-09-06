@@ -3,29 +3,27 @@ import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { throwError } from "rxjs";
 import { catchError } from "rxjs/operators";
-
-function tokenExpirado(token: string): boolean {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    if (!payload.exp) return false;
-    return payload.exp * 1000 < Date.now();
-  } catch {
-    return false;
-  }
-}
+import { TokenService } from "./services/token/token.service";
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private tokenService: TokenService) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
-    const token = localStorage.getItem('token');
+    const token = this.tokenService.getToken();
 
-    // Si el token existe y está expirado, cerrar sesión antes de enviar la petición
-    if (token && tokenExpirado(token)) {
+    // Si el token existe y ya expiro, cerrar sesion antes de enviar la peticion
+    if (token && this.tokenService.expirado(token)) {
       this.cerrarSesion();
       return throwError(() => new Error('Sesión expirada'));
+    }
+
+    // Sesion deslizante: cada peticion cuenta como actividad. Si al token le
+    // queda poca vida se pide uno nuevo en segundo plano (por su propio cliente,
+    // no vuelve a pasar por aqui).
+    if (token) {
+      this.tokenService.renovarSiHaceFalta();
     }
 
     const request = token
@@ -43,8 +41,7 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   private cerrarSesion(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user_session');
+    this.tokenService.clear();
     this.router.navigate(['/auth/login']);
   }
 }

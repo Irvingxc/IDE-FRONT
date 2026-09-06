@@ -8,17 +8,9 @@ import { Observable, of } from "rxjs";
 import { catchError, switchMap, tap, map } from "rxjs/operators";
 import * as fromActions from './user.actions';
 import { UserResponse } from "./user.models";
+import { TokenService } from "@app/services";
 
 const USER_KEY = 'user_session';
-
-function tokenExpirado(token: string): boolean {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.exp * 1000 < Date.now();
-  } catch {
-    return true;
-  }
-}
 
 type Action = fromActions.All;
 
@@ -29,7 +21,8 @@ export class UserEffects {
     private actions: Actions,
     private router: Router,
     private httpClient: HttpClient,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private tokenService: TokenService
   ) { }
 
   signUpEmail: Observable<Action> = createEffect(() =>
@@ -40,8 +33,7 @@ export class UserEffects {
         this.httpClient.post<UserResponse>(`${environment.url}api/Usuario/registrar`, userData)
           .pipe(
             tap((response: UserResponse) => {
-              localStorage.setItem('token', response.token);
-              localStorage.setItem(USER_KEY, JSON.stringify(response));
+              this.tokenService.setToken(response.token, response);
               this.router.navigate(['/']);
             }),
             map((response: UserResponse) => new fromActions.SignUpEmailSuccess(response.email, response || null)),
@@ -62,8 +54,7 @@ export class UserEffects {
         this.httpClient.post<UserResponse>(`${environment.url}api/Usuario/login`, credentials)
           .pipe(
             tap((response: UserResponse) => {
-              localStorage.setItem('token', response.token);
-              localStorage.setItem(USER_KEY, JSON.stringify(response));
+              this.tokenService.setToken(response.token, response);
               const esCliente = response.roles?.includes('Cliente') ?? false;
               const destino = esCliente
                 ? '/portal-cliente'
@@ -86,11 +77,10 @@ export class UserEffects {
     this.actions.pipe(
       ofType(fromActions.Types.INIT),
       switchMap(() => {
-        const token = localStorage.getItem('token');
+        const token = this.tokenService.getToken();
 
-        if (!token || tokenExpirado(token)) {
-          localStorage.removeItem('token');
-          localStorage.removeItem(USER_KEY);
+        if (!token || this.tokenService.expirado(token)) {
+          this.tokenService.clear();
           return of(new fromActions.InitUnauthorized());
         }
 
@@ -104,8 +94,7 @@ export class UserEffects {
           }),
           map((user: UserResponse) => new fromActions.InitAuthorized(user.email!, user)),
           catchError(() => {
-            localStorage.removeItem('token');
-            localStorage.removeItem(USER_KEY);
+            this.tokenService.clear();
             return of(new fromActions.InitUnauthorized());
           })
         );
