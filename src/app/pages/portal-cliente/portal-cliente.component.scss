@@ -242,8 +242,9 @@ $cream:  #FAF6F0;
     thead, .mat-header-row { display: none; }
     tbody { display: block; }
 
-    .mat-row {
+    .mat-row, tr.mat-row {
       display: block;
+      height: auto;                 // Material fuerza tr.mat-row { height: 48px }
       border: 1px solid #e8e0d8;
       border-radius: 12px;
       background: #fff;
@@ -251,7 +252,7 @@ $cream:  #FAF6F0;
       margin-bottom: 10px;
     }
 
-    .mat-cell {
+    .mat-cell, td.mat-cell {
       display: flex; align-items: center; justify-content: space-between;
       gap: 16px;
       min-height: 0;
