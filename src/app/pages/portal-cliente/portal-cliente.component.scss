@@ -228,6 +228,69 @@ $cream:  #FAF6F0;
 .table-scroll .portal-table { min-width: 560px; }
 .table-scroll .notas-resumen-table { min-width: 440px; }
 
+// ── Tablas en modo tarjeta (movil) ────────────────
+// En pantallas chicas, notas-resumen y estado de cuenta dejan de ser tabla
+// (que obligaba a scroll horizontal) y cada fila se apila como tarjeta
+// etiqueta:valor. Las etiquetas salen del atributo data-label de cada <td>.
+@media (max-width: 640px) {
+  .table-scroll { overflow-x: visible; }
+  .table-scroll .portal-table.card-movil { min-width: 0; }
+
+  .portal-table.card-movil {
+    display: block;
+
+    thead, .mat-header-row { display: none; }
+    tbody { display: block; }
+
+    .mat-row {
+      display: block;
+      border: 1px solid #e8e0d8;
+      border-radius: 12px;
+      background: #fff;
+      padding: 6px 14px 8px;
+      margin-bottom: 10px;
+    }
+
+    .mat-cell {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px;
+      min-height: 0;
+      padding: 7px 0;
+      border-bottom: 1px solid #f4f0ea;
+      font-size: 13px; color: #333; text-align: right;
+
+      &:last-child { border-bottom: none; }
+
+      &::before {
+        content: attr(data-label);
+        flex-shrink: 0;
+        font-size: 10.5px; font-weight: 700; letter-spacing: .4px;
+        text-transform: uppercase; color: #999; text-align: left;
+      }
+
+      // primera celda = encabezado de la tarjeta
+      &:first-child {
+        padding: 2px 0 9px; margin-bottom: 3px;
+        border-bottom: 1px solid #e8e0d8;
+        font-size: 15px; font-weight: 800; color: $guinda;
+        &::before { display: none; }
+      }
+    }
+
+    // fila "Sin registros"
+    .mat-cell[colspan] {
+      display: block; text-align: center; border: none;
+      &::before { display: none; }
+    }
+  }
+
+  // Asistencia: se queda como tabla pero compacta y sin scroll
+  .table-scroll .portal-table.asistencia-table {
+    min-width: 0;
+    .mat-cell, .mat-header-cell { padding: 0 6px; font-size: 12px; }
+  }
+}
+
 .estado-badge {
   display: inline-block; padding: 3px 10px; border-radius: 20px;
   font-size: 11px; font-weight: 700; letter-spacing: .4px;

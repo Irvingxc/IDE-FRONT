@@ -74,18 +74,18 @@
           <ng-container *ngTemplateOutlet="notasEstados"></ng-container>
 
           <div class="table-scroll" *ngIf="!cargandoNotas && notas.length > 0">
-          <table mat-table [dataSource]="notas" class="portal-table notas-resumen-table">
+          <table mat-table [dataSource]="notas" class="portal-table notas-resumen-table card-movil">
             <ng-container matColumnDef="claseNombre">
               <th mat-header-cell *matHeaderCellDef>Materia</th>
-              <td mat-cell *matCellDef="let c">{{ c.claseNombre }}</td>
+              <td mat-cell *matCellDef="let c" data-label="Materia">{{ c.claseNombre }}</td>
             </ng-container>
             <ng-container matColumnDef="maestroNombre">
               <th mat-header-cell *matHeaderCellDef>Maestro</th>
-              <td mat-cell *matCellDef="let c">{{ c.maestroNombre || '—' }}</td>
+              <td mat-cell *matCellDef="let c" data-label="Maestro">{{ c.maestroNombre || '—' }}</td>
             </ng-container>
             <ng-container matColumnDef="total">
               <th mat-header-cell *matHeaderCellDef>Nota total</th>
-              <td mat-cell *matCellDef="let c">
+              <td mat-cell *matCellDef="let c" data-label="Nota total">
                 <span class="notas-clase-total"
                       [class.total-bien]="totalClase(c) >= 70"
                       [class.total-alerta]="totalClase(c) < 70">
@@ -178,7 +178,7 @@
           </div>
 
           <div class="table-scroll" *ngIf="!cargandoAsistencia && asistencia.length > 0">
-          <table mat-table [dataSource]="asistencia" class="portal-table">
+          <table mat-table [dataSource]="asistencia" class="portal-table asistencia-table">
             <ng-container matColumnDef="fecha">
               <th mat-header-cell *matHeaderCellDef>Fecha</th>
               <td mat-cell *matCellDef="let r">{{ r.fecha | date:'dd/MM/yyyy' }}</td>
@@ -217,26 +217,26 @@
           </div>
 
           <div class="table-scroll" *ngIf="!cargandoCxc">
-          <table mat-table [dataSource]="cxc" class="portal-table">
+          <table mat-table [dataSource]="cxc" class="portal-table cxc-table card-movil">
             <ng-container matColumnDef="mes">
               <th mat-header-cell *matHeaderCellDef>Mes</th>
-              <td mat-cell *matCellDef="let r">{{ svc.nombreMes(r.mes) }} {{ r.anio }}</td>
+              <td mat-cell *matCellDef="let r" data-label="Mes">{{ svc.nombreMes(r.mes) }} {{ r.anio }}</td>
             </ng-container>
             <ng-container matColumnDef="producto">
               <th mat-header-cell *matHeaderCellDef>Concepto</th>
-              <td mat-cell *matCellDef="let r">{{ r.producto || r.tipoCuota || '—' }}</td>
+              <td mat-cell *matCellDef="let r" data-label="Concepto">{{ r.producto || r.tipoCuota || '—' }}</td>
             </ng-container>
             <ng-container matColumnDef="monto">
               <th mat-header-cell *matHeaderCellDef>Monto</th>
-              <td mat-cell *matCellDef="let r">{{ svc.formatLps(r.monto) }}</td>
+              <td mat-cell *matCellDef="let r" data-label="Monto">{{ svc.formatLps(r.monto) }}</td>
             </ng-container>
             <ng-container matColumnDef="vence">
               <th mat-header-cell *matHeaderCellDef>Vence</th>
-              <td mat-cell *matCellDef="let r">{{ r.fechaVence ? (r.fechaVence | date:'dd/MM/yyyy') : '—' }}</td>
+              <td mat-cell *matCellDef="let r" data-label="Vence">{{ r.fechaVence ? (r.fechaVence | date:'dd/MM/yyyy') : '—' }}</td>
             </ng-container>
             <ng-container matColumnDef="estado">
               <th mat-header-cell *matHeaderCellDef>Estado</th>
-              <td mat-cell *matCellDef="let r">
+              <td mat-cell *matCellDef="let r" data-label="Estado">
                 <span class="estado-badge" [class.pagado]="r.estado === 'Pagado'" [class.pendiente]="r.estado === 'Pendiente'">
                   {{ r.estado }}
                 </span>
@@ -244,7 +244,7 @@
             </ng-container>
             <ng-container matColumnDef="fechaPago">
               <th mat-header-cell *matHeaderCellDef>Fecha pago</th>
-              <td mat-cell *matCellDef="let r">{{ r.fechaPago ? (r.fechaPago | date:'dd/MM/yyyy') : '—' }}</td>
+              <td mat-cell *matCellDef="let r" data-label="Fecha pago">{{ r.fechaPago ? (r.fechaPago | date:'dd/MM/yyyy') : '—' }}</td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="cxcColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: cxcColumns;"></tr>
