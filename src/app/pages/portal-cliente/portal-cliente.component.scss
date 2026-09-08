@@ -66,7 +66,12 @@ $cream:  #FAF6F0;
   flex: 1;
   gap: 0;
 
-  @media (max-width: 700px) { grid-template-columns: 1fr; }
+  &.sin-sidebar { grid-template-columns: 1fr; }
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;   // el selector de hijos ocupa solo su alto
+  }
 }
 
 // ── Sidebar ───────────────────────────────────────
@@ -78,22 +83,37 @@ $cream:  #FAF6F0;
   h3 { font-size: 12px; font-weight: 700; color: #999; letter-spacing: 1px;
        text-transform: uppercase; margin: 0 0 12px; }
 
+  .hijos-lista { display: flex; flex-direction: column; gap: 4px; }
+
+  // En movil: no scroll horizontal — los hijos se muestran como pills que
+  // envuelven a la siguiente linea.
   @media (max-width: 700px) {
     border-right: none;
     border-bottom: 1px solid #e8e0d8;
-    padding: 12px;
-    display: flex; align-items: stretch; gap: 8px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    padding: 10px 12px;
 
-    h3 { display: none; }
+    h3 { margin-bottom: 8px; }
+
+    .hijos-lista { flex-direction: row; flex-wrap: wrap; gap: 8px; }
 
     .hijo-card {
-      flex: 0 0 auto;
-      padding: 8px 12px;
+      width: auto; flex: 0 1 auto;
+      gap: 8px;
+      padding: 5px 14px 5px 5px;
+      border: 1px solid #e8e0d8;
+      border-radius: 999px;
+
+      &.activo { border-color: $guinda; background: rgba($guinda, .08); }
+
+      .hijo-avatar { width: 26px; height: 26px; flex-shrink: 0; mat-icon { font-size: 16px; } }
+      .hijo-info {
+        flex-direction: row; align-items: center; gap: 6px; min-width: 0;
+        strong { font-size: 12.5px; white-space: nowrap; }
+        .hijo-nombre-full  { display: none; }
+        .hijo-nombre-corto { display: block; }
+        span   { display: none; }
+      }
     }
-    .hijo-info strong,
-    .hijo-info span { white-space: nowrap; }
   }
 }
 
@@ -102,7 +122,9 @@ $cream:  #FAF6F0;
 .hijo-card {
   display: flex; align-items: center; gap: 12px;
   padding: 12px; border-radius: 10px; cursor: pointer;
-  transition: background .15s;
+  transition: background .15s, border-color .15s;
+  width: 100%; text-align: left;
+  background: none; border: none; font: inherit; color: inherit;
 
   &:hover   { background: $cream; }
   &.activo  { background: rgba($guinda, .07); }
@@ -117,9 +139,10 @@ $cream:  #FAF6F0;
   }
 
   .hijo-info {
-    display: flex; flex-direction: column;
+    display: flex; flex-direction: column; min-width: 0;
     strong { font-size: 13px; color: #222; font-weight: 700; line-height: 1.3; }
     span   { font-size: 11px; color: #888; }
+    .hijo-nombre-corto { display: none; }
   }
 }
 
@@ -154,7 +177,7 @@ $cream:  #FAF6F0;
 
 // ── Resumen cards ─────────────────────────────────
 .resumen-cards {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+  display: grid; grid-template-columns: minmax(0, 380px); gap: 16px;
   margin-bottom: 24px;
 
   @media (max-width: 500px) { grid-template-columns: 1fr; }
@@ -175,7 +198,6 @@ $cream:  #FAF6F0;
   .resumen-sub   { font-size: 12px; opacity: .7; }
 
   &--pendiente { background: #fff3e0; mat-icon, .resumen-valor { color: #e65100; } .resumen-label { color: #bf360c; } }
-  &--pagado    { background: #e8f5e9; mat-icon, .resumen-valor { color: #2e7d32; } .resumen-label { color: #1b5e20; } }
 }
 
 // ── Tables ────────────────────────────────────────

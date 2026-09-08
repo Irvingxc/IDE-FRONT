@@ -18,26 +18,29 @@
     </div>
   </div>
 
-  <div class="portal-body">
+  <div class="portal-body" [class.sin-sidebar]="!cargandoHijos && hijos.length <= 1">
 
-    <!-- Sidebar hijos -->
-    <aside class="sidebar">
+    <!-- Sidebar hijos: solo si hay mas de un hijo que elegir -->
+    <aside class="sidebar" *ngIf="cargandoHijos || hijos.length > 1">
       <h3>Mis hijos</h3>
       <div *ngIf="cargandoHijos" class="sidebar-loading">
         <mat-spinner diameter="24"></mat-spinner>
       </div>
-      <div class="hijo-card"
-           *ngFor="let h of hijos"
-           [class.activo]="hijoSeleccionado?.identidad === h.identidad"
-           (click)="seleccionar(h)">
-        <div class="hijo-avatar">
-          <img *ngIf="h.foto" [src]="h.foto" alt="">
-          <mat-icon *ngIf="!h.foto">person</mat-icon>
-        </div>
-        <div class="hijo-info">
-          <strong>{{ h.nombreCompleto }}</strong>
-          <span>{{ h.grado }}</span>
-        </div>
+      <div class="hijos-lista">
+        <button type="button" class="hijo-card"
+             *ngFor="let h of hijos"
+             [class.activo]="hijoSeleccionado?.identidad === h.identidad"
+             (click)="seleccionar(h)">
+          <div class="hijo-avatar">
+            <img *ngIf="h.foto" [src]="h.foto" alt="">
+            <mat-icon *ngIf="!h.foto">person</mat-icon>
+          </div>
+          <div class="hijo-info">
+            <strong class="hijo-nombre-full">{{ h.nombreCompleto }}</strong>
+            <strong class="hijo-nombre-corto">{{ nombreCorto(h) }}</strong>
+            <span>{{ h.grado }}</span>
+          </div>
+        </button>
       </div>
     </aside>
 
@@ -58,14 +61,6 @@
             <span class="resumen-label">Saldo pendiente</span>
             <span class="resumen-valor">{{ svc.formatLps(totalPendiente) }}</span>
             <span class="resumen-sub">{{ pendientes.length }} cuota(s)</span>
-          </div>
-        </div>
-        <div class="resumen-card resumen-card--pagado">
-          <mat-icon>check_circle</mat-icon>
-          <div>
-            <span class="resumen-label">Total pagado {{ anio }}</span>
-            <span class="resumen-valor">{{ svc.formatLps(totalPagado) }}</span>
-            <span class="resumen-sub">{{ pagadas.length }} cuota(s)</span>
           </div>
         </div>
       </div>

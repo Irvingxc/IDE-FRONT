@@ -163,9 +163,13 @@ export class PortalClienteComponent implements OnInit {
         sumaActividades + (actividad.nota ?? 0), 0), 0);
   }
 
+  // Nombre corto (primeras dos palabras) para las pills del selector de hijos en movil,
+  // donde el nombre completo no cabe. Entre hermanos alcanza para distinguirlos.
+  nombreCorto(hijo: HijoDto): string {
+    return (hijo.nombreCompleto || '').split(/\s+/).slice(0, 2).join(' ');
+  }
+
   get pendientes(): PortalCxcDto[] { return this.cxc.filter(c => c.estado === 'Pendiente'); }
-  get pagadas():    PortalCxcDto[] { return this.cxc.filter(c => c.estado === 'Pagado'); }
 
   get totalPendiente(): number { return this.pendientes.reduce((s, c) => s + +c.monto, 0); }
-  get totalPagado():    number { return this.pagadas.reduce((s, c) => s + +c.monto, 0); }
 }
