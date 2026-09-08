@@ -8,6 +8,7 @@ export interface DashboardHomeResponse {
   facturasEmitidas: number;
   mesFacturas: string;
   pagosPendientes: number;
+  asistenciaHoy: number;
 }
 
 @Injectable({ providedIn: 'root' })

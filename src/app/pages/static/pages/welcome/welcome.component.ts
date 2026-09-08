@@ -108,10 +108,17 @@ export class WelcomeComponent implements OnInit {
           this.stats[1].value = data.facturasEmitidas.toString();
           this.stats[1].sub   = data.mesFacturas;
           this.stats[2].value = data.pagosPendientes.toString();
+
+          this.stats[3].value = `${data.asistenciaHoy}/${data.estudiantesActivos}`;
+          const pct = data.estudiantesActivos > 0
+            ? Math.round((data.asistenciaHoy / data.estudiantesActivos) * 100)
+            : 0;
+          this.stats[3].sub = `${pct}% de asistencia`;
         } else {
           this.stats[0].value = '0';
           this.stats[1].value = '0';
           this.stats[2].value = '0';
+          this.stats[3].value = '0';
         }
         this.loadingStats = false;
       },
