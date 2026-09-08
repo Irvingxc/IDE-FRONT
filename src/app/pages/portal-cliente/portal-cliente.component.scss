@@ -6,6 +6,7 @@ $cream:  #FAF6F0;
   min-height: 100vh;
   display: flex; flex-direction: column;
   background: $cream;
+  overflow-x: hidden;
 }
 
 // ── Header ────────────────────────────────────────
@@ -13,16 +14,17 @@ $cream:  #FAF6F0;
   background: $guinda;
   padding: 14px 24px;
   display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
 
   .portal-brand {
-    display: flex; align-items: center; gap: 12px;
-    img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid $gold; }
+    display: flex; align-items: center; gap: 12px; min-width: 0;
+    img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid $gold; flex-shrink: 0; }
     .brand-name { font-size: 18px; font-weight: 800; color: $gold; letter-spacing: 2px; }
     .brand-sub  { font-size: 11px; color: rgba(255,255,255,.6); }
   }
 
   .portal-user {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center; gap: 10px; min-width: 0;
     color: rgba(255,255,255,.85); font-size: 13px;
 
     .avatar {
@@ -30,11 +32,30 @@ $cream:  #FAF6F0;
       background: $gold; color: $guinda;
       font-size: 12px; font-weight: 800;
       display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .portal-user-nombre {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
     button {
       color: rgba(255,255,255,.85);
+      flex-shrink: 0;
     }
+  }
+
+  @media (max-width: 600px) {
+    padding: 12px 14px;
+
+    .portal-brand {
+      gap: 10px;
+      img { width: 36px; height: 36px; }
+      .brand-name { font-size: 16px; letter-spacing: 1.5px; }
+      .brand-sub  { font-size: 10px; }
+    }
+
+    .portal-user .portal-user-nombre { display: none; }
   }
 }
 
@@ -56,6 +77,24 @@ $cream:  #FAF6F0;
 
   h3 { font-size: 12px; font-weight: 700; color: #999; letter-spacing: 1px;
        text-transform: uppercase; margin: 0 0 12px; }
+
+  @media (max-width: 700px) {
+    border-right: none;
+    border-bottom: 1px solid #e8e0d8;
+    padding: 12px;
+    display: flex; align-items: stretch; gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    h3 { display: none; }
+
+    .hijo-card {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+    }
+    .hijo-info strong,
+    .hijo-info span { white-space: nowrap; }
+  }
 }
 
 .sidebar-loading { display: flex; justify-content: center; padding: 20px; }
@@ -87,7 +126,10 @@ $cream:  #FAF6F0;
 // ── Main ──────────────────────────────────────────
 .main-content {
   padding: 24px;
-  overflow-x: auto;
+  min-width: 0;
+  overflow-x: hidden;
+
+  @media (max-width: 600px) { padding: 16px 12px; }
 }
 
 .main-empty {
@@ -98,10 +140,10 @@ $cream:  #FAF6F0;
 }
 
 .section-title {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px;
   font-size: 18px; font-weight: 700; color: $guinda;
   margin-bottom: 20px;
-  mat-icon { font-size: 22px; }
+  mat-icon { font-size: 22px; flex-shrink: 0; }
 }
 
 .grado-badge {
@@ -122,6 +164,8 @@ $cream:  #FAF6F0;
   border-radius: 12px; padding: 20px;
   display: flex; align-items: center; gap: 16px;
 
+  @media (max-width: 600px) { padding: 16px; gap: 12px; }
+
   mat-icon { font-size: 36px; width: 36px; height: 36px; flex-shrink: 0; }
 
   > div { display: flex; flex-direction: column; gap: 2px; }
@@ -137,20 +181,30 @@ $cream:  #FAF6F0;
 // ── Tables ────────────────────────────────────────
 .tab-toolbar {
   padding: 16px 0 8px;
-  .anio-select { width: 120px; }
-  .periodo-select { width: 220px; }
+  display: flex; flex-wrap: wrap; gap: 12px;
+  .anio-select { width: 120px; max-width: 100%; }
+  .periodo-select { width: 220px; max-width: 100%; }
 }
 
 .loading-row {
   display: flex; justify-content: center; padding: 32px;
 }
 
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .portal-table {
   width: 100%;
 
-  th { font-size: 12px; font-weight: 700; color: #888; letter-spacing: .5px; }
+  th { font-size: 12px; font-weight: 700; color: #888; letter-spacing: .5px; white-space: nowrap; }
   td { font-size: 13px; color: #333; }
 }
+
+.table-scroll .portal-table { min-width: 560px; }
+.table-scroll .notas-resumen-table { min-width: 440px; }
 
 .estado-badge {
   display: inline-block; padding: 3px 10px; border-radius: 20px;
@@ -166,14 +220,25 @@ $cream:  #FAF6F0;
 .asistencia-toolbar {
   display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
 
-  .mes-select { width: 160px; }
+  .mes-select { width: 160px; max-width: 100%; }
 }
 
 .resumen-chips {
-  display: flex; gap: 8px; margin-left: auto;
+  display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto;
+
+  @media (max-width: 600px) { margin-left: 0; }
 }
 
-.portal-tabs { margin-top: 4px; }
+.portal-tabs {
+  margin-top: 4px;
+
+  ::ng-deep .mat-tab-label { min-width: 0; padding: 0 16px; opacity: .75; }
+  ::ng-deep .mat-tab-label-active { opacity: 1; }
+
+  @media (max-width: 600px) {
+    ::ng-deep .mat-tab-label { padding: 0 10px; height: 44px; font-size: 13px; }
+  }
+}
 
 // ── Notas ─────────────────────────────────────────
 .notas-empty {
@@ -206,10 +271,18 @@ $cream:  #FAF6F0;
   height: auto !important;
   padding: 14px 18px !important;
 
-  ::ng-deep .mat-content { align-items: center; }
+  ::ng-deep .mat-content { align-items: center; gap: 8px; min-width: 0; }
+
+  ::ng-deep .mat-expansion-panel-header-title { flex-wrap: wrap; min-width: 0; }
+  ::ng-deep .mat-expansion-panel-header-description { flex-grow: 0; flex-shrink: 0; margin-right: 0; }
 
   strong { font-size: 14px; color: $guinda; }
   .notas-clase-maestro { font-size: 12px; color: #888; margin-left: 10px; }
+
+  @media (max-width: 600px) {
+    padding: 12px 14px !important;
+    .notas-clase-maestro { margin-left: 0; flex-basis: 100%; }
+  }
 }
 
 .notas-clase-total {
@@ -227,6 +300,8 @@ $cream:  #FAF6F0;
 .notas-concepto {
   padding: 12px 18px;
   & + .notas-concepto { border-top: 1px dashed #eee; }
+
+  @media (max-width: 600px) { padding: 12px 14px; }
 }
 
 .notas-concepto-nombre {
@@ -237,7 +312,11 @@ $cream:  #FAF6F0;
 
 .notas-actividades-table {
   width: 100%;
+  min-width: 360px;
   border-collapse: collapse;
+  // Layout fijo: todas las tablas de conceptos de una misma clase alinean
+  // sus columnas igual, sin importar el largo del nombre de la actividad.
+  table-layout: fixed;
 
   th {
     font-size: 11px; font-weight: 700; color: #999;
@@ -248,9 +327,9 @@ $cream:  #FAF6F0;
     padding: 6px 8px;
     border-top: 1px solid #f2f2f2;
   }
-  th:last-child, td:last-child { text-align: right; font-weight: 700; }
-  th:nth-child(2), td:nth-child(2) { text-align: right; width: 110px; }
-  th:last-child { width: 110px; }
+  td:first-child { overflow-wrap: anywhere; }
+  th:nth-child(2), td:nth-child(2) { width: 130px; text-align: right; }
+  th:last-child,   td:last-child   { width: 110px; text-align: right; font-weight: 700; }
 
   .sin-calificar { color: #bbb; font-weight: 400; }
 }

@@ -11,7 +11,7 @@
     </div>
     <div class="portal-user" *ngIf="user$ | async as u">
       <span class="avatar">{{ u.nombre?.charAt(0) }}{{ u.apellido?.charAt(0) }}</span>
-      <span>{{ u.nombre }} {{ u.apellido }}</span>
+      <span class="portal-user-nombre">{{ u.nombre }} {{ u.apellido }}</span>
       <button mat-icon-button title="Cerrar sesión" (click)="cerrarSesion()">
         <mat-icon>logout</mat-icon>
       </button>
@@ -74,12 +74,12 @@
       <mat-tab-group [(selectedIndex)]="tabActiva" class="portal-tabs">
 
         <!-- Notas vista general -->
-        <mat-tab label="Notas vista general">
+        <mat-tab label="Notas">
           <ng-container *ngTemplateOutlet="periodoToolbar"></ng-container>
           <ng-container *ngTemplateOutlet="notasEstados"></ng-container>
 
-          <table mat-table [dataSource]="notas" class="portal-table notas-resumen-table"
-                 *ngIf="!cargandoNotas && notas.length > 0">
+          <div class="table-scroll" *ngIf="!cargandoNotas && notas.length > 0">
+          <table mat-table [dataSource]="notas" class="portal-table notas-resumen-table">
             <ng-container matColumnDef="claseNombre">
               <th mat-header-cell *matHeaderCellDef>Materia</th>
               <td mat-cell *matCellDef="let c">{{ c.claseNombre }}</td>
@@ -101,10 +101,11 @@
             <tr mat-header-row *matHeaderRowDef="notasResumenColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: notasResumenColumns;"></tr>
           </table>
+          </div>
         </mat-tab>
 
         <!-- Notas detalladas -->
-        <mat-tab label="Notas detalladas">
+        <mat-tab label="Detalle">
           <ng-container *ngTemplateOutlet="periodoToolbar"></ng-container>
           <ng-container *ngTemplateOutlet="notasEstados"></ng-container>
 
@@ -126,6 +127,7 @@
 
               <div class="notas-concepto" *ngFor="let concepto of clase.conceptos">
                 <div class="notas-concepto-nombre">{{ concepto.nombre }}</div>
+                <div class="table-scroll">
                 <table class="notas-actividades-table">
                   <thead>
                     <tr>
@@ -142,6 +144,7 @@
                     </tr>
                   </tbody>
                 </table>
+                </div>
               </div>
             </mat-expansion-panel>
           </mat-accordion>
@@ -179,7 +182,8 @@
             <p>Sin días hábiles registrados para este mes.</p>
           </div>
 
-          <table mat-table [dataSource]="asistencia" class="portal-table" *ngIf="!cargandoAsistencia && asistencia.length > 0">
+          <div class="table-scroll" *ngIf="!cargandoAsistencia && asistencia.length > 0">
+          <table mat-table [dataSource]="asistencia" class="portal-table">
             <ng-container matColumnDef="fecha">
               <th mat-header-cell *matHeaderCellDef>Fecha</th>
               <td mat-cell *matCellDef="let r">{{ r.fecha | date:'dd/MM/yyyy' }}</td>
@@ -199,10 +203,11 @@
             <tr mat-header-row *matHeaderRowDef="asistenciaColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: asistenciaColumns;"></tr>
           </table>
+          </div>
         </mat-tab>
 
         <!-- Estado de cuenta -->
-        <mat-tab label="Estado de cuenta">
+        <mat-tab label="Cuenta">
           <div class="tab-toolbar">
             <mat-form-field appearance="outline" class="anio-select">
               <mat-label>Año</mat-label>
@@ -216,7 +221,8 @@
             <mat-spinner diameter="28"></mat-spinner>
           </div>
 
-          <table mat-table [dataSource]="cxc" class="portal-table" *ngIf="!cargandoCxc">
+          <div class="table-scroll" *ngIf="!cargandoCxc">
+          <table mat-table [dataSource]="cxc" class="portal-table">
             <ng-container matColumnDef="mes">
               <th mat-header-cell *matHeaderCellDef>Mes</th>
               <td mat-cell *matCellDef="let r">{{ svc.nombreMes(r.mes) }} {{ r.anio }}</td>
@@ -251,6 +257,7 @@
               <td class="mat-cell" colspan="6" style="text-align:center;padding:24px">Sin registros para este año.</td>
             </tr>
           </table>
+          </div>
         </mat-tab>
 
       </mat-tab-group>
