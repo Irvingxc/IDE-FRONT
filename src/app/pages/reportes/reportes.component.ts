@@ -84,6 +84,7 @@ export class ReportesComponent implements OnInit {
   notasPeriodos: PeriodoResponse[] = [];
   notasIdPeriodo: number | null = null;
   notasIdGrado: number | null = null;
+  notasSeccion: string | null = null;
   notasAlumnos: AlumnoGrado[] = [];
   notasAlumnoIdentidad: string | null = null;
   notasAlumnoFiltro = '';
@@ -92,14 +93,31 @@ export class ReportesComponent implements OnInit {
   notasBuscado = false;
   reporteNotas: ReporteNotaClase[] = [];
 
+  private seccionDe(a: AlumnoGrado): string {
+    return a.seccion?.trim() || '—';
+  }
+
+  get notasSecciones(): string[] {
+    return Array.from(new Set(this.notasAlumnos.map(a => this.seccionDe(a)))).sort();
+  }
+
   get notasAlumnosFiltrados(): AlumnoGrado[] {
+    let list = this.notasAlumnos;
+    if (this.notasSeccion) list = list.filter(a => this.seccionDe(a) === this.notasSeccion);
     const q = this.notasAlumnoFiltro.trim().toLowerCase();
-    if (!q) return this.notasAlumnos;
-    return this.notasAlumnos.filter(a => a.nombreCompleto.toLowerCase().includes(q));
+    if (q) list = list.filter(a => a.nombreCompleto.toLowerCase().includes(q));
+    return list;
   }
 
   get notasAlumnoSeleccionado(): AlumnoGrado | null {
     return this.notasAlumnos.find(a => a.identidad === this.notasAlumnoIdentidad) ?? null;
+  }
+
+  get filtrosNotasCompletos(): boolean {
+    return this.notasIdGrado != null
+        && this.notasSeccion != null
+        && this.notasAlumnoIdentidad != null
+        && this.notasIdPeriodo != null;
   }
 
   constructor(
@@ -126,6 +144,7 @@ export class ReportesComponent implements OnInit {
 
   onNotasGradoChange(): void {
     this.notasAlumnos = [];
+    this.notasSeccion = null;
     this.notasAlumnoIdentidad = null;
     this.notasAlumnoFiltro = '';
     this.reporteNotas = [];
@@ -134,9 +153,21 @@ export class ReportesComponent implements OnInit {
 
     this.cargandoAlumnos = true;
     this.academicoService.alumnosPorGrado(this.notasIdGrado).subscribe({
-      next: (a) => { this.notasAlumnos = a; this.cargandoAlumnos = false; },
+      next: (a) => {
+        this.notasAlumnos = a;
+        this.cargandoAlumnos = false;
+        // Si el grado tiene una sola sección, la deja seleccionada
+        if (this.notasSecciones.length === 1) this.notasSeccion = this.notasSecciones[0];
+      },
       error: () => { this.cargandoAlumnos = false; this.snack.open('No se pudieron cargar los alumnos', '', { duration: 3000 }); }
     });
+  }
+
+  onNotasSeccionChange(): void {
+    this.notasAlumnoIdentidad = null;
+    this.notasAlumnoFiltro = '';
+    this.reporteNotas = [];
+    this.notasBuscado = false;
   }
 
   onFiltroAlumnoChange(): void {
@@ -166,6 +197,119 @@ export class ReportesComponent implements OnInit {
   totalClaseNotas(clase: ReporteNotaClase): number {
     return clase.conceptos.reduce((s, c) =>
       s + c.actividades.reduce((sa, a) => sa + (a.nota ?? 0), 0), 0);
+  }
+
+  get promedioNotas(): number {
+    if (!this.reporteNotas.length) return 0;
+    return this.reporteNotas.reduce((s, c) => s + this.totalClaseNotas(c), 0) / this.reporteNotas.length;
+  }
+
+  descargandoNotasPdf = false;
+
+  /**
+   * Genera y descarga un PDF con el resumen de notas del alumno filtrado
+   * (mismo formato que el PDF del Portal de Padres).
+   */
+  async descargarNotasPdf(): Promise<void> {
+    const alumno = this.notasAlumnoSeleccionado;
+    if (this.descargandoNotasPdf || !alumno || this.reporteNotas.length === 0) return;
+    this.descargandoNotasPdf = true;
+    try {
+      const { jsPDF } = await import('jspdf');
+      const autoTable = (await import('jspdf-autotable')).default;
+
+      const GUINDA: [number, number, number] = [107, 15, 26];
+      const CREMA:  [number, number, number] = [250, 246, 240];
+      const periodo = this.notasPeriodos.find(p => p.id === this.notasIdPeriodo);
+      const gradoNombre = this.grados.find(g => g.idGrado === this.notasIdGrado)?.gradoNombre ?? '—';
+      const anioLectivo = periodo?.anioLectivo ?? new Date().getFullYear();
+
+      const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const M = 48;
+
+      // ── Cabecera ──
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...GUINDA);
+      doc.setFontSize(14);
+      doc.text(`Reporte de Notas · ${periodo?.nombre ?? 'Período'}`, pageW / 2, 52, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(90);
+      doc.text(
+        'Institute for the Development of Excellence (IDE) · Danlí, El Paraíso, Honduras',
+        pageW / 2, 68, { align: 'center' });
+
+      doc.setDrawColor(...GUINDA);
+      doc.setLineWidth(1.5);
+      doc.line(M, 78, pageW - M, 78);
+
+      // ── Datos del estudiante ──
+      let y = 100;
+      const info: [string, string][] = [
+        ['Estudiante:',       alumno.nombreCompleto],
+        ['Identidad:',        alumno.identidad],
+        ['Grado:',            gradoNombre],
+        ['Sección:',          alumno.seccion ?? '—'],
+        ['Año lectivo:',      String(anioLectivo)],
+        ['Fecha de emisión:', new Date().toLocaleDateString('es-HN')],
+      ];
+      if (alumno.nivelIngles) info.splice(4, 0, ['Nivel de inglés:', alumno.nivelIngles]);
+      doc.setFontSize(10);
+      info.forEach(([label, valor]) => {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...GUINDA);
+        doc.text(label, M, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(30);
+        doc.text(valor, M + 110, y);
+        y += 16;
+      });
+
+      // ── Tabla resumen ──
+      const filas = this.reporteNotas.map(c => [
+        c.claseNombre,
+        c.maestroNombre || '—',
+        `${this.totalClaseNotas(c).toFixed(2)} / 100`,
+        this.totalClaseNotas(c) >= 70 ? 'Aprobado' : 'Reprobado',
+      ]);
+
+      autoTable(doc, {
+        startY: y + 10,
+        head: [['Materia', 'Maestro', 'Nota', 'Estado']],
+        body: filas,
+        styles:            { font: 'helvetica', fontSize: 9, cellPadding: 5, textColor: 40, lineColor: [230, 224, 216], lineWidth: 0.5 },
+        headStyles:        { fillColor: GUINDA, textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles:{ fillColor: CREMA },
+        columnStyles:      { 2: { halign: 'right' }, 3: { halign: 'center' } },
+        margin:            { left: M, right: M },
+      });
+
+      const finalY = (doc as any).lastAutoTable.finalY as number;
+
+      // ── Promedio ──
+      doc.setDrawColor(...GUINDA);
+      doc.setLineWidth(1.5);
+      doc.line(M, finalY + 14, pageW - M, finalY + 14);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(...GUINDA);
+      doc.text('Promedio del período:', pageW - M - 185, finalY + 33);
+      doc.text(`${this.promedioNotas.toFixed(2)} / 100`, pageW - M, finalY + 33, { align: 'right' });
+
+      // ── Pie ──
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(140);
+      doc.text('ETHICS · SCIENCE · TECHNOLOGY', pageW / 2, pageH - 28, { align: 'center' });
+
+      const limpio = (s: string) => (s || '').trim().replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ');
+      doc.save(`NOTAS ${limpio(alumno.nombreCompleto)} ${limpio(periodo?.nombre ?? 'PERIODO')}.pdf`);
+    } finally {
+      this.descargandoNotasPdf = false;
+    }
   }
 
   sincronizarZlink(): void {

@@ -337,13 +337,21 @@
             </mat-select>
           </mat-form-field>
 
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Sección</mat-label>
+            <mat-select [(ngModel)]="notasSeccion" (selectionChange)="onNotasSeccionChange()"
+                        [disabled]="notasIdGrado == null || cargandoAlumnos || notasSecciones.length === 0">
+              <mat-option *ngFor="let s of notasSecciones" [value]="s">{{ s }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
           <mat-form-field appearance="outline" class="filtro-field-md">
             <mat-label>Alumno</mat-label>
             <input matInput
                    [matAutocomplete]="autoAlumnoNotas"
                    [(ngModel)]="notasAlumnoFiltro"
                    (ngModelChange)="onFiltroAlumnoChange()"
-                   [disabled]="notasIdGrado == null || cargandoAlumnos"
+                   [disabled]="notasIdGrado == null || notasSeccion == null || cargandoAlumnos"
                    placeholder="Escribe el nombre...">
             <mat-icon matSuffix>{{ cargandoAlumnos ? 'hourglass_empty' : 'search' }}</mat-icon>
             <mat-autocomplete #autoAlumnoNotas="matAutocomplete">
@@ -370,6 +378,14 @@
           <button mat-stroked-button (click)="cargarReporteNotas()"
                   [disabled]="!notasAlumnoIdentidad || notasIdPeriodo == null">
             <mat-icon>refresh</mat-icon> Actualizar
+          </button>
+
+          <button mat-flat-button color="primary"
+                  *ngIf="reporteNotas.length > 0"
+                  [disabled]="descargandoNotasPdf || !filtrosNotasCompletos"
+                  (click)="descargarNotasPdf()">
+            <mat-icon>{{ descargandoNotasPdf ? 'hourglass_empty' : 'download' }}</mat-icon>
+            {{ descargandoNotasPdf ? 'Generando…' : 'Descargar PDF' }}
           </button>
         </div>
 
