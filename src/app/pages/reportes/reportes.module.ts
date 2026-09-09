@@ -17,6 +17,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, MAT_DATE_LOCALE, DateAdapter, NativeDateAdapter } from '@angular/material/core';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
   override format(date: Date): string {
@@ -47,6 +48,7 @@ class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
     MatDatepickerModule,
     MatNativeDateModule,
     MatSnackBarModule,
+    MatAutocompleteModule,
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es-HN' },

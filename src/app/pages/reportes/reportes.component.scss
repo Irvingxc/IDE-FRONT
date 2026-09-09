@@ -113,3 +113,88 @@
   mat-icon { font-size: 40px; width: 40px; height: 40px; color: #d4a017; }
   span { font-size: 15px; font-weight: 500; }
 }
+
+.opt-extra { color: #999; font-size: 12px; margin-left: 4px; }
+
+// ── Reporte de notas por alumno ──
+.notas-reporte {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notas-reporte-encabezado {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #6B0F1A;
+
+  strong { font-size: 16px; color: #6B0F1A; }
+  span   { font-size: 13px; color: #666; }
+}
+
+.notas-clase {
+  border: 1px solid #e6e0d8;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.notas-clase-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #faf6f0;
+
+  strong { font-size: 14px; color: #333; }
+  .notas-clase-maestro { display: block; font-size: 12px; color: #888; margin-top: 2px; }
+}
+
+.notas-clase-total {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+
+  &.total-bien   { background: #e8f5e9; color: #2e7d32; }
+  &.total-alerta { background: #fff3f3; color: #c62828; }
+}
+
+.notas-concepto {
+  padding: 8px 16px 12px;
+  border-top: 1px solid #f0ebe3;
+
+  .notas-concepto-nombre {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #6B0F1A;
+    margin-bottom: 4px;
+  }
+}
+
+.notas-actividades {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    text-align: left;
+    font-weight: 600;
+    color: #999;
+    font-size: 11px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+  }
+  td { padding: 5px 8px; border-top: 1px solid #f2efe9; }
+  th:last-child, td:last-child { text-align: right; width: 120px; }
+
+  .act-nota .sin-calificar { color: #bbb; }
+  .act-posible { color: #aaa; font-size: 12px; }
+}

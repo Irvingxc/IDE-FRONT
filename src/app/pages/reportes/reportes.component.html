@@ -328,10 +328,107 @@
     <!-- ═══ NOTAS ═══ -->
     <mat-tab label="Notas">
       <div class="tab-content">
-        <div class="en-construccion">
-          <mat-icon>construction</mat-icon>
-          <span>Reporte de notas — En construcción</span>
+
+        <div class="asistencia-filtros">
+          <mat-form-field appearance="outline" class="filtro-field-md">
+            <mat-label>Grado</mat-label>
+            <mat-select [(ngModel)]="notasIdGrado" (selectionChange)="onNotasGradoChange()">
+              <mat-option *ngFor="let g of grados" [value]="g.idGrado">{{ g.gradoNombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-md">
+            <mat-label>Alumno</mat-label>
+            <input matInput
+                   [matAutocomplete]="autoAlumnoNotas"
+                   [(ngModel)]="notasAlumnoFiltro"
+                   (ngModelChange)="onFiltroAlumnoChange()"
+                   [disabled]="notasIdGrado == null || cargandoAlumnos"
+                   placeholder="Escribe el nombre...">
+            <mat-icon matSuffix>{{ cargandoAlumnos ? 'hourglass_empty' : 'search' }}</mat-icon>
+            <mat-autocomplete #autoAlumnoNotas="matAutocomplete">
+              <mat-option *ngFor="let a of notasAlumnosFiltrados"
+                          [value]="a.nombreCompleto"
+                          (onSelectionChange)="$event.isUserInput && onAlumnoElegido(a)">
+                {{ a.nombreCompleto }}
+                <small class="opt-extra" *ngIf="a.seccion">· Sec. {{ a.seccion }}</small>
+                <small class="opt-extra" *ngIf="a.nivelIngles">· {{ a.nivelIngles }}</small>
+              </mat-option>
+              <mat-option *ngIf="!cargandoAlumnos && notasAlumnos.length && !notasAlumnosFiltrados.length" disabled>
+                Sin coincidencias
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Período</mat-label>
+            <mat-select [(ngModel)]="notasIdPeriodo" (selectionChange)="cargarReporteNotas()">
+              <mat-option *ngFor="let p of notasPeriodos" [value]="p.id">{{ p.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-stroked-button (click)="cargarReporteNotas()"
+                  [disabled]="!notasAlumnoIdentidad || notasIdPeriodo == null">
+            <mat-icon>refresh</mat-icon> Actualizar
+          </button>
         </div>
+
+        <div *ngIf="cargandoNotas" class="loading-row">
+          <mat-icon class="spin-icon">sync</mat-icon>
+          <span>Cargando notas...</span>
+        </div>
+
+        <div *ngIf="!cargandoNotas && !notasBuscado" class="en-construccion">
+          <mat-icon>assessment</mat-icon>
+          <span>Selecciona grado, alumno y período para ver las notas.</span>
+        </div>
+
+        <div *ngIf="!cargandoNotas && notasBuscado && reporteNotas.length === 0" class="en-construccion">
+          <mat-icon>info</mat-icon>
+          <span>Sin clases o notas registradas para este alumno en el período seleccionado.</span>
+        </div>
+
+        <div *ngIf="!cargandoNotas && reporteNotas.length > 0" class="notas-reporte">
+
+          <div class="notas-reporte-encabezado" *ngIf="notasAlumnoSeleccionado as al">
+            <strong>{{ al.nombreCompleto }}</strong>
+            <span *ngIf="al.seccion">Sección {{ al.seccion }}</span>
+            <span *ngIf="al.nivelIngles">{{ al.nivelIngles }}</span>
+          </div>
+
+          <div class="notas-clase" *ngFor="let clase of reporteNotas">
+            <div class="notas-clase-header">
+              <div>
+                <strong>{{ clase.claseNombre }}</strong>
+                <span class="notas-clase-maestro" *ngIf="clase.maestroNombre">{{ clase.maestroNombre }}</span>
+              </div>
+              <span class="notas-clase-total"
+                    [class.total-bien]="totalClaseNotas(clase) >= 70"
+                    [class.total-alerta]="totalClaseNotas(clase) < 70">
+                {{ totalClaseNotas(clase) | number:'1.0-2' }} / 100
+              </span>
+            </div>
+
+            <div class="notas-concepto" *ngFor="let concepto of clase.conceptos">
+              <div class="notas-concepto-nombre">{{ concepto.nombre }}</div>
+              <table class="notas-actividades">
+                <thead>
+                  <tr><th>Actividad</th><th>Nota</th></tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let act of concepto.actividades">
+                    <td>{{ act.nombre }}</td>
+                    <td class="act-nota">
+                      <span [class.sin-calificar]="act.nota === null">{{ act.nota ?? '—' }}</span>
+                      <span class="act-posible"> / {{ act.porcentaje }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
       </div>
     </mat-tab>
 

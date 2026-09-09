@@ -4,6 +4,9 @@ import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.servi
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { FeriadosDialogComponent } from './feriados-dialog/feriados-dialog.component';
+import {
+  AcademicoService, PeriodoResponse, AlumnoGrado, ReporteNotaClase
+} from '@app/services/academico/academico.service';
 
 @Component({
   selector: 'app-reportes',
@@ -77,9 +80,32 @@ export class ReportesComponent implements OnInit {
   // ── Sincronizacion con Zlink (compartida por los tabs) ──
   sincronizando = false;
 
+  // ── Notas (reporte por alumno) ───────────────────────────
+  notasPeriodos: PeriodoResponse[] = [];
+  notasIdPeriodo: number | null = null;
+  notasIdGrado: number | null = null;
+  notasAlumnos: AlumnoGrado[] = [];
+  notasAlumnoIdentidad: string | null = null;
+  notasAlumnoFiltro = '';
+  cargandoAlumnos = false;
+  cargandoNotas = false;
+  notasBuscado = false;
+  reporteNotas: ReporteNotaClase[] = [];
+
+  get notasAlumnosFiltrados(): AlumnoGrado[] {
+    const q = this.notasAlumnoFiltro.trim().toLowerCase();
+    if (!q) return this.notasAlumnos;
+    return this.notasAlumnos.filter(a => a.nombreCompleto.toLowerCase().includes(q));
+  }
+
+  get notasAlumnoSeleccionado(): AlumnoGrado | null {
+    return this.notasAlumnos.find(a => a.identidad === this.notasAlumnoIdentidad) ?? null;
+  }
+
   constructor(
     private asistenciaService: AsistenciaService,
     private catalogoService: CatalogoService,
+    private academicoService: AcademicoService,
     private snack: MatSnackBar,
     private dialog: MatDialog
   ) {}
@@ -88,6 +114,58 @@ export class ReportesComponent implements OnInit {
     this.catalogoService.getGrados().subscribe(g => this.grados = g);
     this.cargarAsistencia();
     this.cargarEmpleados();
+
+    this.academicoService.listarPeriodos().subscribe(p => {
+      this.notasPeriodos = p;
+      const activo = p.find(x => x.activo);
+      this.notasIdPeriodo = activo?.id ?? p[0]?.id ?? null;
+    });
+  }
+
+  // ── Notas ──
+
+  onNotasGradoChange(): void {
+    this.notasAlumnos = [];
+    this.notasAlumnoIdentidad = null;
+    this.notasAlumnoFiltro = '';
+    this.reporteNotas = [];
+    this.notasBuscado = false;
+    if (this.notasIdGrado == null) return;
+
+    this.cargandoAlumnos = true;
+    this.academicoService.alumnosPorGrado(this.notasIdGrado).subscribe({
+      next: (a) => { this.notasAlumnos = a; this.cargandoAlumnos = false; },
+      error: () => { this.cargandoAlumnos = false; this.snack.open('No se pudieron cargar los alumnos', '', { duration: 3000 }); }
+    });
+  }
+
+  onFiltroAlumnoChange(): void {
+    const sel = this.notasAlumnoSeleccionado;
+    if (sel && this.notasAlumnoFiltro === sel.nombreCompleto) return; // el texto lo puso la selección
+    this.notasAlumnoIdentidad = null;
+    this.reporteNotas = [];
+    this.notasBuscado = false;
+  }
+
+  onAlumnoElegido(a: AlumnoGrado): void {
+    this.notasAlumnoIdentidad = a.identidad;
+    this.notasAlumnoFiltro = a.nombreCompleto;
+    this.cargarReporteNotas();
+  }
+
+  cargarReporteNotas(): void {
+    if (!this.notasAlumnoIdentidad || this.notasIdPeriodo == null) return;
+    this.cargandoNotas = true;
+    this.notasBuscado = true;
+    this.academicoService.reporteNotasAlumno(this.notasAlumnoIdentidad, this.notasIdPeriodo).subscribe({
+      next: (r) => { this.reporteNotas = r; this.cargandoNotas = false; },
+      error: () => { this.reporteNotas = []; this.cargandoNotas = false; this.snack.open('No se pudo cargar el reporte de notas', '', { duration: 3000 }); }
+    });
+  }
+
+  totalClaseNotas(clase: ReporteNotaClase): number {
+    return clase.conceptos.reduce((s, c) =>
+      s + c.actividades.reduce((sa, a) => sa + (a.nota ?? 0), 0), 0);
   }
 
   sincronizarZlink(): void {

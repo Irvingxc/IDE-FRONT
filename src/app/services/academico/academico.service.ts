@@ -127,6 +127,35 @@ export interface GuardarNotaActividadItem {
   nota:        number | null;
 }
 
+export interface AlumnoGrado {
+  identidad:      string;
+  nombreCompleto: string;
+  seccion:        string | null;
+  nivelIngles:    string | null;
+}
+
+export interface ReporteNotaActividad {
+  id:         number;
+  nombre:     string;
+  porcentaje: number;
+  orden:      number;
+  nota:       number | null;
+}
+
+export interface ReporteNotaConcepto {
+  id:          number;
+  nombre:      string;
+  orden:       number;
+  actividades: ReporteNotaActividad[];
+}
+
+export interface ReporteNotaClase {
+  idClase:       number;
+  claseNombre:   string;
+  maestroNombre: string | null;
+  conceptos:     ReporteNotaConcepto[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class AcademicoService {
   private base = `${environment.url}api/Academico`;
@@ -232,5 +261,17 @@ export class AcademicoService {
   guardarNotasActividad(idClase: number, idPeriodo: number, notas: GuardarNotaActividadItem[]): Observable<void> {
     const params = new HttpParams().set('idClase', idClase).set('idPeriodo', idPeriodo);
     return this.http.put<void>(`${this.base}/notas-actividad`, notas, { params });
+  }
+
+  // ── Reporte de notas por alumno (modulo Reportes) ──
+
+  alumnosPorGrado(idGrado: number): Observable<AlumnoGrado[]> {
+    const params = new HttpParams().set('idGrado', idGrado);
+    return this.http.get<AlumnoGrado[]>(`${this.base}/alumnos-por-grado`, { params });
+  }
+
+  reporteNotasAlumno(identidad: string, idPeriodo: number): Observable<ReporteNotaClase[]> {
+    const params = new HttpParams().set('identidad', identidad).set('idPeriodo', idPeriodo);
+    return this.http.get<ReporteNotaClase[]>(`${this.base}/reporte-notas`, { params });
   }
 }
