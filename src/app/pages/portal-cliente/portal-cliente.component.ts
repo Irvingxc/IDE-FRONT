@@ -46,8 +46,9 @@ export class PortalClienteComponent implements OnInit {
 
   readonly cxcColumns  = ['mes', 'producto', 'monto', 'vence', 'estado', 'fechaPago'];
   readonly facColumns  = ['noFactura', 'fecha', 'total', 'estado'];
-  readonly notasResumenColumns = ['claseNombre', 'maestroNombre', 'total'];
   readonly asistenciaColumns = ['fecha', 'estado', 'horaMarca'];
+
+  descargandoPdf = false;
 
   constructor(
     private store: Store<fromRoot.State>,
@@ -161,6 +162,113 @@ export class PortalClienteComponent implements OnInit {
     return clase.conceptos.reduce((sumaConceptos, concepto) =>
       sumaConceptos + concepto.actividades.reduce((sumaActividades, actividad) =>
         sumaActividades + (actividad.nota ?? 0), 0), 0);
+  }
+
+  get promedioNotas(): number {
+    if (!this.notas.length) return 0;
+    return this.notas.reduce((s, c) => s + this.totalClase(c), 0) / this.notas.length;
+  }
+
+  /**
+   * Genera y descarga (automatico) un PDF con el resumen de notas del periodo
+   * seleccionado, siguiendo el formato institucional (guinda, carta, cabecera IDE).
+   */
+  async descargarNotas(): Promise<void> {
+    if (this.descargandoPdf || !this.hijoSeleccionado || this.notas.length === 0) return;
+    this.descargandoPdf = true;
+    try {
+      const { jsPDF } = await import('jspdf');
+      const autoTable = (await import('jspdf-autotable')).default;
+
+      const GUINDA: [number, number, number] = [107, 15, 26];
+      const CREMA:  [number, number, number] = [250, 246, 240];
+      const periodo = this.periodos.find(p => p.id === this.periodoSeleccionadoId);
+      const anioLectivo = periodo?.anioLectivo ?? this.anio;
+
+      const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const M = 48;
+
+      // ── Cabecera ────────────────────────────────
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...GUINDA);
+      doc.setFontSize(14);
+      doc.text(`Reporte de Notas · ${periodo?.nombre ?? 'Período'}`, pageW / 2, 52, { align: 'center' });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(90);
+      doc.text(
+        'Institute for the Development of Excellence (IDE) · Danlí, El Paraíso, Honduras',
+        pageW / 2, 68, { align: 'center' });
+
+      doc.setDrawColor(...GUINDA);
+      doc.setLineWidth(1.5);
+      doc.line(M, 78, pageW - M, 78);
+
+      // ── Datos del estudiante ────────────────────
+      let y = 100;
+      const info: [string, string][] = [
+        ['Estudiante:',        this.hijoSeleccionado.nombreCompleto],
+        ['Identidad:',         this.hijoSeleccionado.identidad],
+        ['Grado:',             this.hijoSeleccionado.grado ?? '—'],
+        ['Año lectivo:',       String(anioLectivo)],
+        ['Fecha de emisión:',  new Date().toLocaleDateString('es-HN')],
+      ];
+      doc.setFontSize(10);
+      info.forEach(([label, valor]) => {
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...GUINDA);
+        doc.text(label, M, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(30);
+        doc.text(valor, M + 96, y);
+        y += 16;
+      });
+
+      // ── Tabla resumen ───────────────────────────
+      const filas = this.notas.map(c => [
+        c.claseNombre,
+        c.maestroNombre || '—',
+        `${this.totalClase(c).toFixed(2)} / 100`,
+        this.totalClase(c) >= 70 ? 'Aprobado' : 'Reprobado',
+      ]);
+
+      autoTable(doc, {
+        startY: y + 10,
+        head: [['Materia', 'Maestro', 'Nota', 'Estado']],
+        body: filas,
+        styles:            { font: 'helvetica', fontSize: 9, cellPadding: 5, textColor: 40, lineColor: [230, 224, 216], lineWidth: 0.5 },
+        headStyles:        { fillColor: GUINDA, textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles:{ fillColor: CREMA },
+        columnStyles:      { 2: { halign: 'right' }, 3: { halign: 'center' } },
+        margin:            { left: M, right: M },
+      });
+
+      const finalY = (doc as any).lastAutoTable.finalY as number;
+
+      // ── Promedio ────────────────────────────────
+      doc.setDrawColor(...GUINDA);
+      doc.setLineWidth(1.5);
+      doc.line(M, finalY + 14, pageW - M, finalY + 14);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(...GUINDA);
+      doc.text('Promedio del período:', pageW - M - 185, finalY + 33);
+      doc.text(`${this.promedioNotas.toFixed(2)} / 100`, pageW - M, finalY + 33, { align: 'right' });
+
+      // ── Pie ─────────────────────────────────────
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(140);
+      doc.text('ETHICS · SCIENCE · TECHNOLOGY', pageW / 2, pageH - 28, { align: 'center' });
+
+      const limpio = (s: string) => (s || '').trim().replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ');
+      doc.save(`NOTAS ${limpio(this.hijoSeleccionado.nombreCompleto)} ${limpio(periodo?.nombre ?? 'PERIODO')}.pdf`);
+    } finally {
+      this.descargandoPdf = false;
+    }
   }
 
   // Nombre corto (primeras dos palabras) para las pills del selector de hijos en movil,

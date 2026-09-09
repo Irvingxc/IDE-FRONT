@@ -203,9 +203,28 @@ $cream:  #FAF6F0;
 // ── Tables ────────────────────────────────────────
 .tab-toolbar {
   padding: 16px 0 8px;
-  display: flex; flex-wrap: wrap; gap: 12px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
   .anio-select { width: 120px; max-width: 100%; }
   .periodo-select { width: 220px; max-width: 100%; }
+
+  // El mat-form-field outline reserva ~1.25em abajo para el subscript (hint/
+  // error) que aca no se usa. Se recorta para que el select y el boton
+  // "Descargar notas" queden centrados entre si.
+  ::ng-deep .mat-form-field-wrapper { margin-bottom: -1.25em; }
+}
+
+.btn-descargar-notas {
+  height: 40px;
+  background: #2e7d32 !important;
+  color: #fff !important;
+  font-weight: 700;
+
+  &:hover:not([disabled]) { background: #276b2b !important; }
+  &[disabled] { opacity: .55; }
+
+  mat-icon { margin-right: 4px; font-size: 18px; height: 18px; width: 18px; }
+
+  @media (max-width: 500px) { width: 100%; }
 }
 
 .loading-row {
@@ -226,23 +245,28 @@ $cream:  #FAF6F0;
 }
 
 .table-scroll .portal-table { min-width: 560px; }
-.table-scroll .notas-resumen-table { min-width: 440px; }
 
 // ── Tablas en modo tarjeta (movil) ────────────────
-// En pantallas chicas, notas-resumen y estado de cuenta dejan de ser tabla
+// En pantallas chicas, estado de cuenta deja de ser tabla
 // (que obligaba a scroll horizontal) y cada fila se apila como tarjeta
 // etiqueta:valor. Las etiquetas salen del atributo data-label de cada <td>.
+//
+// Se usa ::ng-deep porque <thead>/<tbody> los crea el CDK en runtime (no
+// estan en la plantilla) y un selector con encapsulacion no los alcanza:
+// sin esto, el <tbody> sigue siendo table-row-group, el navegador arma una
+// tabla anonima que se encoge al contenido y las tarjetas salen angostas.
 @media (max-width: 640px) {
   .table-scroll { overflow-x: visible; }
-  .table-scroll .portal-table.card-movil { min-width: 0; }
 
-  .portal-table.card-movil {
+  :host ::ng-deep .portal-table.card-movil {
     display: block;
+    min-width: 0 !important;
+    width: 100%;
 
     thead, .mat-header-row { display: none; }
-    tbody { display: block; }
+    tbody { display: block; width: 100%; }
 
-    .mat-row, tr.mat-row {
+    .mat-row {
       display: block;
       height: auto;                 // Material fuerza tr.mat-row { height: 48px }
       border: 1px solid #e8e0d8;
@@ -252,7 +276,7 @@ $cream:  #FAF6F0;
       margin-bottom: 10px;
     }
 
-    .mat-cell, td.mat-cell {
+    .mat-cell {
       display: flex; align-items: center; justify-content: space-between;
       gap: 16px;
       min-height: 0;
@@ -379,10 +403,6 @@ $cream:  #FAF6F0;
   &.total-alerta { color: #e65100; background: #fff3e0; }
 }
 
-.notas-resumen-table {
-  td, th { padding: 4px 10px; }
-}
-
 .notas-concepto {
   padding: 12px 18px;
   & + .notas-concepto { border-top: 1px dashed #eee; }
@@ -398,7 +418,6 @@ $cream:  #FAF6F0;
 
 .notas-actividades-table {
   width: 100%;
-  min-width: 360px;
   border-collapse: collapse;
   // Layout fijo: todas las tablas de conceptos de una misma clase alinean
   // sus columnas igual, sin importar el largo del nombre de la actividad.
@@ -414,8 +433,15 @@ $cream:  #FAF6F0;
     border-top: 1px solid #f2f2f2;
   }
   td:first-child { overflow-wrap: anywhere; }
-  th:nth-child(2), td:nth-child(2) { width: 130px; text-align: right; }
-  th:last-child,   td:last-child   { width: 110px; text-align: right; font-weight: 700; }
+  th:last-child, td:last-child {
+    width: 116px; text-align: right; white-space: nowrap;
+  }
 
+  .act-nota { font-weight: 700; }
+  .act-posible { font-weight: 400; color: #999; }
   .sin-calificar { color: #bbb; font-weight: 400; }
+
+  @media (max-width: 640px) {
+    th:last-child, td:last-child { width: 84px; }
+  }
 }

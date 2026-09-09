@@ -35,6 +35,8 @@
     "@types/qrcode": "^1.5.6",
     "ezuikit-js": "^9.0.17",
     "firebase": "^9.9.1",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
     "material-icons": "^1.13.14",
     "ngx-image-cropper": "^6.2.2",
     "qrcode": "^1.5.4",

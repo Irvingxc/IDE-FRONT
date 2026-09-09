@@ -68,44 +68,13 @@
       <!-- Tabs -->
       <mat-tab-group [(selectedIndex)]="tabActiva" class="portal-tabs">
 
-        <!-- Notas vista general -->
+        <!-- Notas (detalle por materia) -->
         <mat-tab label="Notas">
           <ng-container *ngTemplateOutlet="periodoToolbar"></ng-container>
           <ng-container *ngTemplateOutlet="notasEstados"></ng-container>
 
-          <div class="table-scroll" *ngIf="!cargandoNotas && notas.length > 0">
-          <table mat-table [dataSource]="notas" class="portal-table notas-resumen-table card-movil">
-            <ng-container matColumnDef="claseNombre">
-              <th mat-header-cell *matHeaderCellDef>Materia</th>
-              <td mat-cell *matCellDef="let c" data-label="Materia">{{ c.claseNombre }}</td>
-            </ng-container>
-            <ng-container matColumnDef="maestroNombre">
-              <th mat-header-cell *matHeaderCellDef>Maestro</th>
-              <td mat-cell *matCellDef="let c" data-label="Maestro">{{ c.maestroNombre || '—' }}</td>
-            </ng-container>
-            <ng-container matColumnDef="total">
-              <th mat-header-cell *matHeaderCellDef>Nota total</th>
-              <td mat-cell *matCellDef="let c" data-label="Nota total">
-                <span class="notas-clase-total"
-                      [class.total-bien]="totalClase(c) >= 70"
-                      [class.total-alerta]="totalClase(c) < 70">
-                  {{ totalClase(c) | number:'1.0-2' }} / 100
-                </span>
-              </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="notasResumenColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: notasResumenColumns;"></tr>
-          </table>
-          </div>
-        </mat-tab>
-
-        <!-- Notas detalladas -->
-        <mat-tab label="Detalle">
-          <ng-container *ngTemplateOutlet="periodoToolbar"></ng-container>
-          <ng-container *ngTemplateOutlet="notasEstados"></ng-container>
-
           <mat-accordion class="notas-acordeon" multi="false">
-            <mat-expansion-panel class="notas-clase-card" *ngFor="let clase of notas; let primera = first" [expanded]="primera">
+            <mat-expansion-panel class="notas-clase-card" *ngFor="let clase of notas">
               <mat-expansion-panel-header class="notas-clase-header">
                 <mat-panel-title>
                   <strong>{{ clase.claseNombre }}</strong>
@@ -122,24 +91,23 @@
 
               <div class="notas-concepto" *ngFor="let concepto of clase.conceptos">
                 <div class="notas-concepto-nombre">{{ concepto.nombre }}</div>
-                <div class="table-scroll">
                 <table class="notas-actividades-table">
                   <thead>
                     <tr>
                       <th>Actividad</th>
-                      <th>Puntos posibles</th>
-                      <th>Nota obtenida</th>
+                      <th>Nota</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr *ngFor="let actividad of concepto.actividades">
                       <td>{{ actividad.nombre }}</td>
-                      <td>{{ actividad.porcentaje }}</td>
-                      <td [class.sin-calificar]="actividad.nota === null">{{ actividad.nota ?? 0 }}</td>
+                      <td class="act-nota">
+                        <span [class.sin-calificar]="actividad.nota === null">{{ actividad.nota ?? 0 }}</span>
+                        <span class="act-posible"> / {{ actividad.porcentaje }}</span>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
-                </div>
               </div>
             </mat-expansion-panel>
           </mat-accordion>
@@ -265,6 +233,14 @@
               <mat-option *ngFor="let p of periodos" [value]="p.id">{{ p.nombre }}</mat-option>
             </mat-select>
           </mat-form-field>
+
+          <button mat-flat-button class="btn-descargar-notas"
+                  *ngIf="!cargandoNotas && notas.length > 0"
+                  [disabled]="descargandoPdf"
+                  (click)="descargarNotas()">
+            <mat-icon>{{ descargandoPdf ? 'hourglass_empty' : 'download' }}</mat-icon>
+            {{ descargandoPdf ? 'Generando…' : 'Descargar notas' }}
+          </button>
         </div>
       </ng-template>
 
