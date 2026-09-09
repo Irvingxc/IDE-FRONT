@@ -48,6 +48,13 @@ $gold:   #C9A227;
   mat-icon { font-size: 16px; flex-shrink: 0; }
 }
 
+.activar-card .campo-error {
+  color: #c62828;
+  font-size: 13px;
+  line-height: 1.4;
+  margin: -2px 0 4px;
+}
+
 .icon-ok    { font-size: 64px; width: 64px; height: 64px; color: #2e7d32; }
 .icon-error { font-size: 64px; width: 64px; height: 64px; color: #c62828; }
 

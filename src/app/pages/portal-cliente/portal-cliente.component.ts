@@ -9,6 +9,8 @@ import {
   PortalClienteService, HijoDto, PortalFacturaDto, PortalCxcDto, PortalPeriodo, PortalClaseNota, PortalAsistenciaDto
 } from '@app/services/portal-cliente/portal-cliente.service';
 import { TokenService } from '@app/services';
+import { MatDialog } from '@angular/material/dialog';
+import { CambiarPasswordDialogComponent } from '@app/components/cambiar-password-dialog/cambiar-password-dialog.component';
 
 @Component({
   selector: 'app-portal-cliente',
@@ -54,7 +56,8 @@ export class PortalClienteComponent implements OnInit {
     private store: Store<fromRoot.State>,
     private router: Router,
     public svc: PortalClienteService,
-    private tokenService: TokenService
+    private tokenService: TokenService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -88,6 +91,10 @@ export class PortalClienteComponent implements OnInit {
     this.cargarCxc();
     this.cargarNotas();
     this.cargarAsistencia();
+  }
+
+  cambiarPassword(): void {
+    this.dialog.open(CambiarPasswordDialogComponent, { width: '420px' });
   }
 
   cerrarSesion(): void {

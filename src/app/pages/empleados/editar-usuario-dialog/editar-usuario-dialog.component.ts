@@ -23,11 +23,12 @@ export class EditarUsuarioDialogComponent implements OnInit {
     private usuarioService: UsuarioService,
     private notification: NotificationService
   ) {
+    const esCliente = usuario.rol === 'Cliente';
     this.form = this.fb.group({
       nombre:     [usuario.nombre,    Validators.required],
       apellido:   [usuario.apellido,  Validators.required],
-      username:   [usuario.username,  Validators.required],
-      email:      [usuario.email,     [Validators.required, Validators.email]],
+      username:   [{ value: usuario.username, disabled: esCliente },  Validators.required],
+      email:      [{ value: usuario.email, disabled: esCliente },     [Validators.required, Validators.email]],
       telefono:   [usuario.telefono  ?? ''],
       rol:        [usuario.rol       ?? ''],
       sucursalId: [usuario.sucursalId ?? null],
@@ -44,6 +45,11 @@ export class EditarUsuarioDialogComponent implements OnInit {
     return this.form.get('rol')?.value === 'Maestro';
   }
 
+  // Los clientes del portal gestionan su correo/usuario desde su ficha en Clientes.
+  get esCliente(): boolean {
+    return this.usuario.rol === 'Cliente';
+  }
+
   guardar(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.guardando = true;
@@ -52,8 +58,8 @@ export class EditarUsuarioDialogComponent implements OnInit {
         this.notification.success('Usuario actualizado correctamente');
         this.dialogRef.close(true);
       },
-      error: () => {
-        this.notification.error('Error al actualizar el usuario');
+      error: (err) => {
+        this.notification.error(err?.error?.errores?.mensaje ?? 'Error al actualizar el usuario');
         this.guardando = false;
       }
     });

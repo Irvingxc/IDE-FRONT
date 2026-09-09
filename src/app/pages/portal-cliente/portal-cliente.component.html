@@ -12,9 +12,19 @@
     <div class="portal-user" *ngIf="user$ | async as u">
       <span class="avatar">{{ u.nombre?.charAt(0) }}{{ u.apellido?.charAt(0) }}</span>
       <span class="portal-user-nombre">{{ u.nombre }} {{ u.apellido }}</span>
-      <button mat-icon-button title="Cerrar sesión" (click)="cerrarSesion()">
-        <mat-icon>logout</mat-icon>
+      <button mat-icon-button title="Cuenta" [matMenuTriggerFor]="menuCuenta">
+        <mat-icon>expand_more</mat-icon>
       </button>
+      <mat-menu #menuCuenta="matMenu" xPosition="before">
+        <button mat-menu-item (click)="cambiarPassword()">
+          <mat-icon>lock_reset</mat-icon>
+          <span>Cambiar contraseña</span>
+        </button>
+        <button mat-menu-item (click)="cerrarSesion()">
+          <mat-icon>logout</mat-icon>
+          <span>Cerrar sesión</span>
+        </button>
+      </mat-menu>
     </div>
   </div>
 

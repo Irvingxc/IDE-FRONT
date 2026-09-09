@@ -19,6 +19,7 @@
       <mat-label>Username *</mat-label>
       <input matInput formControlName="username">
       <mat-error>Requerido</mat-error>
+      <mat-hint *ngIf="esCliente">Se cambia desde la ficha del cliente en Clientes.</mat-hint>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
@@ -31,6 +32,7 @@
       <input matInput formControlName="email" type="email">
       <mat-error *ngIf="form.get('email')?.hasError('required')">Requerido</mat-error>
       <mat-error *ngIf="form.get('email')?.hasError('email')">Correo inválido</mat-error>
+      <mat-hint *ngIf="esCliente">El correo de acceso al portal se cambia desde la ficha del cliente en Clientes.</mat-hint>
     </mat-form-field>
 
     <mat-form-field appearance="outline">

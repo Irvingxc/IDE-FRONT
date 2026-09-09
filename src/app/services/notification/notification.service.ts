@@ -26,6 +26,14 @@ export class NotificationService {
 
   }
 
+  warning(message: string): void {
+    this.snackBar.openFromComponent(NotificationComponent, {
+      duration: 5000,
+      data: { message },
+      panelClass: ['mat-snackbar_warning']
+    });
+  }
+
 
 
 

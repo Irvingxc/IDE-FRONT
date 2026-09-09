@@ -14,6 +14,8 @@ export class EditClienteDialogComponent implements OnInit {
 
   form!: FormGroup;
   guardando = false;
+  correoOriginal = '';
+  confirmaCambioCorreo = false;
 
   paises: PaisTelefono[] = PAISES_TELEFONO;
   tiposId = ['DNI / Identidad', 'Pasaporte'];
@@ -51,6 +53,7 @@ export class EditClienteDialogComponent implements OnInit {
 
   ngOnInit(): void {
     const tel = this.parsearTelefono(this.data.telefono ?? null);
+    this.correoOriginal = (this.data.correoElectronico ?? '').trim();
 
     this.form = this.fb.group({
       primerNombre:       [this.data.nombres        || '', Validators.required],
@@ -73,8 +76,18 @@ export class EditClienteDialogComponent implements OnInit {
     });
   }
 
+  get correoCambio(): boolean {
+    const actual = (this.form?.get('correoElectronico')?.value ?? '').trim();
+    return actual.toLowerCase() !== this.correoOriginal.toLowerCase();
+  }
+
+  get requiereConfirmarCorreo(): boolean {
+    return !!this.data.tienePortal && this.correoCambio;
+  }
+
   guardar(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.requiereConfirmarCorreo && !this.confirmaCambioCorreo) return;
     this.guardando = true;
     const f = this.form.value;
 
@@ -101,11 +114,14 @@ export class EditClienteDialogComponent implements OnInit {
       rtn:                f.rtn                  || undefined,
     }).subscribe({
       next: () => {
-        this.notification.success('Cliente actualizado correctamente');
+        const msg = this.requiereConfirmarCorreo
+          ? 'Cliente actualizado. El correo de acceso al portal también se actualizó.'
+          : 'Cliente actualizado correctamente';
+        this.notification.success(msg);
         this.dialogRef.close(true);
       },
-      error: () => {
-        this.notification.error('Error al actualizar el cliente');
+      error: (err) => {
+        this.notification.error(err?.error?.errores?.mensaje ?? 'Error al actualizar el cliente');
         this.guardando = false;
       }
     });

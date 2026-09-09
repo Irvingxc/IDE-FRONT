@@ -218,7 +218,7 @@
               <button mat-icon-button color="primary" title="Generar contrato" (click)="generarContrato(row)">
                 <mat-icon>description</mat-icon>
               </button>
-              <button mat-icon-button color="accent"
+              <button mat-icon-button color="accent" *ngIf="puedeInvitarPortal"
                       [title]="row.correoElectronico ? 'Enviar acceso al portal' : 'Sin correo registrado'"
                       [disabled]="!row.correoElectronico || enviandoAcceso[row.id]"
                       (click)="enviarAcceso(row)">

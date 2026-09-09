@@ -32,3 +32,18 @@ input[matInput] { text-transform: uppercase; }
   grid-template-columns: 200px 1fr;
   gap: 0 16px;
 }
+
+.aviso-portal {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #FDF6E3;
+  border: 1px solid #E8D9A8;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 4px 0 12px;
+
+  mat-icon { color: $guinda; flex-shrink: 0; }
+  p { margin: 0 0 8px; font-size: 13px; color: #5b4a1a; text-transform: none; }
+  mat-checkbox { font-size: 13px; }
+}

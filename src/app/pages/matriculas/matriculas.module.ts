@@ -30,6 +30,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatCardModule } from '@angular/material/card';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatListModule } from '@angular/material/list';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
   override format(date: Date): string {
@@ -81,6 +82,7 @@ class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
     MatCardModule,
     MatPaginatorModule,
     MatListModule,
+    MatCheckboxModule,
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es-HN' },

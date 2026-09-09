@@ -42,6 +42,7 @@ export interface ClienteResponse {
   correoElectronico: string;
   rtn: string;
   fechaCreacion: string;
+  tienePortal: boolean;
   totalRegistros: number;
   totalPaginas: number;
 }

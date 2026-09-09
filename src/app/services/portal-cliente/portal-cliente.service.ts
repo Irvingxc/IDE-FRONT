@@ -7,6 +7,7 @@ export interface InvitacionResponse {
   token:         string;
   email:         string;
   nombreCliente: string;
+  correoEnviado: boolean;
 }
 
 export interface ValidarInvitacionResponse {

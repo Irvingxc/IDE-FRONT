@@ -97,7 +97,19 @@
       <mat-label>Correo electrónico</mat-label>
       <input matInput formControlName="correoElectronico" type="email">
       <mat-error>Correo inválido</mat-error>
+      <mat-hint *ngIf="data.tienePortal">Este cliente tiene acceso al Portal de Padres con este correo.</mat-hint>
     </mat-form-field>
+
+    <div class="aviso-portal full-width" *ngIf="requiereConfirmarCorreo">
+      <mat-icon>info</mat-icon>
+      <div>
+        <p>Vas a cambiar el correo de un cliente con acceso al Portal de Padres.
+           También cambiará el correo con el que inicia sesión y donde recibe las notificaciones.</p>
+        <mat-checkbox [(ngModel)]="confirmaCambioCorreo" [ngModelOptions]="{ standalone: true }">
+          Entiendo y quiero cambiar el correo de acceso al portal
+        </mat-checkbox>
+      </div>
+    </div>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Dirección</mat-label>
@@ -109,7 +121,8 @@
 
 <mat-dialog-actions align="end">
   <button mat-stroked-button (click)="cancelar()">Cancelar</button>
-  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="guardando">
+  <button mat-raised-button color="primary" (click)="guardar()"
+          [disabled]="guardando || (requiereConfirmarCorreo && !confirmaCambioCorreo)">
     <mat-icon>save</mat-icon> {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
   </button>
 </mat-dialog-actions>

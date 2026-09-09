@@ -13,6 +13,9 @@ import { AlumnoService, AlumnoResponse } from '@app/services/alumno/alumno.servi
 import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.service';
 import { PortalClienteService } from '@app/services/portal-cliente/portal-cliente.service';
 import { NotificationService } from '@app/services';
+import { Store, select } from '@ngrx/store';
+import * as fromRoot from '@app/store';
+import * as fromUser from '@app/store/user';
 
 @Component({
   selector: 'app-matriculas',
@@ -47,16 +50,24 @@ export class MatriculasComponent implements OnInit {
 
   enviandoAcceso: { [id: number]: boolean } = {};
 
+  // Solo Administrador/Director puede invitar al portal (el backend exige ese rol).
+  puedeInvitarPortal = false;
+
   constructor(
     private dialog: MatDialog,
     private clienteService: ClienteService,
     private alumnoService: AlumnoService,
     private catalogoService: CatalogoService,
     private portalService: PortalClienteService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private store: Store<fromRoot.State>
   ) {}
 
   ngOnInit(): void {
+    this.store.pipe(select(fromUser.getUserState)).subscribe(u => {
+      const roles: string[] = (u?.entity as any)?.roles ?? [];
+      this.puedeInvitarPortal = roles.some(r => r === 'Administrador' || r === 'Director');
+    });
     this.catalogoService.getGrados().subscribe({ next: (data) => this.grados = data ?? [] });
     this.cargarAlumnos();
     this.cargarClientes();
@@ -196,16 +207,24 @@ export class MatriculasComponent implements OnInit {
     this.portalService.invitar(cliente.id).subscribe({
       next: (inv) => {
         this.enviandoAcceso[cliente.id] = false;
-        this.notification.success(
-          `Invitación generada para ${inv.nombreCliente}. Envía el link al correo: ${inv.email}`
-        );
-        // Copiar link al portapapeles
+        // El enlace también se copia al portapapeles por si hay que reenviarlo.
         const link = `${window.location.origin}/activar-cuenta/${inv.token}`;
         navigator.clipboard.writeText(link).catch(() => {});
+
+        if (inv.correoEnviado) {
+          this.notification.success(
+            `Invitación enviada al correo ${inv.email}. El enlace se copió al portapapeles.`
+          );
+        } else {
+          this.notification.warning(
+            `No se pudo enviar el correo a ${inv.email}. El enlace de activación se copió al portapapeles; envíalo manualmente.`
+          );
+        }
       },
-      error: () => {
+      error: (err) => {
         this.enviandoAcceso[cliente.id] = false;
-        this.notification.error('No se pudo generar la invitación.');
+        const mensaje = err?.error?.errores?.mensaje ?? 'No se pudo generar la invitación.';
+        this.notification.error(mensaje);
       }
     });
   }

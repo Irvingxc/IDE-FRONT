@@ -41,14 +41,20 @@
         <mat-form-field appearance="outline">
           <mat-label>Confirmar contraseña</mat-label>
           <input matInput type="password" formControlName="confirmar">
-          <mat-error *ngIf="form.hasError('noCoinciden')">Las contraseñas no coinciden</mat-error>
+          <mat-error *ngIf="form.get('confirmar')?.hasError('required')">Requerida</mat-error>
         </mat-form-field>
+
+        <p class="campo-error"
+           *ngIf="form.hasError('noCoinciden') && form.get('confirmar')?.value">
+          Las contraseñas no coinciden.
+        </p>
 
         <div class="activar-error" *ngIf="errorMsg">
           <mat-icon>warning</mat-icon> {{ errorMsg }}
         </div>
 
-        <button mat-raised-button color="primary" type="submit" [disabled]="estado === 'activando'">
+        <button mat-raised-button color="primary" type="submit"
+                [disabled]="estado === 'activando' || form.invalid">
           <mat-icon>check_circle</mat-icon>
           {{ estado === 'activando' ? 'Activando...' : 'Activar mi cuenta' }}
         </button>

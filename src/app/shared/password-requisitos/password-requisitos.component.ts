@@ -15,4 +15,14 @@ export class PasswordRequisitosComponent {
   cumple(key: string): boolean {
     return !!this.control && !this.control.hasError(key);
   }
+
+  // Marca en rojo un requisito no cumplido solo cuando el usuario ya empezó a escribir.
+  enRojo(key: string): boolean {
+    return !!this.control && !this.cumple(key) && (this.control.dirty || this.control.touched);
+  }
+
+  icono(key: string): string {
+    if (this.cumple(key)) return 'check_circle';
+    return this.enRojo(key) ? 'cancel' : 'radio_button_unchecked';
+  }
 }
