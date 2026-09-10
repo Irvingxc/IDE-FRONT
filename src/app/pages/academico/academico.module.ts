@@ -9,6 +9,7 @@ import { ClaseDialogComponent } from './clase-dialog/clase-dialog.component';
 import { EvaluacionDialogComponent } from './evaluacion-dialog/evaluacion-dialog.component';
 import { NotasDialogComponent } from './notas-dialog/notas-dialog.component';
 import { NivelInglesDialogComponent } from './nivel-ingles-dialog/nivel-ingles-dialog.component';
+import { HistorialNotasDialogComponent } from './historial-notas-dialog/historial-notas-dialog.component';
 
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
@@ -47,6 +48,7 @@ class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
     EvaluacionDialogComponent,
     NotasDialogComponent,
     NivelInglesDialogComponent,
+    HistorialNotasDialogComponent,
   ],
   imports: [
     CommonModule,

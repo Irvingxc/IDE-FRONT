@@ -50,8 +50,9 @@ export class MatriculasComponent implements OnInit {
 
   enviandoAcceso: { [id: number]: boolean } = {};
 
-  // Solo Administrador/Director puede invitar al portal (el backend exige ese rol).
+  // Solo Administrador/Director puede invitar al portal / promover grados (el backend exige ese rol).
   puedeInvitarPortal = false;
+  puedePromover = false;
 
   constructor(
     private dialog: MatDialog,
@@ -67,6 +68,7 @@ export class MatriculasComponent implements OnInit {
     this.store.pipe(select(fromUser.getUserState)).subscribe(u => {
       const roles: string[] = (u?.entity as any)?.roles ?? [];
       this.puedeInvitarPortal = roles.some(r => r === 'Administrador' || r === 'Director');
+      this.puedePromover = this.puedeInvitarPortal;
     });
     this.catalogoService.getGrados().subscribe({ next: (data) => this.grados = data ?? [] });
     this.cargarAlumnos();

@@ -265,8 +265,9 @@ export class AcademicoService {
 
   // ── Reporte de notas por alumno (modulo Reportes) ──
 
-  alumnosPorGrado(idGrado: number): Observable<AlumnoGrado[]> {
-    const params = new HttpParams().set('idGrado', idGrado);
+  alumnosPorGrado(idGrado: number, anioLectivo?: number): Observable<AlumnoGrado[]> {
+    let params = new HttpParams().set('idGrado', idGrado);
+    if (anioLectivo != null) params = params.set('anioLectivo', anioLectivo);
     return this.http.get<AlumnoGrado[]>(`${this.base}/alumnos-por-grado`, { params });
   }
 
@@ -274,4 +275,25 @@ export class AcademicoService {
     const params = new HttpParams().set('identidad', identidad).set('idPeriodo', idPeriodo);
     return this.http.get<ReporteNotaClase[]>(`${this.base}/reporte-notas`, { params });
   }
+
+  historialNotasAlumno(idClase: number, idPeriodo: number, idAlumno: string): Observable<HistorialNota[]> {
+    const params = new HttpParams()
+      .set('idClase', idClase)
+      .set('idPeriodo', idPeriodo)
+      .set('idAlumno', idAlumno);
+    return this.http.get<HistorialNota[]>(`${this.base}/historial-notas`, { params });
+  }
+}
+
+export interface HistorialNota {
+  id:              number;
+  idActividad:     number;
+  actividadNombre: string;
+  conceptoNombre:  string | null;
+  notaAnterior:    number | null;
+  notaNueva:       number | null;
+  accion:          'ALTA' | 'MODIFICACION';
+  fecha:           string;
+  usuarioId:       string | null;
+  usuarioNombre:   string | null;
 }

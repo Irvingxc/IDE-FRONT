@@ -247,6 +247,16 @@
       </div>
     </mat-tab>
 
+    <!-- TAB PROMOCIÓN DE GRADO -->
+    <mat-tab *ngIf="puedePromover">
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">trending_up</mat-icon>
+        Promoción de grado
+      </ng-template>
+
+      <app-promocion></app-promocion>
+    </mat-tab>
+
   </mat-tab-group>
 
 </div>

@@ -1,0 +1,53 @@
+<h2 mat-dialog-title>Historial de notas — {{ data.alumnoNombre }}</h2>
+
+<mat-dialog-content>
+  <p class="sub" *ngIf="data.claseNombre || data.periodoNombre">
+    <span *ngIf="data.claseNombre">{{ data.claseNombre }}</span>
+    <span *ngIf="data.claseNombre && data.periodoNombre"> · </span>
+    <span *ngIf="data.periodoNombre">{{ data.periodoNombre }}</span>
+  </p>
+
+  <div *ngIf="cargando" class="loading-row">
+    <mat-icon class="spin-icon">sync</mat-icon>
+    <span>Cargando historial...</span>
+  </div>
+
+  <div *ngIf="!cargando && historial.length === 0" class="vacio">
+    <mat-icon>history_toggle_off</mat-icon>
+    <span>No hay cambios registrados para este alumno en esta clase y periodo.</span>
+  </div>
+
+  <table class="hist-table" *ngIf="!cargando && historial.length > 0">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Actividad</th>
+        <th class="num">Antes</th>
+        <th class="num">Después</th>
+        <th>Acción</th>
+        <th>Realizado por</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let h of historial">
+        <td>{{ h.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td>
+          {{ h.actividadNombre }}
+          <span class="concepto" *ngIf="h.conceptoNombre">{{ h.conceptoNombre }}</span>
+        </td>
+        <td class="num">{{ fmt(h.notaAnterior) }}</td>
+        <td class="num nueva">{{ fmt(h.notaNueva) }}</td>
+        <td>
+          <span class="chip" [class.alta]="h.accion === 'ALTA'">
+            {{ h.accion === 'ALTA' ? 'Ingreso' : 'Modificación' }}
+          </span>
+        </td>
+        <td>{{ h.usuarioNombre || h.usuarioId || '—' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

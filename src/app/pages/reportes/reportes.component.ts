@@ -152,7 +152,12 @@ export class ReportesComponent implements OnInit {
     if (this.notasIdGrado == null) return;
 
     this.cargandoAlumnos = true;
-    this.academicoService.alumnosPorGrado(this.notasIdGrado).subscribe({
+    // Si el parcial elegido es de un año lectivo anterior, listar los alumnos que
+    // estuvieron en ese grado ese año (histórico), no los que están hoy.
+    const anioSel = this.notasPeriodos.find(p => p.id === this.notasIdPeriodo)?.anioLectivo;
+    const anioActual = new Date().getFullYear();
+    const anioHistorico = anioSel != null && anioSel < anioActual ? anioSel : undefined;
+    this.academicoService.alumnosPorGrado(this.notasIdGrado, anioHistorico).subscribe({
       next: (a) => {
         this.notasAlumnos = a;
         this.cargandoAlumnos = false;

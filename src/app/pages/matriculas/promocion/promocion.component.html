@@ -1,0 +1,158 @@
+<div class="tab-content promocion">
+
+  <div class="promo-header">
+    <div class="anio-selector">
+      <mat-form-field appearance="outline" class="filtro-field-sm">
+        <mat-label>Año lectivo origen</mat-label>
+        <mat-select [(ngModel)]="anioOrigen" (selectionChange)="cargar()">
+          <mat-option *ngFor="let a of aniosDisponibles" [value]="a">{{ a }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-icon class="flecha">arrow_forward</mat-icon>
+      <span class="anio-destino">{{ anioDestino }}</span>
+    </div>
+
+    <div class="estado-chips" *ngIf="estado as e">
+      <span class="chip">{{ e.totalOrigen }} matriculados en {{ e.anioOrigen }}</span>
+      <span class="chip">{{ e.procesados }} ya procesados</span>
+      <span class="chip">{{ e.totalDestino }} matriculados en {{ e.anioDestino }}</span>
+    </div>
+  </div>
+
+  <div class="filtros-row">
+    <mat-form-field appearance="outline" class="filtro-field">
+      <mat-label>Buscar por nombre</mat-label>
+      <input matInput [(ngModel)]="filtroNombre" placeholder="Nombre o apellido">
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filtro-field-md">
+      <mat-label>Grado actual</mat-label>
+      <mat-select [(ngModel)]="filtroIdGrado">
+        <mat-option [value]="null">Todos</mat-option>
+        <mat-option *ngFor="let g of grados" [value]="g.idGrado">{{ g.gradoNombre }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-stroked-button (click)="limpiarFiltros()" *ngIf="filtroNombre || filtroIdGrado != null">
+      <mat-icon>clear</mat-icon> Limpiar
+    </button>
+    <button mat-stroked-button (click)="cargar()">
+      <mat-icon>refresh</mat-icon> Recargar
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="loading-row">
+    <mat-icon class="spin-icon">sync</mat-icon>
+    <span>Cargando alumnos...</span>
+  </div>
+
+  <div class="tabla-wrapper" *ngIf="!cargando">
+    <table mat-table [dataSource]="filasVisibles" class="data-table">
+
+      <ng-container matColumnDef="sel">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox [checked]="todasVisiblesMarcadas()"
+                        (change)="toggleTodas($event.checked)"></mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let f">
+          <mat-checkbox [(ngModel)]="f.seleccionado"></mat-checkbox>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="alumno">
+        <th mat-header-cell *matHeaderCellDef>Alumno</th>
+        <td mat-cell *matCellDef="let f">
+          {{ f.nombreCompleto }}
+          <span class="mini-chip warn" *ngIf="f.yaPromovido" title="Ya tiene matrícula en el año destino">ya promovido</span>
+          <span class="mini-chip" *ngIf="f.estado && f.estado !== 'Activo'">{{ f.estado }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="gradoActual">
+        <th mat-header-cell *matHeaderCellDef>Grado actual</th>
+        <td mat-cell *matCellDef="let f">
+          {{ f.gradoActual || '—' }} <span class="text-muted">{{ f.seccion }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="resultado">
+        <th mat-header-cell *matHeaderCellDef>Resultado</th>
+        <td mat-cell *matCellDef="let f">
+          <mat-button-toggle-group [(ngModel)]="f.resultado" (change)="onResultadoChange(f)"
+                                   [disabled]="f.esUltimoGrado" class="mini-toggle">
+            <mat-button-toggle value="Aprobado">Aprobado</mat-button-toggle>
+            <mat-button-toggle value="Reprobado">Repite</mat-button-toggle>
+          </mat-button-toggle-group>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="gradoDestino">
+        <th mat-header-cell *matHeaderCellDef>Grado destino {{ anioDestino }}</th>
+        <td mat-cell *matCellDef="let f">
+          <span class="mini-chip egresa" *ngIf="f.esUltimoGrado">Último grado — Egresa</span>
+          <mat-form-field appearance="outline" class="celda-select" *ngIf="!f.esUltimoGrado">
+            <mat-select [(ngModel)]="f.idGradoDestino" (selectionChange)="onGradoDestinoChange(f)">
+              <mat-option *ngFor="let g of grados" [value]="g.idGrado">{{ g.gradoNombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="seccion">
+        <th mat-header-cell *matHeaderCellDef>Sección</th>
+        <td mat-cell *matCellDef="let f">
+          <mat-form-field appearance="outline" class="celda-select corta" *ngIf="!f.esUltimoGrado">
+            <mat-select [(ngModel)]="f.seccionDestino">
+              <mat-option *ngFor="let s of secciones" [value]="s">{{ s }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <span *ngIf="f.esUltimoGrado" class="text-muted">—</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="nivelIngles">
+        <th mat-header-cell *matHeaderCellDef>Nivel de inglés</th>
+        <td mat-cell *matCellDef="let f">
+          <mat-form-field appearance="outline" class="celda-select" *ngIf="!f.esUltimoGrado">
+            <mat-select [(ngModel)]="f.idNivelInglesDestino">
+              <mat-option [value]="null">Sin nivel</mat-option>
+              <mat-option *ngFor="let n of niveles" [value]="n.id">{{ n.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <span *ngIf="f.esUltimoGrado" class="text-muted">—</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="mensualidad">
+        <th mat-header-cell *matHeaderCellDef>Mensualidad</th>
+        <td mat-cell *matCellDef="let f">
+          <mat-form-field appearance="outline" class="celda-select corta" *ngIf="!f.esUltimoGrado">
+            <input matInput type="number" min="0" step="0.01" [(ngModel)]="f.mensualidad"
+                   placeholder="Actual">
+          </mat-form-field>
+          <span *ngIf="f.esUltimoGrado" class="text-muted">—</span>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnas;"
+          [class.fila-egresa]="row.esUltimoGrado"
+          [class.fila-repite]="row.resultado === 'Reprobado' && !row.esUltimoGrado"></tr>
+      <tr class="mat-row no-data-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="columnas.length">
+          <span>No hay alumnos con matrícula en {{ anioOrigen }} que coincidan con el filtro.</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="promo-footer" *ngIf="seleccionadas.length > 0">
+    <span>{{ seleccionadas.length }} alumno(s) seleccionado(s)</span>
+    <button mat-raised-button color="primary" (click)="promover()" [disabled]="promoviendo">
+      <mat-icon>trending_up</mat-icon>
+      {{ promoviendo ? 'Promoviendo...' : 'Promover seleccionados a ' + anioDestino }}
+    </button>
+  </div>
+
+</div>

@@ -12,6 +12,8 @@ import { HijosDialogComponent } from './hijos-dialog/hijos-dialog.component';
 import { DescuentoAlumnoDialogComponent } from './descuento-alumno-dialog/descuento-alumno-dialog.component';
 import { ContratoDialogComponent } from './contrato-dialog/contrato-dialog.component';
 import { CarnetAlumnoDialogComponent } from './carnet-alumno-dialog/carnet-alumno-dialog.component';
+import { PromocionComponent } from './promocion/promocion.component';
+import { PromocionConfirmDialogComponent } from './promocion/promocion-confirm-dialog.component';
 import { IdentidadMaskDirective } from './identidad-mask.directive';
 import { TelefonoMaskDirective } from './telefono-mask.directive';
 
@@ -31,6 +33,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatListModule } from '@angular/material/list';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
   override format(date: Date): string {
@@ -59,6 +62,8 @@ class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
     DescuentoAlumnoDialogComponent,
     ContratoDialogComponent,
     CarnetAlumnoDialogComponent,
+    PromocionComponent,
+    PromocionConfirmDialogComponent,
     IdentidadMaskDirective,
     TelefonoMaskDirective,
   ],
@@ -83,6 +88,7 @@ class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
     MatPaginatorModule,
     MatListModule,
     MatCheckboxModule,
+    MatButtonToggleModule,
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es-HN' },

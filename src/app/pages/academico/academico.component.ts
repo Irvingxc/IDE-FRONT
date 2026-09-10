@@ -12,6 +12,7 @@ import { ClaseDialogComponent } from './clase-dialog/clase-dialog.component';
 import { EvaluacionDialogComponent } from './evaluacion-dialog/evaluacion-dialog.component';
 import { NotasDialogComponent } from './notas-dialog/notas-dialog.component';
 import { NivelInglesDialogComponent } from './nivel-ingles-dialog/nivel-ingles-dialog.component';
+import { HistorialNotasDialogComponent } from './historial-notas-dialog/historial-notas-dialog.component';
 
 interface ActividadRow {
   id:         number | null;
@@ -594,6 +595,21 @@ export class AcademicoComponent implements OnInit {
     } else {
       guardarNotas();
     }
+  }
+
+  verHistorialNotas(alumno: AlumnoNotaActividad): void {
+    if (!this.notasSimpleIdClase || !this.notasSimpleIdPeriodo) return;
+    this.dialog.open(HistorialNotasDialogComponent, {
+      width: '760px',
+      data: {
+        idClase:       this.notasSimpleIdClase,
+        idPeriodo:     this.notasSimpleIdPeriodo,
+        idAlumno:      alumno.idAlumno,
+        alumnoNombre:  alumno.nombreCompleto,
+        claseNombre:   this.notasMateriaSeleccionada || undefined,
+        periodoNombre: this.periodoBusqueda || undefined,
+      }
+    });
   }
 
   // ── Grados / conceptos de evaluación ───────────────────────

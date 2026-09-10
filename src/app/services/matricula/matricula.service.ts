@@ -48,11 +48,77 @@ export interface GuardarMatriculaDto {
   foto?:                        string;
 }
 
+// ── Promoción de grado / cierre de año lectivo ──
+
+export interface PromocionAlumno {
+  identidad:       string;
+  codigo:          number | null;
+  nombreCompleto:  string;
+  estado:          string | null;
+  idGradoActual:   number | null;
+  gradoActual:     string | null;
+  ordenActual:     number | null;
+  seccion:         string | null;
+  idNivelIngles:   number | null;
+  nivelIngles:     string | null;
+  estadoFinal:     string | null;
+  promovido:       boolean | null;
+  idGradoSugerido: number | null;
+  gradoSugerido:   string | null;
+  esUltimoGrado:   boolean;
+  yaPromovido:     boolean;
+}
+
+export interface PromoverAlumnoItem {
+  identidad:            string;
+  promovido:            boolean;
+  egresa:               boolean;
+  estadoFinal?:         string | null;
+  idGradoDestino?:      number | null;
+  seccion?:             string | null;
+  idNivelInglesDestino?: number | null;
+  valorMatricula?:      number | null;
+  valorMensualidad?:    number | null;
+}
+
+export interface PromoverRequest {
+  anioOrigen:  number;
+  anioDestino: number;
+  alumnos:     PromoverAlumnoItem[];
+}
+
+export interface PromocionResultado {
+  promovidos: number;
+  egresados:  number;
+}
+
+export interface PromocionEstado {
+  anioOrigen:   number;
+  anioDestino:  number;
+  totalOrigen:  number;
+  procesados:   number;
+  totalDestino: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MatriculaService {
   constructor(private http: HttpClient) {}
 
   guardarMatricula(dto: GuardarMatriculaDto): Observable<{ idCliente: number }> {
     return this.http.post<{ idCliente: number }>(`${environment.url}api/Matricula/guardar`, dto);
+  }
+
+  listarPromocion(anioOrigen: number): Observable<PromocionAlumno[]> {
+    return this.http.get<PromocionAlumno[]>(
+      `${environment.url}api/Matricula/promocion?anioOrigen=${anioOrigen}`);
+  }
+
+  estadoPromocion(anioOrigen: number): Observable<PromocionEstado> {
+    return this.http.get<PromocionEstado>(
+      `${environment.url}api/Matricula/promocion/estado?anioOrigen=${anioOrigen}`);
+  }
+
+  promover(dto: PromoverRequest): Observable<PromocionResultado> {
+    return this.http.post<PromocionResultado>(`${environment.url}api/Matricula/promover`, dto);
   }
 }

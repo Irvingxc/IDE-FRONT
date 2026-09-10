@@ -1,0 +1,117 @@
+.promocion {
+  padding-bottom: 96px;
+
+  .promo-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .anio-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .flecha { color: #888; }
+
+    .anio-destino {
+      font-size: 18px;
+      font-weight: 600;
+      color: #6B0F1A;
+    }
+
+    .filtro-field-sm { width: 160px; }
+  }
+
+  .estado-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .chip {
+    background: #f1f1f1;
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 12px;
+    color: #555;
+  }
+
+  .filtros-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .filtro-field    { width: 260px; }
+    .filtro-field-md { width: 200px; }
+  }
+
+  .tabla-wrapper { overflow-x: auto; }
+
+  .data-table { width: 100%; min-width: 900px; }
+
+  .celda-select {
+    width: 150px;
+    margin: 4px 0 -1.25em;
+
+    &.corta { width: 90px; }
+
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+  }
+
+  .mini-toggle ::ng-deep .mat-button-toggle-label-content {
+    line-height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .mini-chip {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+    background: #eee;
+    color: #666;
+
+    &.warn   { background: #fff3e0; color: #e65100; }
+    &.egresa { background: #ede7f6; color: #4527a0; }
+  }
+
+  .text-muted { color: #999; }
+
+  .fila-egresa { background: #faf7ff; }
+  .fila-repite { background: #fff8f8; }
+
+  .loading-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 0;
+    color: #666;
+
+    .spin-icon { animation: spin 1s linear infinite; }
+  }
+
+  .promo-footer {
+    position: fixed;
+    right: 32px;
+    bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
+    border-radius: 10px;
+    padding: 12px 18px;
+    z-index: 20;
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

@@ -279,7 +279,13 @@
             </thead>
             <tbody>
               <tr *ngFor="let a of alumnosNotas">
-                <td class="col-nombre">{{ a.nombreCompleto }}</td>
+                <td class="col-nombre">
+                  <span>{{ a.nombreCompleto }}</span>
+                  <button type="button" class="btn-historial" title="Ver historial de cambios de notas"
+                          (click)="verHistorialNotas(a)">
+                    <mat-icon>history</mat-icon>
+                  </button>
+                </td>
                 <td *ngFor="let actividad of actividadesPlanas">
                   <input type="number" min="0" [max]="actividad.porcentaje" step="0.01" [(ngModel)]="a.notas[actividad.id]" (ngModelChange)="marcarCambioNotas()" (keydown)="bloquearTeclaNoNumerica($event)" (paste)="bloquearPegadoNoNumerico($event)" [title]="'Máximo ' + actividad.porcentaje + ' puntos'">
                 </td>
