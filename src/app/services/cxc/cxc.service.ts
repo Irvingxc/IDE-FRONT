@@ -23,6 +23,8 @@ export interface CxcDetalle {
   mes:            number;
   tipoCuota:      string;
   idProducto:     number;
+  idGrado:        number | null;
+  gradoNombre:    string | null;
   fechaVence:     string | null;
   monto:          number;
   descuento:      number;
