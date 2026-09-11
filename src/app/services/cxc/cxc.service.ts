@@ -34,6 +34,36 @@ export interface CxcDetalle {
   motivo:         string | null;
 }
 
+export interface CxcGeneracion {
+  anio:            number;
+  estado:          string;
+  fechaReferencia: string | null;
+  totalAlumnos:    number | null;
+  totalCuotas:     number | null;
+  fechaGeneracion: string | null;
+}
+
+export interface CxcAlumnoValidacion {
+  identidad:           string;
+  nombreCompleto:      string;
+  estado:              string | null;
+  grado:               string | null;
+  mensualidades:       number;
+  tieneMatricula:      boolean;
+  tieneMatriculaAnual: boolean;
+}
+
+export interface CxcRevision {
+  id:             number;
+  identidad:      string;
+  nombreCompleto: string;
+  estado:         string | null;
+  tipoCuota:      string;
+  mes:            number;
+  monto:          number;
+  estadoCuota:    string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CxcService {
   constructor(private http: HttpClient) {}
@@ -45,12 +75,20 @@ export class CxcService {
     return this.http.get<CxcResumen[]>(`${environment.url}api/Cxc/resumen`, { params });
   }
 
-  generarAnio(anio: number): Observable<void> {
-    return this.http.post<void>(`${environment.url}api/Cxc/generar?anio=${anio}`, null);
+  generarAnio(anio: number, fechaReferencia?: string, forzar = false): Observable<CxcAlumnoValidacion[]> {
+    let params = new HttpParams().set('anio', anio).set('forzar', forzar);
+    if (fechaReferencia) params = params.set('fechaReferencia', fechaReferencia);
+    return this.http.post<CxcAlumnoValidacion[]>(`${environment.url}api/Cxc/generar`, null, { params });
   }
 
-  getAniosGenerados(): Observable<number[]> {
-    return this.http.get<number[]>(`${environment.url}api/Cxc/anios-generados`);
+  recalcularAnio(anio: number, fechaReferencia?: string): Observable<CxcRevision[]> {
+    let params = new HttpParams().set('anio', anio);
+    if (fechaReferencia) params = params.set('fechaReferencia', fechaReferencia);
+    return this.http.post<CxcRevision[]>(`${environment.url}api/Cxc/recalcular`, null, { params });
+  }
+
+  getAniosGenerados(): Observable<CxcGeneracion[]> {
+    return this.http.get<CxcGeneracion[]>(`${environment.url}api/Cxc/anios-generados`);
   }
 
   getDetalle(identidad: string, anio?: number, soloPendientes = false): Observable<CxcDetalle[]> {

@@ -11,6 +11,26 @@
     </button>
   </div>
 
+  <!-- Vigencia / factor -->
+  <div class="vigencia-bar">
+    <label class="vig-field">
+      <span>Programar como nueva vigencia desde</span>
+      <input type="date" [(ngModel)]="vigenciaDesde">
+    </label>
+    <span class="vig-hint" *ngIf="vigenciaDesde">
+      Al guardar se cierra el precio anterior el día previo y arranca el nuevo en esa fecha.
+    </span>
+    <span class="vig-hint" *ngIf="!vigenciaDesde">
+      Sin fecha: se edita el precio vigente en el momento.
+    </span>
+    <span class="vig-sep"></span>
+    <label class="vig-field">
+      <span>Aplicar % a la vista</span>
+      <input type="number" step="0.5" [(ngModel)]="factorPct" placeholder="ej. 10">
+    </label>
+    <button mat-stroked-button (click)="aplicarFactor()" [disabled]="factorPct == null">Aplicar</button>
+  </div>
+
   <!-- Filtro nivel -->
   <div class="filtro-bar">
     <button mat-stroked-button
@@ -90,6 +110,9 @@
           <ng-template #sinCambios>
             <mat-icon class="ok-icon" matTooltip="Sin cambios">check_circle</mat-icon>
           </ng-template>
+          <button mat-icon-button matTooltip="Historial de precios" (click)="verHistorial(row)">
+            <mat-icon>history</mat-icon>
+          </button>
         </td>
       </ng-container>
 

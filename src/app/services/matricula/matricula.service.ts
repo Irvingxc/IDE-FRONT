@@ -67,6 +67,11 @@ export interface PromocionAlumno {
   gradoSugerido:   string | null;
   esUltimoGrado:   boolean;
   yaPromovido:     boolean;
+  // Lo que realmente quedo guardado en el anio destino, si ya se proceso.
+  idGradoReal:       number | null;
+  gradoReal:         string | null;
+  seccionReal:       string | null;
+  idNivelInglesReal: number | null;
 }
 
 export interface PromoverAlumnoItem {

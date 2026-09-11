@@ -81,6 +81,17 @@
 
     &.warn   { background: #fff3e0; color: #e65100; }
     &.egresa { background: #ede7f6; color: #4527a0; }
+
+    .btn-desbloquear {
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+      padding: 0;
+      margin-left: 2px;
+      vertical-align: middle;
+
+      ::ng-deep .mat-icon { font-size: 14px; width: 14px; height: 14px; line-height: 14px; }
+    }
   }
 
   .text-muted { color: #999; }

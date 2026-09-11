@@ -4,7 +4,7 @@ import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CxcService, CxcResumen } from '@app/services/cxc/cxc.service';
+import { CxcService, CxcResumen, CxcGeneracion, CxcAlumnoValidacion, CxcRevision } from '@app/services/cxc/cxc.service';
 import { EstadoCuentaDialogComponent } from './estado-cuenta-dialog/estado-cuenta-dialog.component';
 
 @Component({
@@ -22,13 +22,18 @@ export class CxcComponent implements OnInit {
   filtroNombre  = '';
   filtroEstado  = '';
 
-  aniosGenerados: Set<number> = new Set();
+  aniosGenerados = new Map<number, CxcGeneracion>();
   readonly aniosDisponibles: number[] = (() => {
     const base = new Date().getFullYear();
     return [base - 2, base - 1, base, base + 1];
   })();
 
   esAdmin = false;
+
+  // Resultado de la última generación / recálculo (para el panel de avisos)
+  validacion: CxcAlumnoValidacion[] = [];
+  revision: CxcRevision[] = [];
+  avisoAnio: number | null = null;
 
   constructor(
     private cxcService: CxcService,
@@ -48,8 +53,14 @@ export class CxcComponent implements OnInit {
 
   cargarAniosGenerados(): void {
     this.cxcService.getAniosGenerados().subscribe({
-      next: (lista) => { this.aniosGenerados = new Set(lista); }
+      next: (lista) => {
+        this.aniosGenerados = new Map((lista ?? []).map(g => [g.anio, g]));
+      }
     });
+  }
+
+  estaGenerado(anio: number): boolean {
+    return this.aniosGenerados.has(anio);
   }
 
   cargar(): void {
@@ -71,20 +82,71 @@ export class CxcComponent implements OnInit {
   }
 
   generarCxc(anioSeleccionado: number): void {
-    if (this.generando || this.aniosGenerados.has(anioSeleccionado)) return;
+    if (this.generando) return;
+
+    const yaGenerado = this.estaGenerado(anioSeleccionado);
+    if (yaGenerado &&
+        !confirm(`El año ${anioSeleccionado} ya tiene CxC generada. ` +
+                 `Volver a ejecutar solo agrega las cuotas de alumnos nuevos (no reescribe las existentes). ¿Continuar?`)) {
+      return;
+    }
+
     this.generando = true;
+    this.limpiarAvisos();
     this.cxcService.generarAnio(anioSeleccionado).subscribe({
-      next: () => {
+      next: (validacion) => {
         this.generando = false;
-        this.aniosGenerados = new Set([...this.aniosGenerados, anioSeleccionado]);
-        this.snack.open(`CXC ${anioSeleccionado} generado correctamente`, '', { duration: 3000 });
+        this.cargarAniosGenerados();
+        this.validacion = validacion ?? [];
+        this.avisoAnio = anioSeleccionado;
+        this.snack.open(
+          this.validacion.length
+            ? `CxC ${anioSeleccionado} generada. ${this.validacion.length} alumno(s) con cuotas incompletas — revisá el aviso.`
+            : `CxC ${anioSeleccionado} generada correctamente`,
+          '', { duration: 5000 });
         if (this.anio === anioSeleccionado) this.cargar();
       },
-      error: () => {
+      error: (err) => {
         this.generando = false;
-        this.snack.open('Error al generar CXC', '', { duration: 4000 });
+        const msg = err?.error?.errores?.mensaje ?? err?.error?.mensaje ?? 'Error al generar CxC';
+        this.snack.open(msg, 'OK', { duration: 8000 });
       }
     });
+  }
+
+  recalcularCxc(anioSeleccionado: number): void {
+    if (this.generando) return;
+    if (!confirm(`Recalcular CxC ${anioSeleccionado}: reajusta grado y monto de las cuotas ` +
+                 `PENDIENTES según el catálogo y la matrícula del año, y agrega las faltantes. ` +
+                 `No toca cuotas pagadas. ¿Continuar?`)) return;
+
+    this.generando = true;
+    this.limpiarAvisos();
+    this.cxcService.recalcularAnio(anioSeleccionado).subscribe({
+      next: (revision) => {
+        this.generando = false;
+        this.cargarAniosGenerados();
+        this.revision = revision ?? [];
+        this.avisoAnio = anioSeleccionado;
+        this.snack.open(
+          this.revision.length
+            ? `CxC ${anioSeleccionado} recalculada. ${this.revision.length} cuota(s) de alumnos no activos para revisar.`
+            : `CxC ${anioSeleccionado} recalculada correctamente`,
+          '', { duration: 5000 });
+        if (this.anio === anioSeleccionado) this.cargar();
+      },
+      error: (err) => {
+        this.generando = false;
+        const msg = err?.error?.errores?.mensaje ?? err?.error?.mensaje ?? 'Error al recalcular CxC';
+        this.snack.open(msg, 'OK', { duration: 8000 });
+      }
+    });
+  }
+
+  limpiarAvisos(): void {
+    this.validacion = [];
+    this.revision = [];
+    this.avisoAnio = null;
   }
 
   abrirEstadoCuenta(row: CxcResumen): void {

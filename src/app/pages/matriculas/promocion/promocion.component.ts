@@ -14,6 +14,8 @@ interface FilaPromocion extends PromocionAlumno {
   seccionDestino:      string | null;
   idNivelInglesDestino: number | null;
   mensualidad:         number | null;
+  /** Ya promovida: bloqueada para no seleccionarla/editarla y sobreescribir por accidente. */
+  bloqueada:           boolean;
 }
 
 @Component({
@@ -30,6 +32,7 @@ export class PromocionComponent implements OnInit {
   aniosDisponibles: number[] = [];
 
   filas: FilaPromocion[] = [];
+  filasVisibles: FilaPromocion[] = [];
   cargando = false;
   promoviendo = false;
   estado: PromocionEstado | null = null;
@@ -54,7 +57,6 @@ export class PromocionComponent implements OnInit {
     this.aniosDisponibles = [anio - 2, anio - 1, anio, anio + 1];
 
     this.catalogoService.getGrados().subscribe(d => this.grados = d ?? []);
-    this.catalogoService.getGradosConPrecios().subscribe(d => this.gradosPrecios = d ?? []);
     this.catalogoService.getNivelesIngles().subscribe(d => this.niveles = d ?? []);
 
     this.cargar();
@@ -67,9 +69,15 @@ export class PromocionComponent implements OnInit {
       next: e => this.estado = e,
       error: () => this.estado = null
     });
+    // Precio de referencia = el vigente al inicio del año lectivo destino.
+    this.catalogoService.getGradosConPrecios(`${this.anioDestino}-01-01`).subscribe(d => {
+      this.gradosPrecios = d ?? [];
+      this.filas.forEach(f => f.mensualidad = this.precioDeGrado(f.idGradoDestino));
+    });
     this.matriculaService.listarPromocion(this.anioOrigen).subscribe({
       next: data => {
         this.filas = (data ?? []).map(a => this.aFila(a));
+        this.recalcularFilasVisibles();
         this.cargando = false;
       },
       error: () => {
@@ -79,30 +87,69 @@ export class PromocionComponent implements OnInit {
     });
   }
 
+  trackByIdentidad(_index: number, f: FilaPromocion): string {
+    return f.identidad;
+  }
+
   private aFila(a: PromocionAlumno): FilaPromocion {
-    const idGradoDestino = a.esUltimoGrado ? null : (a.idGradoSugerido ?? a.idGradoActual ?? null);
+    let resultado: 'Aprobado' | 'Reprobado' = 'Aprobado';
+    let idGradoDestino: number | null;
+    let seccionDestino: string | null;
+    let idNivelInglesDestino: number | null;
+
+    if (a.esUltimoGrado) {
+      idGradoDestino = null;
+      seccionDestino = a.seccion ?? null;
+      idNivelInglesDestino = a.idNivelIngles ?? null;
+    } else if (a.yaPromovido) {
+      // Ya se proceso: mostrar lo que realmente quedo guardado, no la sugerencia
+      // por defecto (si no, al recargar parece que "se olvidó" la decisión tomada).
+      resultado = a.estadoFinal === 'Reprobado' ? 'Reprobado' : 'Aprobado';
+      idGradoDestino = a.idGradoReal ?? a.idGradoSugerido ?? a.idGradoActual ?? null;
+      seccionDestino = a.seccionReal ?? a.seccion ?? null;
+      idNivelInglesDestino = a.idNivelInglesReal ?? a.idNivelIngles ?? null;
+    } else {
+      idGradoDestino = a.idGradoSugerido ?? a.idGradoActual ?? null;
+      seccionDestino = a.seccion ?? null;
+      idNivelInglesDestino = a.idNivelIngles ?? null;
+    }
+
     return {
       ...a,
-      seleccionado:         false,
-      resultado:            'Aprobado',
+      seleccionado: false,
+      resultado,
       idGradoDestino,
-      seccionDestino:       a.seccion ?? null,
-      idNivelInglesDestino: a.idNivelIngles ?? null,
-      mensualidad:          this.precioDeGrado(idGradoDestino),
+      seccionDestino,
+      idNivelInglesDestino,
+      mensualidad: this.precioDeGrado(idGradoDestino),
+      bloqueada: a.yaPromovido,
     };
+  }
+
+  /** Permite editar y volver a promover una fila ya procesada (corregir un error de captura). */
+  desbloquear(fila: FilaPromocion): void {
+    if (!confirm(`"${fila.nombreCompleto}" ya fue promovido. Si la volvés a promover se ` +
+                 `SOBREESCRIBE su matrícula ${this.anioDestino}. ¿Editar de todos modos?`)) return;
+    fila.bloqueada = false;
   }
 
   private precioDeGrado(idGrado: number | null): number | null {
     if (idGrado == null) return null;
-    const gp = this.gradosPrecios.find(g => g.idGrado === idGrado);
+    // Producto 2 = Mensualidad
+    const gp = this.gradosPrecios.find(g => g.idGrado === idGrado && g.idProducto === 2);
     return gp ? gp.precio : null;
   }
 
   // ── filtros / selección ──
 
-  get filasVisibles(): FilaPromocion[] {
+  // filasVisibles es un array materializado (no un getter): un getter usado como
+  // [dataSource] de mat-table se re-evalua en CADA ciclo de deteccion de cambios
+  // y devuelve una referencia nueva aunque el contenido sea el mismo, lo que hace
+  // que la tabla destruya y re-cree las celdas (incluidos los mat-button-toggle-group
+  // de "Resultado") constantemente — eso puede perder el estado de esos controles.
+  recalcularFilasVisibles(): void {
     const nom = this.filtroNombre.trim().toLowerCase();
-    return this.filas.filter(f =>
+    this.filasVisibles = this.filas.filter(f =>
       (!nom || f.nombreCompleto.toLowerCase().includes(nom)) &&
       (this.filtroIdGrado == null || f.idGradoActual === this.filtroIdGrado)
     );
@@ -113,12 +160,12 @@ export class PromocionComponent implements OnInit {
   }
 
   todasVisiblesMarcadas(): boolean {
-    const v = this.filasVisibles;
-    return v.length > 0 && v.every(f => f.seleccionado);
+    const seleccionables = this.filasVisibles.filter(f => !f.bloqueada);
+    return seleccionables.length > 0 && seleccionables.every(f => f.seleccionado);
   }
 
   toggleTodas(check: boolean): void {
-    this.filasVisibles.forEach(f => f.seleccionado = check);
+    this.filasVisibles.filter(f => !f.bloqueada).forEach(f => f.seleccionado = check);
   }
 
   onResultadoChange(fila: FilaPromocion): void {
@@ -139,6 +186,7 @@ export class PromocionComponent implements OnInit {
   limpiarFiltros(): void {
     this.filtroNombre = '';
     this.filtroIdGrado = null;
+    this.recalcularFilasVisibles();
   }
 
   // ── ejecutar ──
@@ -150,6 +198,18 @@ export class PromocionComponent implements OnInit {
     const invalidas = sel.filter(f => !f.esUltimoGrado && f.idGradoDestino == null);
     if (invalidas.length) {
       this.notification.error('Hay alumnos seleccionados sin grado destino.');
+      return;
+    }
+
+    // Aviso: "Aprobado" pero grado destino = grado actual casi siempre es un error
+    // de captura (debería ser "Repite"). No bloquea, pero se confirma antes de mandar.
+    const sospechosos = sel.filter(f =>
+      !f.esUltimoGrado && f.resultado === 'Aprobado' && f.idGradoDestino === f.idGradoActual);
+    if (sospechosos.length &&
+        !confirm(`${sospechosos.length} alumno(s) están marcados "Aprobado" pero con el mismo grado ` +
+                 `actual como destino (¿debería ser "Repite"?). Revisá: ` +
+                 sospechosos.slice(0, 5).map(f => f.nombreCompleto).join(', ') +
+                 (sospechosos.length > 5 ? '…' : '') + `. ¿Continuar igual?`)) {
       return;
     }
 
@@ -174,17 +234,27 @@ export class PromocionComponent implements OnInit {
   private ejecutar(sel: FilaPromocion[]): void {
     this.promoviendo = true;
 
-    const alumnos: PromoverAlumnoItem[] = sel.map(f => ({
-      identidad:            f.identidad,
-      promovido:            f.resultado === 'Aprobado',
-      egresa:               f.esUltimoGrado,
-      estadoFinal:          f.esUltimoGrado ? 'Egresado' : f.resultado,
-      idGradoDestino:       f.esUltimoGrado ? null : f.idGradoDestino,
-      seccion:              f.esUltimoGrado ? null : f.seccionDestino,
-      idNivelInglesDestino: f.esUltimoGrado ? null : f.idNivelInglesDestino,
-      valorMensualidad:     f.esUltimoGrado ? null : f.mensualidad,
-      valorMatricula:       null,
-    }));
+    const alumnos: PromoverAlumnoItem[] = sel.map(f => {
+      const repite = !f.esUltimoGrado && f.resultado === 'Reprobado';
+      // "Repite" siempre = mismo grado, sin depender de que el dropdown se haya sincronizado.
+      const idGradoDestino = f.esUltimoGrado
+        ? null
+        : repite
+          ? (f.idGradoActual ?? f.idGradoDestino ?? null)
+          : (f.idGradoDestino ?? f.idGradoSugerido ?? null);
+      return {
+        identidad:            f.identidad,
+        promovido:            !repite && !f.esUltimoGrado,
+        egresa:               f.esUltimoGrado,
+        estadoFinal:          f.esUltimoGrado ? 'Egresado' : (repite ? 'Reprobado' : 'Aprobado'),
+        idGradoDestino,
+        seccion:              f.esUltimoGrado ? null : f.seccionDestino,
+        idNivelInglesDestino: f.esUltimoGrado ? null : f.idNivelInglesDestino,
+        // Los precios los define el catalogo por fecha; no se envian desde aqui.
+        valorMensualidad:     null,
+        valorMatricula:       null,
+      };
+    });
 
     this.matriculaService.promover({
       anioOrigen:  this.anioOrigen,

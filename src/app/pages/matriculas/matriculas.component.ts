@@ -141,8 +141,13 @@ export class MatriculasComponent implements OnInit {
       this.alumnoService.cambiarEstado(alumno.identidad, 'Inactivo').subscribe({
         next: () => {
           alumno.estado = 'Inactivo';
+          this.notification.success('Alumno inactivado.');
         },
-        error: () => {}
+        error: (err) => {
+          const msg = err?.error?.errores?.mensaje ?? err?.error?.mensaje
+            ?? 'No se pudo inactivar el alumno.';
+          this.notification.error(msg);
+        }
       });
     });
   }

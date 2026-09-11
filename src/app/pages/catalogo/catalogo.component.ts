@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CatalogoService, GradoPrecioFlat } from '@app/services/catalogo/catalogo.service';
 import { NuevoProductoDialogComponent } from './nuevo-producto-dialog/nuevo-producto-dialog.component';
+import { HistorialPreciosDialogComponent } from './historial-precios-dialog.component';
 
 interface PrecioItem {
   idProducto:     number;
@@ -32,6 +33,10 @@ export class CatalogoComponent implements OnInit {
   productos: { id: number; nombre: string }[] = [];
   columnas:  string[] = [];
   nivelFiltro = '';
+
+  /** Si tiene valor, "Guardar" programa una nueva vigencia desde esa fecha en vez de editar la actual. */
+  vigenciaDesde = '';
+  factorPct: number | null = null;
 
   constructor(
     private catService: CatalogoService,
@@ -111,6 +116,7 @@ export class CatalogoComponent implements OnInit {
         idGrado:    row.idGrado,
         idProducto: p.idProducto,
         precio:     p.precio,
+        fechaDesde: this.vigenciaDesde || null,
       }).subscribe({
         next: () => {
           p.original = p.precio;
@@ -130,6 +136,24 @@ export class CatalogoComponent implements OnInit {
 
   cancelar(row: GradoRow): void {
     row.precios.forEach(p => p.precio = p.original);
+  }
+
+  aplicarFactor(): void {
+    const f = this.factorPct;
+    if (f == null || !isFinite(f)) return;
+    const objetivo = this.filasFiltradas;
+    objetivo.forEach(row => row.precios.forEach(p => {
+      p.precio = Math.round(p.original * (1 + f / 100));
+    }));
+    this.snack.open(`Factor ${f > 0 ? '+' : ''}${f}% aplicado a la vista. Revisá y Guardá cada grado.`, 'OK', { duration: 4000 });
+  }
+
+  verHistorial(row: GradoRow): void {
+    this.dialog.open(HistorialPreciosDialogComponent, {
+      width: '720px',
+      maxWidth: '96vw',
+      data: { idGrado: row.idGrado, gradoNombre: row.nombre },
+    });
   }
 
   nuevoProducto(): void {

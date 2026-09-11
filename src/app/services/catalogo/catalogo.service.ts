@@ -18,12 +18,32 @@ export interface GradoPrecioFlat {
   idProducto:     number;
   productoNombre: string;
   precio:         number;
+  esAnual:        boolean;
+  fechaDesde:     string | null;
+  fechaHasta:     string | null;
+}
+
+export interface HistorialPrecio {
+  id:             number;
+  idGrado:        number;
+  gradoNombre:    string | null;
+  idProducto:     number;
+  productoNombre: string | null;
+  precio:         number;
+  esAnual:        boolean;
+  activo:         boolean;
+  fechaDesde:     string;
+  fechaHasta:     string | null;
+  vigente:        boolean;
 }
 
 export interface ActualizarPrecioDto {
-  idGrado:    number;
-  idProducto: number;
-  precio:     number;
+  idGrado:     number;
+  idProducto:  number;
+  precio:      number;
+  /** null = edita la vigencia actual; con fecha = programa una nueva vigencia */
+  fechaDesde?: string | null;
+  esAnual?:    boolean | null;
 }
 
 export interface CrearProductoDto {
@@ -54,8 +74,16 @@ export class CatalogoService {
     return this.http.get<GradoDto[]>(`${this.url}/grados`);
   }
 
-  getGradosConPrecios(): Observable<GradoPrecioFlat[]> {
-    return this.http.get<GradoPrecioFlat[]>(`${this.url}/grados-precios`);
+  getGradosConPrecios(fechaReferencia?: string): Observable<GradoPrecioFlat[]> {
+    const q = fechaReferencia ? `?fechaReferencia=${fechaReferencia}` : '';
+    return this.http.get<GradoPrecioFlat[]>(`${this.url}/grados-precios${q}`);
+  }
+
+  getHistorialPrecios(idGrado?: number, idProducto?: number): Observable<HistorialPrecio[]> {
+    const p: string[] = [];
+    if (idGrado != null)    p.push(`idGrado=${idGrado}`);
+    if (idProducto != null) p.push(`idProducto=${idProducto}`);
+    return this.http.get<HistorialPrecio[]>(`${this.url}/grados-precios/historial${p.length ? '?' + p.join('&') : ''}`);
   }
 
   actualizarPrecio(dto: ActualizarPrecioDto): Observable<void> {

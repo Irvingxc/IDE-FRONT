@@ -17,11 +17,12 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { CatalogoComponent } from './catalogo.component';
 import { NuevoProductoDialogComponent } from './nuevo-producto-dialog/nuevo-producto-dialog.component';
+import { HistorialPreciosDialogComponent } from './historial-precios-dialog.component';
 
 const routes: Routes = [{ path: '', component: CatalogoComponent }];
 
 @NgModule({
-  declarations: [CatalogoComponent, NuevoProductoDialogComponent],
+  declarations: [CatalogoComponent, NuevoProductoDialogComponent, HistorialPreciosDialogComponent],
   imports: [
     CommonModule,
     RouterModule.forChild(routes),
