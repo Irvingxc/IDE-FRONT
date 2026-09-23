@@ -14,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
 
 import { EgresosComponent } from './egresos.component';
 import { NuevoEgresoDialogComponent } from './nuevo-egreso-dialog/nuevo-egreso-dialog.component';
@@ -38,6 +39,7 @@ const routes: Routes = [{ path: '', component: EgresosComponent }];
     MatDialogModule,
     MatDatepickerModule,
     MatNativeDateModule,
-  ]
+  ],
+  providers: FECHA_DD_MM_YYYY_PROVIDERS,
 })
 export class EgresosModule {}

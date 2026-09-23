@@ -15,18 +15,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule, MAT_DATE_LOCALE, DateAdapter, NativeDateAdapter } from '@angular/material/core';
+import { MatNativeDateModule } from '@angular/material/core';
+import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-
-class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
-  override format(date: Date): string {
-    const d = date.getDate().toString().padStart(2, '0');
-    const m = (date.getMonth() + 1).toString().padStart(2, '0');
-    const y = date.getFullYear();
-    return `${d}/${m}/${y}`;
-  }
-}
 
 @NgModule({
   declarations: [
@@ -50,9 +42,6 @@ class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
     MatSnackBarModule,
     MatAutocompleteModule,
   ],
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'es-HN' },
-    { provide: DateAdapter, useClass: EsDdMmYyyyDateAdapter },
-  ]
+  providers: FECHA_DD_MM_YYYY_PROVIDERS,
 })
 export class ReportesModule {}

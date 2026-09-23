@@ -14,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 import { ComprasComponent } from './compras.component';
@@ -41,6 +42,7 @@ const routes: Routes = [{ path: '', component: ComprasComponent }];
     MatDatepickerModule,
     MatNativeDateModule,
     MatAutocompleteModule,
-  ]
+  ],
+  providers: FECHA_DD_MM_YYYY_PROVIDERS,
 })
 export class ComprasModule {}

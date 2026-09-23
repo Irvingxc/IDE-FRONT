@@ -22,23 +22,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule, MAT_DATE_LOCALE, DateAdapter, NativeDateAdapter } from '@angular/material/core';
-
-class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
-  override format(date: Date): string {
-    const d = date.getDate().toString().padStart(2, '0');
-    const m = (date.getMonth() + 1).toString().padStart(2, '0');
-    const y = date.getFullYear();
-    return `${d}/${m}/${y}`;
-  }
-  override parse(value: any): Date | null {
-    if (typeof value === 'string' && value.includes('/')) {
-      const [d, m, y] = value.split('/').map(Number);
-      if (d && m && y) return new Date(y, m - 1, d);
-    }
-    return super.parse(value);
-  }
-}
+import { MatNativeDateModule } from '@angular/material/core';
+import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
 
 @NgModule({
   declarations: [
@@ -68,9 +53,6 @@ class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
     MatDatepickerModule,
     MatNativeDateModule,
   ],
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'es-HN' },
-    { provide: DateAdapter, useClass: EsDdMmYyyyDateAdapter },
-  ]
+  providers: FECHA_DD_MM_YYYY_PROVIDERS,
 })
 export class AcademicoModule {}

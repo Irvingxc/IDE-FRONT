@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -38,6 +39,7 @@ const routes: Routes = [{ path: '', component: BitacoraComponent }];
     MatProgressSpinnerModule,
     MatChipsModule,
     MatTooltipModule,
-  ]
+  ],
+  providers: FECHA_DD_MM_YYYY_PROVIDERS,
 })
 export class BitacoraModule {}

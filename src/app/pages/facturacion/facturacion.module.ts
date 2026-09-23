@@ -15,6 +15,7 @@ import { MatTableModule }            from '@angular/material/table';
 import { MatCheckboxModule }         from '@angular/material/checkbox';
 import { MatDatepickerModule }       from '@angular/material/datepicker';
 import { MatNativeDateModule }       from '@angular/material/core';
+import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
 import { MatDividerModule }          from '@angular/material/divider';
 import { MatSelectModule }           from '@angular/material/select';
 import { MatProgressSpinnerModule }  from '@angular/material/progress-spinner';
@@ -51,6 +52,7 @@ import { MatPaginatorModule }        from '@angular/material/paginator';
     MatAutocompleteModule,
     MatSnackBarModule,
     MatPaginatorModule,
-  ]
+  ],
+  providers: FECHA_DD_MM_YYYY_PROVIDERS,
 })
 export class FacturacionModule { }

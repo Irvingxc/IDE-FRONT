@@ -27,29 +27,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule, MAT_DATE_LOCALE, DateAdapter, NativeDateAdapter } from '@angular/material/core';
+import { MatNativeDateModule } from '@angular/material/core';
+import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatCardModule } from '@angular/material/card';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatListModule } from '@angular/material/list';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-
-class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
-  override format(date: Date): string {
-    const d = date.getDate().toString().padStart(2, '0');
-    const m = (date.getMonth() + 1).toString().padStart(2, '0');
-    const y = date.getFullYear();
-    return `${d}/${m}/${y}`;
-  }
-  override parse(value: any): Date | null {
-    if (typeof value === 'string' && value.includes('/')) {
-      const [d, m, y] = value.split('/').map(Number);
-      if (d && m && y) return new Date(y, m - 1, d);
-    }
-    return super.parse(value);
-  }
-}
 
 @NgModule({
   declarations: [
@@ -90,9 +75,6 @@ class EsDdMmYyyyDateAdapter extends NativeDateAdapter {
     MatCheckboxModule,
     MatButtonToggleModule,
   ],
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'es-HN' },
-    { provide: DateAdapter, useClass: EsDdMmYyyyDateAdapter },
-  ]
+  providers: FECHA_DD_MM_YYYY_PROVIDERS,
 })
 export class MatriculasModule { }

@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
 
 import { SarConfigComponent } from './sar-config.component';
 import { NuevoSarDialogComponent } from './nuevo-sar-dialog/nuevo-sar-dialog.component';
@@ -36,6 +37,7 @@ const routes: Routes = [{ path: '', component: SarConfigComponent }];
     MatDialogModule,
     MatDatepickerModule,
     MatNativeDateModule,
-  ]
+  ],
+  providers: FECHA_DD_MM_YYYY_PROVIDERS,
 })
 export class SarConfigModule {}
