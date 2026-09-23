@@ -14,6 +14,7 @@ import { select, Store } from '@ngrx/store';
 export class LoginComponent implements OnInit, OnDestroy {
   loading$!: Observable<boolean | null>;
   errorMsg: string | null = null;
+  mostrarPassword = false;
 
   cooldownSeconds = 0;
   private failedAttempts = 0;

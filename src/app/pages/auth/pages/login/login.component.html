@@ -18,8 +18,14 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Contraseña</mat-label>
-        <input type="password" matInput name="password" ngModel required>
+        <input [type]="mostrarPassword ? 'text' : 'password'" matInput name="password" ngModel required>
         <mat-icon matPrefix>lock</mat-icon>
+        <button mat-icon-button matSuffix type="button"
+                (click)="mostrarPassword = !mostrarPassword"
+                [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                [title]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+          <mat-icon>{{ mostrarPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
         <mat-error>Ingrese su contraseña</mat-error>
       </mat-form-field>
 
