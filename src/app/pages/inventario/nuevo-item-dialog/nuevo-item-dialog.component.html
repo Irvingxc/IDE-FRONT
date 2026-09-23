@@ -25,7 +25,8 @@
   <div class="row-3">
     <mat-form-field appearance="outline">
       <mat-label>Cantidad *</mat-label>
-      <input matInput type="number" min="1" [(ngModel)]="cantidad">
+      <input matInput type="number" min="0" step="1" [(ngModel)]="cantidad">
+      <mat-hint *ngIf="cantidad === 0">Solo se registrará el ítem, sin existencias</mat-hint>
     </mat-form-field>
 
     <mat-form-field appearance="outline">

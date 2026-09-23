@@ -42,9 +42,14 @@ export class NuevoItemDialogComponent implements OnInit {
     });
   }
 
+  // Se permite 0 para registrar el ítem sin existencias; el stock se agrega luego desde Compras.
+  get cantidadValida(): boolean {
+    return this.cantidad != null && Number.isInteger(this.cantidad) && this.cantidad >= 0;
+  }
+
   get puedeGuardar(): boolean {
     return !!this.nombre.trim() && !!this.categoria &&
-           this.cantidad > 0 && this.valorUnitario > 0 &&
+           this.cantidadValida && this.valorUnitario > 0 &&
            !this.nombreDuplicado && !this.guardando;
   }
 
