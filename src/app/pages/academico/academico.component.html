@@ -178,6 +178,22 @@
       <div class="tab-content">
 
         <div class="notas-filtros">
+          <mat-form-field appearance="outline" class="filtro-ancho" *ngIf="esAdmin">
+            <mat-label>Maestro</mat-label>
+            <input matInput
+                   [(ngModel)]="notasMaestroBusqueda"
+                   (focus)="onFocusMateria(); seleccionarTexto($event)"
+                   (click)="seleccionarTexto($event)"
+                   [matAutocomplete]="autoMaestroNotas"
+                   placeholder="Buscar maestro...">
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #autoMaestroNotas="matAutocomplete">
+              <mat-option *ngFor="let m of maestrosFiltradosNotas; trackBy: trackByMaestro" [value]="m.nombre" (onSelectionChange)="onMaestroSeleccionadoNotas(m)">
+                {{ m.nombre }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
           <mat-form-field appearance="outline" class="filtro-ancho">
             <mat-label>Clase</mat-label>
             <input matInput
@@ -185,7 +201,8 @@
                    (focus)="onFocusMateria(); seleccionarTexto($event)"
                    (click)="seleccionarTexto($event)"
                    [matAutocomplete]="autoMateria"
-                   placeholder="Buscar clase...">
+                   [disabled]="!puedeElegirClaseNotas"
+                   [placeholder]="puedeElegirClaseNotas ? 'Buscar clase...' : 'Primero selecciona un maestro'">
             <mat-icon matSuffix>search</mat-icon>
             <mat-autocomplete #autoMateria="matAutocomplete">
               <mat-option *ngFor="let nombre of materiasFiltradas" [value]="nombre" (onSelectionChange)="onMateriaSeleccionada(nombre)">
@@ -235,7 +252,8 @@
                    (focus)="onFocusPeriodo(); seleccionarTexto($event)"
                    (click)="seleccionarTexto($event)"
                    [matAutocomplete]="autoPeriodo"
-                   placeholder="Buscar periodo...">
+                   [disabled]="!notasSeccion"
+                   [placeholder]="notasSeccion ? 'Buscar periodo...' : 'Primero selecciona una sección'">
             <mat-icon matSuffix>search</mat-icon>
             <mat-autocomplete #autoPeriodo="matAutocomplete">
               <mat-option *ngFor="let p of periodosFiltrados" [value]="p.nombre" (onSelectionChange)="onPeriodoSeleccionadoNotas(p)">
@@ -246,7 +264,7 @@
         </div>
 
         <div *ngIf="!notasSimpleIdClase || !notasSimpleIdPeriodo" class="no-data-row">
-          <span>Selecciona clase, grado, sección y periodo para ver los alumnos.</span>
+          <span>{{ esAdmin ? 'Selecciona maestro, clase' : 'Selecciona clase' }}, grado, sección y periodo para ver los alumnos.</span>
         </div>
 
         <div *ngIf="loadingAlumnosNotas" class="loading-row">

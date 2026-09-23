@@ -32,6 +32,11 @@ interface GrupoClase {
   nombre: string;
 }
 
+interface MaestroOpcion {
+  id:     string | null;
+  nombre: string;
+}
+
 @Component({
   selector: 'app-academico',
   templateUrl: './academico.component.html',
@@ -124,7 +129,11 @@ export class AcademicoComponent implements OnInit {
     return this.clases.filter(c => c.idMaestro === this.idUsuarioActual);
   }
 
-  // ── Buscadores en cascada (Clase → Grado → Sección → Periodo) ──
+  // ── Buscadores en cascada (Maestro → Clase → Grado → Sección → Periodo) ──
+  // El filtro de maestro solo aplica a administradores; un maestro ya ve únicamente sus clases.
+  notasMaestroBusqueda = '';
+  notasMaestroSeleccionado: MaestroOpcion | null = null;
+
   notasMateriaBusqueda = '';
   notasMateriaSeleccionada: string | null = null;
 
@@ -136,8 +145,37 @@ export class AcademicoComponent implements OnInit {
 
   periodoBusqueda = '';
 
+  get maestrosDisponiblesNotas(): MaestroOpcion[] {
+    const vistos = new Map<string, MaestroOpcion>();
+    this.clasesDisponiblesNotas.forEach(c => {
+      vistos.set(c.idMaestro ?? '', { id: c.idMaestro, nombre: c.maestroNombre ?? 'Sin asignar' });
+    });
+    return Array.from(vistos.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }
+
+  get maestrosFiltradosNotas(): MaestroOpcion[] {
+    const term = this.notasMaestroBusqueda.trim().toLowerCase();
+    if (!term) return this.maestrosDisponiblesNotas;
+    return this.maestrosDisponiblesNotas.filter(m => m.nombre.toLowerCase().includes(term));
+  }
+
+  trackByMaestro(index: number, m: MaestroOpcion): string {
+    return m.id ?? '';
+  }
+
+  get clasesDelMaestroNotas(): ClaseResponse[] {
+    if (!this.esAdmin) return this.clasesDisponiblesNotas;
+    if (!this.notasMaestroSeleccionado) return [];
+    const idMaestro = this.notasMaestroSeleccionado.id;
+    return this.clasesDisponiblesNotas.filter(c => c.idMaestro === idMaestro);
+  }
+
+  get puedeElegirClaseNotas(): boolean {
+    return !this.esAdmin || !!this.notasMaestroSeleccionado;
+  }
+
   get materiasDisponibles(): string[] {
-    const nombres = this.clasesDisponiblesNotas.map(c => c.nombre);
+    const nombres = this.clasesDelMaestroNotas.map(c => c.nombre);
     return Array.from(new Set(nombres)).sort((a, b) => a.localeCompare(b));
   }
 
@@ -152,7 +190,7 @@ export class AcademicoComponent implements OnInit {
   get gruposDeMateria(): GrupoClase[] {
     if (!this.notasMateriaSeleccionada) return [];
     const vistos = new Map<string, GrupoClase>();
-    this.clasesDisponiblesNotas
+    this.clasesDelMaestroNotas
       .filter(c => c.nombre === this.notasMateriaSeleccionada)
       .forEach(c => {
         if (c.idGrado != null && c.gradoNombre != null) {
@@ -176,7 +214,7 @@ export class AcademicoComponent implements OnInit {
 
   get seccionesDeClase(): string[] {
     if (!this.notasMateriaSeleccionada || !this.notasGradoId || !this.notasGradoTipo) return [];
-    const secciones = this.clasesDisponiblesNotas
+    const secciones = this.clasesDelMaestroNotas
       .filter(c => c.nombre === this.notasMateriaSeleccionada &&
         (this.notasGradoTipo === 'grado' ? c.idGrado === this.notasGradoId : c.idNivelIngles === this.notasGradoId))
       .map(c => c.seccion);
@@ -224,6 +262,22 @@ export class AcademicoComponent implements OnInit {
     this.cargarPeriodos();
   }
 
+  onMaestroSeleccionadoNotas(maestro: MaestroOpcion): void {
+    this.notasMaestroSeleccionado = maestro;
+    this.notasMaestroBusqueda = maestro.nombre;
+
+    this.notasMateriaSeleccionada = null;
+    this.notasMateriaBusqueda = '';
+    this.notasGradoId = null;
+    this.notasGradoTipo = null;
+    this.notasGradoBusqueda = '';
+    this.notasSeccion = null;
+    this.notasSeccionBusqueda = '';
+
+    this.notasSimpleIdClase = null;
+    this.onNotasSimpleFiltroChange();
+  }
+
   onMateriaSeleccionada(nombre: string): void {
     this.notasMateriaSeleccionada = nombre;
     this.notasMateriaBusqueda = nombre;
@@ -254,7 +308,7 @@ export class AcademicoComponent implements OnInit {
     this.notasSeccion = seccion;
     this.notasSeccionBusqueda = seccion;
 
-    const clase = this.clasesDisponiblesNotas.find(c =>
+    const clase = this.clasesDelMaestroNotas.find(c =>
       c.nombre === this.notasMateriaSeleccionada &&
       (this.notasGradoTipo === 'grado' ? c.idGrado === this.notasGradoId : c.idNivelIngles === this.notasGradoId) &&
       c.seccion === seccion
