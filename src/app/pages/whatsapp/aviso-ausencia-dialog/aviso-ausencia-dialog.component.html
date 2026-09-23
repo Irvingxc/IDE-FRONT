@@ -1,0 +1,70 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;color:#6B0F1A;margin-right:8px">event_busy</mat-icon>
+  Enviar avisos de ausencia
+</h2>
+
+<mat-dialog-content>
+
+  <p class="ayuda">
+    Envía por correo el aviso de ausencia a los padres de todos los alumnos que no registraron
+    entrada en la fecha seleccionada, y el reporte en Excel a administración.
+  </p>
+
+  <mat-form-field appearance="outline" class="campo-fecha">
+    <mat-label>Fecha</mat-label>
+    <input matInput [matDatepicker]="picker" [(ngModel)]="fecha" [max]="hoy" [disabled]="enviando || !!resultado" required>
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+
+  <div class="advertencia" *ngIf="!resultado">
+    <mat-icon>warning_amber</mat-icon>
+    <span>
+      Se enviará a <strong>todos</strong> los padres de alumnos ausentes en esa fecha,
+      aunque ya hayan recibido el aviso automático de las 8:00.
+    </span>
+  </div>
+
+  <div *ngIf="enviando" class="progreso-container">
+    <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
+    <span class="progreso-label">Enviando avisos, esto puede tardar unos minutos...</span>
+  </div>
+
+  <div *ngIf="error" class="error-msg">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+
+  <div *ngIf="resultado?.omitido" class="omitido-msg">
+    <mat-icon>info</mat-icon>
+    <span>{{ resultado?.motivo }}</span>
+  </div>
+
+  <div *ngIf="resultado && !resultado.omitido" class="resultado">
+    <div class="resultado-titulo">
+      <mat-icon>check_circle</mat-icon>
+      <span>Envío completado — {{ resultado.totalAusentes }} alumno(s) ausente(s)</span>
+    </div>
+    <div class="resultado-fila"><span>Correos enviados</span><strong>{{ resultado.enviados }}</strong></div>
+    <div class="resultado-fila"><span>Correos fallidos</span><strong [class.rojo]="resultado.fallidos > 0">{{ resultado.fallidos }}</strong></div>
+    <div class="resultado-fila"><span>Padres sin correo registrado</span><strong>{{ resultado.sinCorreo }}</strong></div>
+    <p class="nota" *ngIf="resultado.reporteEnviado">
+      Reporte en Excel enviado a {{ resultado.correoReporte }}.
+    </p>
+    <p class="nota rojo" *ngIf="!resultado.reporteEnviado">
+      No se pudo enviar el reporte en Excel a administración.
+    </p>
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cerrar()" [disabled]="enviando">
+    {{ resultado ? 'Cerrar' : 'Cancelar' }}
+  </button>
+  <button mat-raised-button color="primary" *ngIf="!resultado"
+    (click)="enviar()"
+    [disabled]="!fecha || enviando">
+    <mat-icon>send</mat-icon> Enviar avisos
+  </button>
+</mat-dialog-actions>

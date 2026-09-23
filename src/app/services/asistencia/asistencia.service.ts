@@ -59,6 +59,18 @@ export interface Feriado {
   idSucursal:  number | null;
 }
 
+export interface EnvioAvisosAusenciaDto {
+  fecha:          string;
+  omitido:        boolean;
+  motivo:         string | null;
+  totalAusentes:  number;
+  enviados:       number;
+  fallidos:       number;
+  sinCorreo:      number;
+  reporteEnviado: boolean;
+  correoReporte:  string | null;
+}
+
 export interface ZlinkSyncResultDto {
   totalRecibidos: number;
   alumnos:        number;
@@ -124,5 +136,10 @@ export class AsistenciaService {
 
   sincronizarZlink(): Observable<ZlinkSyncResultDto> {
     return this.http.post<ZlinkSyncResultDto>(`${this.base}/zlink/sincronizar`, {});
+  }
+
+  enviarAvisosAusencia(fecha: Date): Observable<EnvioAvisosAusenciaDto> {
+    const params = new HttpParams().set('fecha', this.formatearFecha(fecha));
+    return this.http.post<EnvioAvisosAusenciaDto>(`${this.base}/avisos-ausencia/enviar`, {}, { params });
   }
 }

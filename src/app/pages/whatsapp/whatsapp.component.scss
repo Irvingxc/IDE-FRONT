@@ -12,6 +12,13 @@
   .breadcrumb { margin: 4px 0 0; font-size: 13px; color: #666; }
 }
 
+.header-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
 .resumen-card {
   display: flex;
   align-items: center;

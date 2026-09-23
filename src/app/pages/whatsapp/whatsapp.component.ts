@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ClienteService, ClienteResponse } from '@app/services/cliente/cliente.service';
 import { EnviarMensajeDialogComponent } from './enviar-mensaje-dialog/enviar-mensaje-dialog.component';
+import { AvisoAusenciaDialogComponent } from './aviso-ausencia-dialog/aviso-ausencia-dialog.component';
 
 @Component({
   selector: 'app-whatsapp',
@@ -40,6 +41,13 @@ export class WhatsappComponent implements OnInit {
       width: '520px',
       disableClose: true,
       data: { clientesTelefono: this.clientes, clientesCorreo: this.clientesConCorreo }
+    });
+  }
+
+  abrirAvisoAusencia(): void {
+    this.dialog.open(AvisoAusenciaDialogComponent, {
+      width: '520px',
+      disableClose: true
     });
   }
 

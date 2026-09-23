@@ -5,11 +5,16 @@
       <h1>WhatsApp</h1>
       <p class="breadcrumb">Inicio / WhatsApp</p>
     </div>
-    <button mat-raised-button color="primary"
-      (click)="abrirEnvioMasivo()"
-      [disabled]="loading || clientes.length === 0">
-      <mat-icon>send</mat-icon> Enviar mensaje masivo
-    </button>
+    <div class="header-acciones">
+      <button mat-stroked-button color="primary" (click)="abrirAvisoAusencia()">
+        <mat-icon>event_busy</mat-icon> Enviar avisos de ausencia
+      </button>
+      <button mat-raised-button color="primary"
+        (click)="abrirEnvioMasivo()"
+        [disabled]="loading || clientes.length === 0">
+        <mat-icon>send</mat-icon> Enviar mensaje masivo
+      </button>
+    </div>
   </div>
 
   <div class="resumen-card">
