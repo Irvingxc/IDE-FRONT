@@ -21,6 +21,7 @@ export class CxcComponent implements OnInit {
   anio          = new Date().getFullYear();
   filtroNombre  = '';
   filtroEstado  = '';
+  filtroEstadoAlumno = 'Activo';
 
   aniosGenerados = new Map<number, CxcGeneracion>();
   readonly aniosDisponibles: number[] = (() => {
@@ -68,7 +69,8 @@ export class CxcComponent implements OnInit {
     this.cxcService.getResumen(
       this.anio,
       this.filtroNombre || undefined,
-      this.filtroEstado || undefined
+      this.filtroEstado || undefined,
+      this.filtroEstadoAlumno
     ).subscribe({
       next: (data) => { this.datos = data ?? []; this.cargando = false; },
       error: ()     => { this.cargando = false; }
@@ -159,6 +161,7 @@ export class CxcComponent implements OnInit {
   limpiar(): void {
     this.filtroNombre = '';
     this.filtroEstado = '';
+    this.filtroEstadoAlumno = 'Activo';
     this.cargar();
   }
 
@@ -176,9 +179,10 @@ export class CxcComponent implements OnInit {
 
   exportarExcel(): void {
     const lps = (v: number) => v.toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const headers = ['Estudiante', 'Padre/Tutor', 'Grado', 'Cuotas Pendientes', 'Total Vencido', 'Total Pagado', 'Total Año'];
+    const headers = ['Estudiante', 'Estado', 'Padre/Tutor', 'Grado', 'Cuotas Pendientes', 'Total Vencido', 'Total Pagado', 'Total Año'];
     const rows = this.datos.map(r => [
       r.nombreCompleto,
+      r.estadoAlumno,
       r.nombreTutor,
       r.gradoNombre,
       r.cuotasPendientes,

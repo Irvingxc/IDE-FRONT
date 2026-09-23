@@ -8,6 +8,7 @@ export interface CxcResumen {
   nombreCompleto:   string;
   gradoNombre:      string;
   nombreTutor:      string;
+  estadoAlumno:     string;
   cuotasPendientes: number;
   cuotasPagadas:    number;
   totalPendiente:   number;
@@ -68,10 +69,12 @@ export interface CxcRevision {
 export class CxcService {
   constructor(private http: HttpClient) {}
 
-  getResumen(anio: number, nombre?: string, estado?: string): Observable<CxcResumen[]> {
+  // estadoAlumno: 'Activo' (defecto) | 'Inactivo' | 'Todos'
+  getResumen(anio: number, nombre?: string, estado?: string, estadoAlumno?: string): Observable<CxcResumen[]> {
     let params = new HttpParams().set('anio', anio);
     if (nombre?.trim()) params = params.set('nombre', nombre.trim());
     if (estado)         params = params.set('estado', estado);
+    if (estadoAlumno)   params = params.set('estadoAlumno', estadoAlumno);
     return this.http.get<CxcResumen[]>(`${environment.url}api/Cxc/resumen`, { params });
   }
 
