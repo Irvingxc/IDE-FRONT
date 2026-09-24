@@ -20,7 +20,7 @@ export class FacturacionComponent implements OnInit, AfterViewInit {
   dataSource = new MatTableDataSource<PagoResumen>();
   cargando   = false;
   anio      = new Date().getFullYear();
-  mes       = 0;
+  mes       = new Date().getMonth() + 1;   // mes actual por defecto (0 = Todos)
   filtroAlumno  = '';
   filtroEstado  = '';
   sar: Sar | null = null;
@@ -109,7 +109,8 @@ export class FacturacionComponent implements OnInit, AfterViewInit {
   limpiar(): void {
     this.filtroAlumno = '';
     this.filtroEstado = '';
-    this.mes = 0;
+    this.anio = new Date().getFullYear();
+    this.mes = new Date().getMonth() + 1;
     this.cargar();
   }
 
