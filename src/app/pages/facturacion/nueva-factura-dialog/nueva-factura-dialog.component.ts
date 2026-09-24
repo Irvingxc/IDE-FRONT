@@ -231,6 +231,9 @@ export class NuevaFacturaDialogComponent implements OnInit {
     if (this.guardando || !this.puedeGuardar || !this.sar) return;
     this.guardando = true;
 
+    // Solo las CxC de los items que siguen en la factura (si se elimino un item, su CxC no se marca pagada)
+    const idsCxc = this.items.map(i => i.idCxc).filter((id): id is number => id != null);
+
     const dto: CrearFacturaRequest = {
       alumno:          this.alumnoIdentidad,
       idSar:           this.sar.idSar,
@@ -245,7 +248,7 @@ export class NuevaFacturaDialogComponent implements OnInit {
         cantidad:         i.cantidad,
         descuento:        i.descuento ?? 0,
       })),
-      idsCxc: this.data.idsCxc?.length ? this.data.idsCxc : undefined,
+      idsCxc: idsCxc.length ? idsCxc : undefined,
     };
 
     this.facturacionService.crearFactura(dto).subscribe({
