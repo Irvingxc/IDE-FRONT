@@ -7,7 +7,8 @@
 
   <p class="ayuda">
     Envía por correo el aviso de ausencia a los padres de todos los alumnos que no registraron
-    entrada en la fecha seleccionada, y el reporte en Excel a administración.
+    entrada en la fecha seleccionada, el aviso de llegada tarde a los que marcaron después de
+    las 7:01, y el reporte en Excel a administración.
   </p>
 
   <mat-form-field appearance="outline" class="campo-fecha">
@@ -20,8 +21,8 @@
   <div class="advertencia" *ngIf="!resultado">
     <mat-icon>warning_amber</mat-icon>
     <span>
-      Se enviará a <strong>todos</strong> los padres de alumnos ausentes en esa fecha,
-      aunque ya hayan recibido el aviso automático de las 7:05.
+      Se enviará a <strong>todos</strong> los padres de alumnos ausentes o que llegaron tarde en
+      esa fecha, aunque ya hayan recibido el aviso automático de las 7:15.
     </span>
   </div>
 
@@ -43,11 +44,16 @@
   <div *ngIf="resultado && !resultado.omitido" class="resultado">
     <div class="resultado-titulo">
       <mat-icon>check_circle</mat-icon>
-      <span>Envío completado — {{ resultado.totalAusentes }} alumno(s) ausente(s)</span>
+      <span>Envío completado</span>
     </div>
+    <div class="resultado-subtitulo">{{ resultado.totalAusentes }} alumno(s) ausente(s)</div>
     <div class="resultado-fila"><span>Correos enviados</span><strong>{{ resultado.enviados }}</strong></div>
     <div class="resultado-fila"><span>Correos fallidos</span><strong [class.rojo]="resultado.fallidos > 0">{{ resultado.fallidos }}</strong></div>
     <div class="resultado-fila"><span>Padres sin correo registrado</span><strong>{{ resultado.sinCorreo }}</strong></div>
+    <div class="resultado-subtitulo">{{ resultado.totalTardes }} llegada(s) tarde</div>
+    <div class="resultado-fila"><span>Correos enviados</span><strong>{{ resultado.tardesEnviados }}</strong></div>
+    <div class="resultado-fila"><span>Correos fallidos</span><strong [class.rojo]="resultado.tardesFallidos > 0">{{ resultado.tardesFallidos }}</strong></div>
+    <div class="resultado-fila"><span>Padres sin correo registrado</span><strong>{{ resultado.tardesSinCorreo }}</strong></div>
     <p class="nota" *ngIf="resultado.reporteEnviado">
       Reporte en Excel enviado a {{ resultado.correoReporte }}.
     </p>

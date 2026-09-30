@@ -67,6 +67,10 @@ export interface EnvioAvisosAusenciaDto {
   enviados:       number;
   fallidos:       number;
   sinCorreo:      number;
+  totalTardes:     number;
+  tardesEnviados:  number;
+  tardesFallidos:  number;
+  tardesSinCorreo: number;
   reporteEnviado: boolean;
   correoReporte:  string | null;
 }
