@@ -65,6 +65,7 @@ export class EstadoCuentaDialogComponent implements OnInit {
       nombre:      string;
       anio:        number;
       gradoNombre: string;
+      cliente?:    string;   // cliente (encargado) ligado actualmente al alumno
       esAdmin?:    boolean;
     }
   ) {}
@@ -188,6 +189,7 @@ export class EstadoCuentaDialogComponent implements OnInit {
   <div class="alumno-info">
     <strong>Estudiante:</strong> ${this.escHtml(this.data.nombre)}<br>
     <strong>Identidad:</strong> ${this.escHtml(this.data.identidad)}<br>
+    <strong>Cliente:</strong> ${this.escHtml(this.data.cliente?.trim() || 'Sin cliente asignado')}<br>
     <strong>Año lectivo:</strong> ${this.data.anio}
   </div>
   <table>

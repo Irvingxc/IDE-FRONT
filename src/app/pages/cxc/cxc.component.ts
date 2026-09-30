@@ -154,7 +154,7 @@ export class CxcComponent implements OnInit {
   abrirEstadoCuenta(row: CxcResumen): void {
     this.dialog.open(EstadoCuentaDialogComponent, {
       width: '1000px',
-      data: { identidad: row.identidad, nombre: row.nombreCompleto, anio: this.anio, gradoNombre: row.gradoNombre, esAdmin: this.esAdmin }
+      data: { identidad: row.identidad, nombre: row.nombreCompleto, anio: this.anio, gradoNombre: row.gradoNombre, cliente: row.nombreTutor, esAdmin: this.esAdmin }
     });
   }
 

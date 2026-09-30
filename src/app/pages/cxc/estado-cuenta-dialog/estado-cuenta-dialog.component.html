@@ -14,6 +14,11 @@
 
     <p class="subtitulo">Año lectivo {{ data.anio }}</p>
 
+    <div class="cliente-info">
+      <mat-icon>person</mat-icon>
+      <span>Cliente: <strong>{{ data.cliente?.trim() || 'Sin cliente asignado' }}</strong></span>
+    </div>
+
     <table mat-table [dataSource]="detalle" class="tabla-detalle mat-elevation-z1">
 
       <ng-container matColumnDef="seleccion">
