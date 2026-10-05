@@ -276,6 +276,27 @@
           <span>Este grado/nivel no tiene conceptos de evaluación configurados. Ve a la pestaña "Parámetros de Evaluación" para configurarlos.</span>
         </div>
 
+        <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && periodoNotasBloqueado" class="aviso-bloqueado">
+          <mat-icon>lock</mat-icon>
+          <span>Este periodo está bloqueado: las notas se muestran solo para consulta.</span>
+        </div>
+
+        <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && estructuraNotas.length > 0" class="plantilla-acciones">
+          <button mat-stroked-button type="button" (click)="descargarPlantillaNotas()" [disabled]="descargandoPlantilla"
+                  title="Descarga un Excel con los alumnos y las notas actuales para llenarlo">
+            <mat-icon>download</mat-icon> {{ descargandoPlantilla ? 'Descargando...' : 'Descargar plantilla Excel' }}
+          </button>
+          <ng-container *ngIf="!periodoNotasBloqueado">
+            <button mat-stroked-button type="button" (click)="archivoPlantilla.click()" [disabled]="importandoPlantilla"
+                    title="Sube la plantilla llena; verás los cambios antes de guardarlos">
+              <mat-icon>upload_file</mat-icon> {{ importandoPlantilla ? 'Leyendo archivo...' : 'Importar Excel' }}
+            </button>
+            <input #archivoPlantilla type="file" hidden
+                   accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                   (change)="importarPlantillaNotas(archivoPlantilla)">
+          </ng-container>
+        </div>
+
         <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && estructuraNotas.length > 0" class="notas-grid-wrapper">
           <table class="notas-grid">
             <thead>
@@ -289,7 +310,7 @@
               <tr>
                 <ng-container *ngFor="let concepto of estructuraNotas">
                   <th *ngFor="let actividad of concepto.actividades" class="th-actividad">
-                    <input type="text" [(ngModel)]="actividad.nombre" (ngModelChange)="marcarCambioNotas()" maxlength="150" title="Puedes renombrar esta actividad, solo se aplica a tu clase">
+                    <input type="text" [(ngModel)]="actividad.nombre" (ngModelChange)="marcarCambioNotas()" maxlength="150" [disabled]="periodoNotasBloqueado" title="Puedes renombrar esta actividad, solo se aplica a tu clase">
                     <span class="th-actividad-pct">{{ actividad.porcentaje }}%</span>
                   </th>
                 </ng-container>
@@ -305,18 +326,18 @@
                   </button>
                 </td>
                 <td *ngFor="let actividad of actividadesPlanas">
-                  <input type="number" min="0" [max]="actividad.porcentaje" step="0.01" [(ngModel)]="a.notas[actividad.id]" (ngModelChange)="marcarCambioNotas()" (keydown)="bloquearTeclaNoNumerica($event)" (paste)="bloquearPegadoNoNumerico($event)" [title]="'Máximo ' + actividad.porcentaje + ' puntos'">
+                  <input type="number" min="0" [max]="actividad.porcentaje" step="0.01" [(ngModel)]="a.notas[actividad.id]" (ngModelChange)="marcarCambioNotas()" (keydown)="bloquearTeclaNoNumerica($event)" (paste)="bloquearPegadoNoNumerico($event)" [disabled]="periodoNotasBloqueado" [class.fuera-rango]="notaFueraDeRango(a.notas[actividad.id], actividad)" [title]="'Máximo ' + actividad.porcentaje + ' puntos'">
                 </td>
                 <td class="col-total">{{ totalAlumno(a) }}</td>
               </tr>
               <tr *ngIf="alumnosNotas.length === 0">
-                <td [attr.colspan]="2 + actividadesPlanas.length" class="no-data-row"><span>No hay alumnos activos en el grado de esta clase.</span></td>
+                <td [attr.colspan]="2 + actividadesPlanas.length" class="no-data-row"><span>No hay alumnos en el grado y sección de esta clase para el año del periodo.</span></td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <div class="cambios-flotante" *ngIf="hayCambiosNotas">
+        <div class="cambios-flotante" *ngIf="hayCambiosNotas && !periodoNotasBloqueado">
           <mat-icon>edit_note</mat-icon>
           <span>Tienes cambios sin guardar</span>
           <button mat-raised-button color="primary" (click)="guardarNotasActividad()" [disabled]="guardandoNotas">

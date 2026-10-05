@@ -4,15 +4,14 @@ import { Store, select } from '@ngrx/store';
 import { forkJoin } from 'rxjs';
 import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
-import { AcademicoService, PeriodoResponse, ClaseResponse, SemanaResponse, EvaluacionResponse, ConceptoPrincipal, Actividad, GuardarConceptoPrincipalItem, ActividadNombreClaseItem, AlumnoNotaActividad, GuardarNotaActividadItem } from '@app/services/academico/academico.service';
+import { AcademicoService, PeriodoResponse, ClaseResponse, ConceptoPrincipal, Actividad, GuardarConceptoPrincipalItem, ActividadNombreClaseItem, AlumnoNotaActividad, GuardarNotaActividadItem } from '@app/services/academico/academico.service';
 import { CatalogoService, GradoDto, NivelIngles } from '@app/services/catalogo/catalogo.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 import { PeriodoDialogComponent } from './periodo-dialog/periodo-dialog.component';
 import { ClaseDialogComponent } from './clase-dialog/clase-dialog.component';
-import { EvaluacionDialogComponent } from './evaluacion-dialog/evaluacion-dialog.component';
-import { NotasDialogComponent } from './notas-dialog/notas-dialog.component';
 import { NivelInglesDialogComponent } from './nivel-ingles-dialog/nivel-ingles-dialog.component';
 import { HistorialNotasDialogComponent } from './historial-notas-dialog/historial-notas-dialog.component';
+import { ImportarNotasDialogComponent } from './importar-notas-dialog/importar-notas-dialog.component';
 
 interface ActividadRow {
   id:         number | null;
@@ -110,6 +109,14 @@ export class AcademicoComponent implements OnInit {
 
   sumaPorcentajes(actividades: Actividad[]): number {
     return actividades.reduce((s, a) => s + a.porcentaje, 0);
+  }
+
+  get periodoNotasBloqueado(): boolean {
+    return !!this.periodos.find(p => p.id === this.notasSimpleIdPeriodo)?.bloqueado;
+  }
+
+  notaFueraDeRango(nota: number | null | undefined, actividad: Actividad): boolean {
+    return nota !== null && nota !== undefined && (nota < 0 || nota > actividad.porcentaje);
   }
 
   totalAlumno(alumno: AlumnoNotaActividad): number {
@@ -323,13 +330,6 @@ export class AcademicoComponent implements OnInit {
     this.onNotasSimpleFiltroChange();
   }
 
-  // ── Notas detalladas ──────────────────────────────────────
-  notasIdClase: number | null = null;
-  notasIdPeriodo: number | null = null;
-  semanas: SemanaResponse[] = [];
-  evaluacionesPorSemana: { [idSemana: number]: EvaluacionResponse[] } = {};
-  loadingSemanas = false;
-
   // ── Grados / conceptos de evaluación ───────────────────────
   tipoEstructura: 'grado' | 'nivel' = 'grado';
 
@@ -528,58 +528,6 @@ export class AcademicoComponent implements OnInit {
   }
 
   // ── Notas ─────────────────────────────────────────────────
-  onNotasFiltroChange(): void {
-    this.semanas = [];
-    this.evaluacionesPorSemana = {};
-    if (!this.notasIdClase || !this.notasIdPeriodo) return;
-
-    this.loadingSemanas = true;
-    this.academicoService.listarSemanas(this.notasIdPeriodo).subscribe({
-      next: (data) => {
-        this.semanas = data;
-        this.loadingSemanas = false;
-        this.semanas.forEach(s => this.cargarEvaluaciones(s.id));
-      },
-      error: () => { this.loadingSemanas = false; }
-    });
-  }
-
-  cargarEvaluaciones(idSemana: number): void {
-    if (!this.notasIdClase) return;
-    this.academicoService.listarEvaluaciones(this.notasIdClase, idSemana).subscribe(data => {
-      this.evaluacionesPorSemana[idSemana] = data;
-    });
-  }
-
-  nuevaEvaluacion(semana: SemanaResponse): void {
-    if (!this.notasIdClase) return;
-    const ref = this.dialog.open(EvaluacionDialogComponent, {
-      width: '400px',
-      data: { idSemana: semana.id, idClase: this.notasIdClase }
-    });
-    ref.afterClosed().subscribe(ok => { if (ok) this.cargarEvaluaciones(semana.id); });
-  }
-
-  abrirNotas(evaluacion: EvaluacionResponse): void {
-    this.dialog.open(NotasDialogComponent, {
-      width: '600px',
-      data: { evaluacion }
-    });
-  }
-
-  inactivarEvaluacion(evaluacion: EvaluacionResponse): void {
-    if (!confirm(`¿Inactivar la evaluación "${evaluacion.nombre}"?`)) return;
-    this.academicoService.inactivarEvaluacion(evaluacion.id).subscribe({
-      next: () => {
-        this.notification.success('Evaluación inactivada correctamente');
-        this.cargarEvaluaciones(evaluacion.idSemana);
-      },
-      error: (err) => {
-        this.notification.error(err.error?.errores ?? 'Error al inactivar la evaluación');
-      }
-    });
-  }
-
   onNotasSimpleFiltroChange(): void {
     this.estructuraNotas = [];
     this.alumnosNotas = [];
@@ -610,6 +558,20 @@ export class AcademicoComponent implements OnInit {
     const idClase = this.notasSimpleIdClase;
     const idPeriodo = this.notasSimpleIdPeriodo;
 
+    if (this.periodoNotasBloqueado) {
+      this.notification.error('Este periodo está bloqueado y no se pueden editar notas.');
+      return;
+    }
+
+    for (const alumno of this.alumnosNotas) {
+      for (const a of this.actividadesPlanas) {
+        if (this.notaFueraDeRango(alumno.notas[a.id], a)) {
+          this.notification.error(`Nota fuera de rango en "${a.nombre}" (${alumno.nombreCompleto}): debe estar entre 0 y ${a.porcentaje}.`);
+          return;
+        }
+      }
+    }
+
     const renombres: ActividadNombreClaseItem[] = this.actividadesPlanas
       .filter(a => this.nombresActividadOriginal[a.id] !== a.nombre)
       .map(a => ({ idActividad: a.id, nombre: a.nombre }));
@@ -639,11 +601,11 @@ export class AcademicoComponent implements OnInit {
     };
 
     if (renombres.length > 0) {
-      this.academicoService.guardarActividadesNombreClase(idClase, renombres).subscribe({
+      this.academicoService.guardarActividadesNombreClase(idClase, idPeriodo, renombres).subscribe({
         next: () => guardarNotas(),
         error: (err) => {
           this.guardandoNotas = false;
-          this.notification.error(err.error?.errores ?? 'Error al guardar los nombres de actividad');
+          this.notification.error(err.error?.errores?.mensaje ?? 'Error al guardar los nombres de actividad');
         }
       });
     } else {
@@ -664,6 +626,84 @@ export class AcademicoComponent implements OnInit {
         periodoNombre: this.periodoBusqueda || undefined,
       }
     });
+  }
+
+  // ── Plantilla Excel de notas ──────────────────────────────
+  descargandoPlantilla = false;
+  importandoPlantilla = false;
+
+  descargarPlantillaNotas(): void {
+    if (!this.notasSimpleIdClase || !this.notasSimpleIdPeriodo) return;
+    if (this.hayCambiosNotas && !confirm('Tienes cambios sin guardar; la plantilla trae las notas guardadas. ¿Descargar de todos modos?')) return;
+
+    this.descargandoPlantilla = true;
+    this.academicoService.descargarPlantillaNotas(this.notasSimpleIdClase, this.notasSimpleIdPeriodo).subscribe({
+      next: (resp) => {
+        this.descargandoPlantilla = false;
+        const nombre = this.nombreArchivoDescarga(resp.headers.get('Content-Disposition')) ?? 'Plantilla de notas.xlsx';
+        const url = URL.createObjectURL(resp.body as Blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombre;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: async (err) => {
+        this.descargandoPlantilla = false;
+        this.notification.error(await this.mensajeErrorBlob(err) ?? 'Error al descargar la plantilla');
+      }
+    });
+  }
+
+  importarPlantillaNotas(input: HTMLInputElement): void {
+    const archivo = input.files?.[0];
+    input.value = '';   // permite volver a elegir el mismo archivo
+    if (!archivo || !this.notasSimpleIdClase || !this.notasSimpleIdPeriodo) return;
+    if (this.hayCambiosNotas && !confirm('Tienes cambios sin guardar en la grilla; al importar se descartan. ¿Continuar?')) return;
+
+    const idClase = this.notasSimpleIdClase;
+    const idPeriodo = this.notasSimpleIdPeriodo;
+
+    this.importandoPlantilla = true;
+    this.academicoService.previsualizarImportacionNotas(idClase, idPeriodo, archivo).subscribe({
+      next: (vista) => {
+        this.importandoPlantilla = false;
+        const ref = this.dialog.open(ImportarNotasDialogComponent, {
+          width: '860px',
+          maxHeight: '90vh',
+          data: {
+            idClase,
+            idPeriodo,
+            claseNombre:   [this.notasMateriaSeleccionada, this.notasGradoBusqueda, this.notasSeccion].filter(Boolean).join(' · ') || undefined,
+            periodoNombre: this.periodoBusqueda || undefined,
+            vista,
+          }
+        });
+        ref.afterClosed().subscribe(ok => { if (ok) this.onNotasSimpleFiltroChange(); });
+      },
+      error: (err) => {
+        this.importandoPlantilla = false;
+        this.notification.error(err.error?.errores?.mensaje ?? 'Error al leer el archivo');
+      }
+    });
+  }
+
+  private nombreArchivoDescarga(contentDisposition: string | null): string | null {
+    if (!contentDisposition) return null;
+    const utf8 = /filename\*=UTF-8''([^;]+)/i.exec(contentDisposition);
+    if (utf8) return decodeURIComponent(utf8[1]);
+    const simple = /filename="?([^";]+)"?/i.exec(contentDisposition);
+    return simple ? simple[1] : null;
+  }
+
+  // Con responseType 'blob' el cuerpo del error tambien llega como Blob.
+  private async mensajeErrorBlob(err: any): Promise<string | null> {
+    try {
+      const texto = err?.error instanceof Blob ? await err.error.text() : null;
+      return texto ? JSON.parse(texto)?.errores?.mensaje ?? null : null;
+    } catch {
+      return null;
+    }
   }
 
   // ── Grados / conceptos de evaluación ───────────────────────
@@ -749,7 +789,7 @@ export class AcademicoComponent implements OnInit {
       },
       error: (err) => {
         this.guardandoConceptos = false;
-        this.notification.error(err.error?.errores ?? 'Error al guardar la estructura');
+        this.notification.error(err.error?.errores?.mensaje ?? 'Error al guardar la estructura');
       }
     });
   }

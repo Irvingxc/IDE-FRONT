@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@src/environments/environment';
 
@@ -43,42 +43,6 @@ export interface GuardarClaseDto {
   seccion:       string;
   idMaestro:     string | null;
   anioLectivo:   number;
-}
-
-export interface SemanaResponse {
-  id:            number;
-  idPeriodo:     number;
-  numeroSemana:  number;
-  fechaDesde:    string;
-  fechaHasta:    string;
-  activo:        boolean;
-  fechaCreacion: string;
-}
-
-export interface EvaluacionResponse {
-  id:            number;
-  idSemana:      number;
-  idClase:       number;
-  nombre:        string;
-  activo:        boolean;
-  fechaCreacion: string;
-}
-
-export interface GuardarEvaluacionDto {
-  idSemana: number;
-  idClase:  number;
-  nombre:   string;
-}
-
-export interface NotaAlumno {
-  idAlumno:       string;
-  nombreCompleto: string;
-  nota:           number | null;
-}
-
-export interface GuardarNotaDto {
-  idAlumno: string;
-  nota:     number;
 }
 
 export interface Actividad {
@@ -125,6 +89,27 @@ export interface GuardarNotaActividadItem {
   idAlumno:    string;
   idActividad: number;
   nota:        number | null;
+}
+
+export interface CambioNotaImportada {
+  idAlumno:        string;
+  alumnoNombre:    string;
+  idActividad:     number;
+  actividadNombre: string;
+  notaAnterior:    number | null;
+  notaNueva:       number;
+}
+
+export interface ErrorImportacionNotas {
+  fila:    number | null;
+  mensaje: string;
+}
+
+export interface PrevisualizacionImportacionNotas {
+  alumnosLeidos:  number;
+  notasSinCambio: number;
+  cambios:        CambioNotaImportada[];
+  errores:        ErrorImportacionNotas[];
 }
 
 export interface AlumnoGrado {
@@ -209,32 +194,6 @@ export class AcademicoService {
     return this.http.delete<void>(`${this.base}/clases/${id}`);
   }
 
-  listarSemanas(idPeriodo: number): Observable<SemanaResponse[]> {
-    const params = new HttpParams().set('idPeriodo', idPeriodo);
-    return this.http.get<SemanaResponse[]>(`${this.base}/semanas`, { params });
-  }
-
-  listarEvaluaciones(idClase: number, idSemana: number): Observable<EvaluacionResponse[]> {
-    const params = new HttpParams().set('idClase', idClase).set('idSemana', idSemana);
-    return this.http.get<EvaluacionResponse[]>(`${this.base}/evaluaciones`, { params });
-  }
-
-  crearEvaluacion(dto: GuardarEvaluacionDto): Observable<EvaluacionResponse> {
-    return this.http.post<EvaluacionResponse>(`${this.base}/evaluaciones`, dto);
-  }
-
-  inactivarEvaluacion(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/evaluaciones/${id}`);
-  }
-
-  listarNotas(idEvaluacion: number): Observable<NotaAlumno[]> {
-    return this.http.get<NotaAlumno[]>(`${this.base}/evaluaciones/${idEvaluacion}/notas`);
-  }
-
-  guardarNotas(idEvaluacion: number, notas: GuardarNotaDto[]): Observable<void> {
-    return this.http.put<void>(`${this.base}/evaluaciones/${idEvaluacion}/notas`, notas);
-  }
-
   listarConceptosConActividades(idGrado: number | null, idNivelIngles: number | null): Observable<ConceptoPrincipal[]> {
     return this.http.get<ConceptoPrincipal[]>(`${this.base}/estructura-grado`, { params: this.paramsGrupo(idGrado, idNivelIngles) });
   }
@@ -248,8 +207,8 @@ export class AcademicoService {
     return this.http.get<ConceptoPrincipal[]>(`${this.base}/estructura-clase`, { params });
   }
 
-  guardarActividadesNombreClase(idClase: number, nombres: ActividadNombreClaseItem[]): Observable<void> {
-    const params = new HttpParams().set('idClase', idClase);
+  guardarActividadesNombreClase(idClase: number, idPeriodo: number, nombres: ActividadNombreClaseItem[]): Observable<void> {
+    const params = new HttpParams().set('idClase', idClase).set('idPeriodo', idPeriodo);
     return this.http.put<void>(`${this.base}/actividades-nombre-clase`, nombres, { params });
   }
 
@@ -261,6 +220,18 @@ export class AcademicoService {
   guardarNotasActividad(idClase: number, idPeriodo: number, notas: GuardarNotaActividadItem[]): Observable<void> {
     const params = new HttpParams().set('idClase', idClase).set('idPeriodo', idPeriodo);
     return this.http.put<void>(`${this.base}/notas-actividad`, notas, { params });
+  }
+
+  descargarPlantillaNotas(idClase: number, idPeriodo: number): Observable<HttpResponse<Blob>> {
+    const params = new HttpParams().set('idClase', idClase).set('idPeriodo', idPeriodo);
+    return this.http.get(`${this.base}/notas-actividad/plantilla`, { params, responseType: 'blob', observe: 'response' });
+  }
+
+  previsualizarImportacionNotas(idClase: number, idPeriodo: number, archivo: File): Observable<PrevisualizacionImportacionNotas> {
+    const params = new HttpParams().set('idClase', idClase).set('idPeriodo', idPeriodo);
+    const form = new FormData();
+    form.append('archivo', archivo, archivo.name);
+    return this.http.post<PrevisualizacionImportacionNotas>(`${this.base}/notas-actividad/importar`, form, { params });
   }
 
   // ── Reporte de notas por alumno (modulo Reportes) ──

@@ -1,0 +1,65 @@
+<h2 mat-dialog-title>Importar notas desde Excel</h2>
+
+<mat-dialog-content>
+  <p class="sub" *ngIf="data.claseNombre || data.periodoNombre">
+    <span *ngIf="data.claseNombre">{{ data.claseNombre }}</span>
+    <span *ngIf="data.claseNombre && data.periodoNombre"> · </span>
+    <span *ngIf="data.periodoNombre">{{ data.periodoNombre }}</span>
+  </p>
+
+  <div class="resumen">
+    <span><strong>{{ vista.alumnosLeidos }}</strong> alumnos leídos</span>
+    <span class="ok"><strong>{{ vista.cambios.length }}</strong> notas a cambiar</span>
+    <span><strong>{{ vista.notasSinCambio }}</strong> sin cambio</span>
+    <span class="mal" *ngIf="vista.errores.length > 0"><strong>{{ vista.errores.length }}</strong> errores</span>
+  </div>
+
+  <div class="bloque-errores" *ngIf="vista.errores.length > 0">
+    <div class="titulo-errores">
+      <mat-icon>error_outline</mat-icon>
+      <span>Corrija estos errores en el archivo y vuelva a importarlo. No se guardó nada.</span>
+    </div>
+    <ul>
+      <li *ngFor="let e of vista.errores">
+        <span class="fila" *ngIf="e.fila">Fila {{ e.fila }}:</span> {{ e.mensaje }}
+      </li>
+    </ul>
+  </div>
+
+  <div class="vacio" *ngIf="vista.errores.length === 0 && vista.cambios.length === 0">
+    <mat-icon>check_circle_outline</mat-icon>
+    <span>El archivo no tiene notas distintas a las ya guardadas. No hay nada que importar.</span>
+  </div>
+
+  <ng-container *ngIf="vista.cambios.length > 0">
+    <p class="aviso" *ngIf="vista.errores.length === 0">
+      Revise que cada nota corresponda al alumno correcto antes de importar.
+    </p>
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Alumno</th>
+          <th>Actividad</th>
+          <th class="num">Antes</th>
+          <th class="num">Nueva</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of vista.cambios">
+          <td>{{ c.alumnoNombre }}</td>
+          <td>{{ c.actividadNombre }}</td>
+          <td class="num">{{ fmt(c.notaAnterior) }}</td>
+          <td class="num nueva">{{ fmt(c.notaNueva) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="importar()" [disabled]="!puedeImportar">
+    <mat-icon>upload</mat-icon>
+    {{ guardando ? 'Importando...' : 'Importar ' + vista.cambios.length + ' nota(s)' }}
+  </button>
+</mat-dialog-actions>

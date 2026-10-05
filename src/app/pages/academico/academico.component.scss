@@ -174,7 +174,43 @@
       outline: 1px solid #6B0F1A;
       border-color: #6B0F1A;
     }
+
+    &.fuera-rango {
+      border-color: #c62828;
+      background: #fdecea;
+      color: #c62828;
+    }
+
+    &:disabled {
+      background: #f5f5f5;
+      color: #555;
+    }
   }
+}
+
+.plantilla-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  button mat-icon { margin-right: 4px; }
+}
+
+.aviso-bloqueado {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #fdecea;
+  color: #c62828;
+  font-size: 13px;
+  font-weight: 600;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
 }
 
 .cambios-flotante {

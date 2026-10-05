@@ -6,10 +6,9 @@ import { AcademicoRoutingModule } from './academico-routing.module';
 import { AcademicoComponent } from './academico.component';
 import { PeriodoDialogComponent } from './periodo-dialog/periodo-dialog.component';
 import { ClaseDialogComponent } from './clase-dialog/clase-dialog.component';
-import { EvaluacionDialogComponent } from './evaluacion-dialog/evaluacion-dialog.component';
-import { NotasDialogComponent } from './notas-dialog/notas-dialog.component';
 import { NivelInglesDialogComponent } from './nivel-ingles-dialog/nivel-ingles-dialog.component';
 import { HistorialNotasDialogComponent } from './historial-notas-dialog/historial-notas-dialog.component';
+import { ImportarNotasDialogComponent } from './importar-notas-dialog/importar-notas-dialog.component';
 
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
@@ -30,10 +29,9 @@ import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
     AcademicoComponent,
     PeriodoDialogComponent,
     ClaseDialogComponent,
-    EvaluacionDialogComponent,
-    NotasDialogComponent,
     NivelInglesDialogComponent,
     HistorialNotasDialogComponent,
+    ImportarNotasDialogComponent,
   ],
   imports: [
     CommonModule,

@@ -164,7 +164,7 @@ export class ReportesComponent implements OnInit {
         // Si el grado tiene una sola sección, la deja seleccionada
         if (this.notasSecciones.length === 1) this.notasSeccion = this.notasSecciones[0];
       },
-      error: () => { this.cargandoAlumnos = false; this.snack.open('No se pudieron cargar los alumnos', '', { duration: 3000 }); }
+      error: (err) => { this.cargandoAlumnos = false; this.snack.open(err.error?.errores?.mensaje ?? 'No se pudieron cargar los alumnos', '', { duration: 3000 }); }
     });
   }
 
@@ -195,7 +195,7 @@ export class ReportesComponent implements OnInit {
     this.notasBuscado = true;
     this.academicoService.reporteNotasAlumno(this.notasAlumnoIdentidad, this.notasIdPeriodo).subscribe({
       next: (r) => { this.reporteNotas = r; this.cargandoNotas = false; },
-      error: () => { this.reporteNotas = []; this.cargandoNotas = false; this.snack.open('No se pudo cargar el reporte de notas', '', { duration: 3000 }); }
+      error: (err) => { this.reporteNotas = []; this.cargandoNotas = false; this.snack.open(err.error?.errores?.mensaje ?? 'No se pudo cargar el reporte de notas', '', { duration: 3000 }); }
     });
   }
 
