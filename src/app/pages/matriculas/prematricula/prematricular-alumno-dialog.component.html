@@ -1,0 +1,61 @@
+<h2 mat-dialog-title>Prematricular alumno actual para {{ data.anio }}</h2>
+
+<mat-dialog-content class="dlg-prematricular">
+  <ng-container *ngIf="!alumno">
+    <mat-form-field appearance="outline" class="ancho">
+      <mat-label>Buscar alumno activo</mat-label>
+      <input matInput [(ngModel)]="busqueda" (keyup.enter)="buscar()" placeholder="Nombre o apellido">
+      <button mat-icon-button matSuffix (click)="buscar()" [disabled]="buscando" aria-label="Buscar">
+        <mat-icon>search</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <div class="resultados">
+      <button type="button" class="resultado" *ngFor="let a of resultados" (click)="elegir(a)">
+        <strong>{{ a.nombreCompleto }}</strong>
+        <span>{{ a.grado || '—' }} {{ a.seccion }}</span>
+      </button>
+      <div class="vacio" *ngIf="!buscando && busqueda && resultados.length === 0">Sin resultados.</div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="alumno">
+    <div class="alumno-elegido">
+      <div>
+        <strong>{{ alumno.nombreCompleto }}</strong>
+        <span>Este año: {{ alumno.grado || '—' }} {{ alumno.seccion }}</span>
+      </div>
+      <button mat-button type="button" (click)="alumno = null">Cambiar</button>
+    </div>
+
+    <div class="campos">
+      <mat-form-field appearance="outline">
+        <mat-label>Grado {{ data.anio }}</mat-label>
+        <mat-select [(ngModel)]="idGrado">
+          <mat-option *ngFor="let g of grados" [value]="g.idGrado">{{ g.gradoNombre }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Sección</mat-label>
+        <input matInput [(ngModel)]="seccion" maxlength="5">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Inicio de clases</mat-label>
+        <input matInput [matDatepicker]="picker" [(ngModel)]="fechaInicio">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-hint *ngIf="!fechaValida" class="error">Debe ser del año siguiente</mat-hint>
+      </mat-form-field>
+    </div>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()"
+          [disabled]="!alumno || !idGrado || !fechaValida || guardando">
+    {{ guardando ? 'Guardando...' : 'Prematricular' }}
+  </button>
+</mat-dialog-actions>

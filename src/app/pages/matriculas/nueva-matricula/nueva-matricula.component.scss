@@ -229,6 +229,24 @@ mat-stepper {
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
 }
 
+/* Prematrícula (inicio de clases del año siguiente) */
+.aviso-prematricula {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #e8f5e9;
+  color: #1b5e20;
+  font-size: 13px;
+  line-height: 1.5;
+
+  mat-icon { flex-shrink: 0; }
+}
+
+.hint-prematricula { color: #2e7d32; font-weight: 600; }
+
 /* Actions */
 .step-actions {
   display: flex;

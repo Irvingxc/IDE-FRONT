@@ -108,6 +108,12 @@ export class PromocionComponent implements OnInit {
       idGradoDestino = a.idGradoReal ?? a.idGradoSugerido ?? a.idGradoActual ?? null;
       seccionDestino = a.seccionReal ?? a.seccion ?? null;
       idNivelInglesDestino = a.idNivelInglesReal ?? a.idNivelIngles ?? null;
+    } else if (a.esPrematriculado) {
+      // Prematriculado para el año destino: el destino es el de la prematrícula.
+      idGradoDestino = a.idGradoReal ?? a.idGradoSugerido ?? a.idGradoActual ?? null;
+      resultado = idGradoDestino != null && idGradoDestino === a.idGradoActual ? 'Reprobado' : 'Aprobado';
+      seccionDestino = a.seccionReal ?? a.seccion ?? null;
+      idNivelInglesDestino = a.idNivelInglesReal ?? a.idNivelIngles ?? null;
     } else {
       idGradoDestino = a.idGradoSugerido ?? a.idGradoActual ?? null;
       seccionDestino = a.seccion ?? null;

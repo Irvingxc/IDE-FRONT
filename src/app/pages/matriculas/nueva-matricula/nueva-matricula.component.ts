@@ -8,6 +8,8 @@ import { MatriculaService, GuardarMatriculaDto } from '@app/services/matricula/m
 import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.service';
 import { PAISES_TELEFONO, PaisTelefono } from '../telefono-mask.directive';
 import { NotificationService } from '@app/services';
+import { MatDialog } from '@angular/material/dialog';
+import { AnticipoDialogComponent } from '../anticipo-dialog/anticipo-dialog.component';
 
 @Component({
   selector: 'app-nueva-matricula',
@@ -99,8 +101,44 @@ export class NuevaMatriculaComponent implements OnInit {
     private alumnoService: AlumnoService,
     private matriculaService: MatriculaService,
     private catalogoService: CatalogoService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private dialog: MatDialog
   ) {}
+
+  /** Año de la fecha de inicio de clases elegida. */
+  get anioInicio(): number | null {
+    const f = this.alumnoForm?.get('fechaInicioClases')?.value;
+    return f ? new Date(f).getFullYear() : null;
+  }
+
+  /** Inicio de clases en un año posterior al actual: el backend la registra como prematrícula. */
+  get esPrematricula(): boolean {
+    const anio = this.anioInicio;
+    return anio != null && anio > new Date().getFullYear();
+  }
+
+  // Tras guardar: si es prematrícula se ofrece registrar el anticipo y emitir el comprobante.
+  private alGuardar(): void {
+    if (!this.esPrematricula) {
+      this.notification.success('Matrícula registrada correctamente');
+      this.router.navigate(['/matriculas']);
+      return;
+    }
+
+    this.notification.success('Alumno prematriculado correctamente');
+    const a = this.alumnoForm.value;
+    const ref = this.dialog.open(AnticipoDialogComponent, {
+      width: '640px',
+      disableClose: true,
+      data: {
+        identidad:    a.identidad,
+        anio:         this.anioInicio,
+        alumnoNombre: [a.nombres, a.segundoNombre, a.apellidos, a.segundoApellido].filter(Boolean).join(' ').toUpperCase(),
+        gradoNombre:  this.grados.find(g => g.idGrado === a.idGrado)?.gradoNombre ?? null,
+      }
+    });
+    ref.afterClosed().subscribe(() => this.router.navigate(['/matriculas']));
+  }
 
   ngOnInit(): void {
     this.catalogoService.getGrados().subscribe({ next: (data) => this.grados = data ?? [] });
@@ -303,10 +341,7 @@ export class NuevaMatriculaComponent implements OnInit {
       };
 
       this.matriculaService.guardarMatricula(dto).subscribe({
-        next: () => {
-          this.notification.success('Matrícula registrada correctamente');
-          this.router.navigate(['/matriculas']);
-        },
+        next: () => this.alGuardar(),
         error: () => {
           this.notification.error('Error al registrar la matrícula. No se guardaron datos.');
           this.guardando = false;
@@ -349,10 +384,7 @@ export class NuevaMatriculaComponent implements OnInit {
     };
 
     this.alumnoService.guardarAlumno(dto).subscribe({
-      next: () => {
-        this.notification.success('Matrícula registrada correctamente');
-        this.router.navigate(['/matriculas']);
-      },
+      next: () => this.alGuardar(),
       error: () => {
         this.notification.error('Error al registrar el estudiante');
         this.guardando = false;

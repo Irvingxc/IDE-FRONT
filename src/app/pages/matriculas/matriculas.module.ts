@@ -14,6 +14,9 @@ import { ContratoDialogComponent } from './contrato-dialog/contrato-dialog.compo
 import { CarnetAlumnoDialogComponent } from './carnet-alumno-dialog/carnet-alumno-dialog.component';
 import { PromocionComponent } from './promocion/promocion.component';
 import { PromocionConfirmDialogComponent } from './promocion/promocion-confirm-dialog.component';
+import { PrematriculaComponent } from './prematricula/prematricula.component';
+import { PrematricularAlumnoDialogComponent } from './prematricula/prematricular-alumno-dialog.component';
+import { AnticipoDialogComponent } from './anticipo-dialog/anticipo-dialog.component';
 import { IdentidadMaskDirective } from './identidad-mask.directive';
 import { TelefonoMaskDirective } from './telefono-mask.directive';
 
@@ -49,6 +52,9 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     CarnetAlumnoDialogComponent,
     PromocionComponent,
     PromocionConfirmDialogComponent,
+    PrematriculaComponent,
+    PrematricularAlumnoDialogComponent,
+    AnticipoDialogComponent,
     IdentidadMaskDirective,
     TelefonoMaskDirective,
   ],

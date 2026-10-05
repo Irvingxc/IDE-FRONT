@@ -215,7 +215,7 @@
             <ng-container matColumnDef="estado">
               <th mat-header-cell *matHeaderCellDef>Estado</th>
               <td mat-cell *matCellDef="let r" data-label="Estado">
-                <span class="estado-badge" [class.pagado]="r.estado === 'Pagado'" [class.pendiente]="r.estado === 'Pendiente'">
+                <span class="estado-badge" [class.pagado]="r.estado === 'Pagado' || r.estado === 'Anticipado'" [class.pendiente]="r.estado === 'Pendiente'">
                   {{ r.estado }}
                 </span>
               </td>

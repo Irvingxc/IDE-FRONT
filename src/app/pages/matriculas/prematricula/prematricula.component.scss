@@ -1,0 +1,171 @@
+.prematricula {
+  padding-top: 16px;
+
+  .barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+
+    .anio   { width: 140px; }
+    .filtro { flex: 1; min-width: 220px; max-width: 420px; }
+    .espacio { flex: 1; }
+  }
+
+  .ayuda {
+    margin: 0 0 16px;
+    font-size: 12px;
+    color: #8a5a60;
+  }
+
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 20px 0 8px;
+    color: #6B0F1A;
+    font-size: 15px;
+
+    .contador {
+      padding: 1px 8px;
+      border-radius: 10px;
+      background: #f2e6e8;
+      font-size: 12px;
+    }
+
+    .resumen {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 500;
+      color: #555;
+    }
+  }
+}
+
+.loading-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0;
+  color: #777;
+}
+
+.spin-icon { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.tabla-wrap { overflow-x: auto; }
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    text-align: left;
+    padding: 8px 10px;
+    background: #f2e6e8;
+    color: #6B0F1A;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+  }
+
+  .num { text-align: right; font-family: 'Courier New', monospace; white-space: nowrap; }
+  .no  { font-weight: 600; white-space: nowrap; }
+  .acciones { text-align: right; white-space: nowrap; width: 1%; }
+  .conceptos { max-width: 280px; font-size: 12px; color: #444; }
+  .sub { font-size: 11px; color: #888; }
+  .sin { color: #aaa; font-family: Arial, sans-serif; font-size: 12px; }
+  .vacio { text-align: center; color: #888; padding: 18px; }
+
+  tr.anulado td { color: #999; }
+
+  .chip {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    background: #e3f2fd;
+    color: #1565c0;
+
+    &.nuevo { background: #e8f5e9; color: #2e7d32; }
+  }
+
+  .estado {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+
+    &.vigente   { background: #fff3e0; color: #e65100; }
+    &.facturado { background: #e8f5e9; color: #2e7d32; }
+    &.anulado   { background: #eeeeee; color: #757575; }
+  }
+}
+
+// Dialogo "Prematricular alumno actual"
+.dlg-prematricular {
+  min-width: 520px;
+
+  .ancho { width: 100%; }
+
+  .resultados {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .resultado {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    font-size: 13px;
+
+    &:hover { border-color: #6B0F1A; background: #fdf5f5; }
+    span { color: #777; }
+  }
+
+  .vacio { color: #888; padding: 8px 0; font-size: 13px; }
+
+  .alumno-elegido {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    background: #fdf5f5;
+
+    span { display: block; font-size: 12px; color: #777; }
+  }
+
+  .campos {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr;
+    gap: 8px;
+  }
+
+  .error { color: #c62828; }
+}
+
+@media (max-width: 640px) {
+  .dlg-prematricular {
+    min-width: 0;
+    .campos { grid-template-columns: 1fr; }
+  }
+}

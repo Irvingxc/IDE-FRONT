@@ -1,0 +1,60 @@
+<h2 mat-dialog-title>Anticipo de prematrícula {{ data.anio }}</h2>
+
+<mat-dialog-content>
+  <p class="sub">
+    {{ data.alumnoNombre }}<span *ngIf="data.gradoNombre"> · {{ data.gradoNombre }}</span>
+  </p>
+
+  <div *ngIf="cargando" class="loading-row">
+    <mat-icon class="spin-icon">sync</mat-icon>
+    <span>Cargando conceptos...</span>
+  </div>
+
+  <ng-container *ngIf="!cargando && conceptos.length > 0">
+    <p class="ayuda">Elija lo que se está pagando por adelantado. Se emitirá un comprobante sin datos fiscales; la factura se hace después desde Prematrícula, sin volver a cobrar.</p>
+
+    <div class="concepto" *ngFor="let c of cuotasUnicas">
+      <mat-checkbox [checked]="seleccionados.has(c.idProducto)" (change)="alternar(c, $event.checked)">
+        {{ c.nombre }} {{ data.anio }}
+      </mat-checkbox>
+      <span class="monto">{{ fmt(c.monto) }}</span>
+    </div>
+
+    <div class="mensualidad" *ngIf="mensualidad as m">
+      <div class="mens-titulo">
+        <span>{{ m.nombre }} {{ data.anio }}</span>
+        <span class="monto">
+          {{ fmt(m.monto) }} c/u
+          <small *ngIf="m.descuento > 0">({{ m.descuento }}% desc.)</small>
+        </span>
+      </div>
+      <mat-button-toggle-group multiple [(ngModel)]="mesesSeleccionados" class="meses" aria-label="Meses de mensualidad">
+        <mat-button-toggle *ngFor="let nombre of meses; let i = index" [value]="i + 1">
+          {{ nombre | titlecase }}
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    <mat-form-field appearance="outline" class="obs">
+      <mat-label>Observación (opcional)</mat-label>
+      <input matInput [(ngModel)]="observacion" maxlength="250" placeholder="Ej. pago en efectivo">
+    </mat-form-field>
+
+    <div class="total">
+      <span>Total a recibir</span>
+      <strong>{{ fmt(total) }}</strong>
+    </div>
+  </ng-container>
+
+  <div *ngIf="!cargando && conceptos.length === 0" class="vacio">
+    <mat-icon>info</mat-icon>
+    <span>No hay conceptos con precio para el grado de la prematrícula. Revise los precios del año {{ data.anio }}.</span>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button [mat-dialog-close]="false" [disabled]="guardando">Ahora no</button>
+  <button mat-raised-button color="primary" (click)="registrar()" [disabled]="lineas.length === 0 || guardando">
+    <mat-icon>receipt_long</mat-icon> {{ guardando ? 'Registrando...' : 'Registrar y emitir comprobante' }}
+  </button>
+</mat-dialog-actions>

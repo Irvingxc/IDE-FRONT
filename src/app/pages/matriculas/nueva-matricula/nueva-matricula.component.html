@@ -300,6 +300,7 @@
               <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicioClases">
               <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
               <mat-datepicker #pickerInicio></mat-datepicker>
+              <mat-hint *ngIf="esPrematricula" class="hint-prematricula">Año {{ anioInicio }}: se registrará como prematrícula</mat-hint>
               <mat-error>Requerido</mat-error>
             </mat-form-field>
 
@@ -440,13 +441,22 @@
 
         </form>
 
+        <div class="aviso-prematricula" *ngIf="esPrematricula">
+          <mat-icon>event_available</mat-icon>
+          <span>
+            La fecha de inicio es del año {{ anioInicio }}: el alumno queda <strong>prematriculado</strong>.
+            No aparece en asistencia ni en el portal hasta su fecha de inicio, y sus cuentas por cobrar se generan ese día.
+            Al guardar podrá registrar el anticipo (matrícula o mensualidad) y emitir el comprobante.
+          </span>
+        </div>
+
         <div class="step-actions">
           <button mat-stroked-button matStepperPrevious>
             <mat-icon>arrow_back</mat-icon> Atrás
           </button>
           <button mat-raised-button color="primary" (click)="guardar()" [disabled]="guardando">
-            <mat-icon>save</mat-icon>
-            {{ guardando ? 'Guardando...' : 'Guardar matrícula' }}
+            <mat-icon>{{ esPrematricula ? 'event_available' : 'save' }}</mat-icon>
+            {{ guardando ? 'Guardando...' : (esPrematricula ? 'Prematricular' : 'Guardar matrícula') }}
           </button>
         </div>
 

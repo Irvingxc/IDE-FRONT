@@ -1,0 +1,134 @@
+<div class="tab-content prematricula">
+
+  <div class="barra">
+    <mat-form-field appearance="outline" class="anio">
+      <mat-label>Año lectivo</mat-label>
+      <mat-select [(ngModel)]="anio" (selectionChange)="cargar()">
+        <mat-option *ngFor="let a of anios" [value]="a">{{ a }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filtro">
+      <mat-label>Buscar</mat-label>
+      <input matInput [(ngModel)]="filtro" placeholder="Alumno, identidad, comprobante o factura">
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+
+    <span class="espacio"></span>
+
+    <button mat-raised-button color="primary" (click)="prematricularActual()">
+      <mat-icon>person_add</mat-icon> Prematricular alumno actual
+    </button>
+  </div>
+
+  <p class="ayuda">
+    Los alumnos nuevos se prematriculan desde <strong>Nueva matrícula</strong> eligiendo una fecha de inicio del año siguiente.
+    Al llegar su fecha de inicio, el sistema los activa solo y genera sus cuentas por cobrar; las cuotas anticipadas no se cobran de nuevo.
+  </p>
+
+  <div *ngIf="cargando" class="loading-row">
+    <mat-icon class="spin-icon">sync</mat-icon><span>Cargando...</span>
+  </div>
+
+  <ng-container *ngIf="!cargando">
+    <!-- PREMATRICULADOS -->
+    <h3>Prematriculados {{ anio }} <span class="contador">{{ prematriculados.length }}</span></h3>
+    <div class="tabla-wrap">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Alumno</th>
+            <th>Este año</th>
+            <th>Grado {{ anio }}</th>
+            <th>Inicio</th>
+            <th class="num">Anticipado</th>
+            <th class="acciones"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of prematriculadosVisibles">
+            <td>
+              {{ p.nombreCompleto }}
+              <span class="chip" [class.nuevo]="p.tipo === 'Nuevo'">{{ p.tipo === 'Nuevo' ? 'Nuevo' : 'Actual' }}</span>
+              <div class="sub">{{ p.clienteNombre }}</div>
+            </td>
+            <td>{{ p.tipo === 'Nuevo' ? '—' : (p.gradoActual + ' ' + (p.seccionActual || '')) }}</td>
+            <td>{{ p.gradoNombre }} {{ p.seccion }}</td>
+            <td>{{ p.fechaInicioClases | date:'dd/MM/yyyy' }}</td>
+            <td class="num">
+              <span *ngIf="p.comprobantes > 0">{{ fmt(p.totalAnticipado) }}</span>
+              <span *ngIf="p.comprobantes === 0" class="sin">sin anticipo</span>
+            </td>
+            <td class="acciones">
+              <button mat-icon-button title="Registrar anticipo y emitir comprobante"
+                      (click)="registrarAnticipo(p.identidad, p.nombreCompleto, p.gradoNombre)">
+                <mat-icon>payments</mat-icon>
+              </button>
+              <button mat-icon-button title="Cancelar prematrícula" [disabled]="procesando === p.identidad"
+                      (click)="cancelarPrematricula(p)">
+                <mat-icon>person_remove</mat-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="prematriculadosVisibles.length === 0">
+            <td colspan="6" class="vacio">No hay alumnos prematriculados para {{ anio }}.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- COMPROBANTES -->
+    <h3>
+      Comprobantes de anticipo <span class="contador">{{ comprobantes.length }}</span>
+      <span class="resumen" *ngIf="totalVigente > 0">Pendiente de facturar: {{ fmt(totalVigente) }}</span>
+    </h3>
+    <div class="tabla-wrap">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Fecha</th>
+            <th>Alumno</th>
+            <th>Conceptos</th>
+            <th class="num">Total</th>
+            <th>Estado</th>
+            <th class="acciones"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of comprobantesVisibles" [class.anulado]="c.estado === 'Anulado'">
+            <td class="no">{{ c.noComprobante }}</td>
+            <td>{{ c.fecha | date:'dd/MM/yyyy' }}</td>
+            <td>
+              {{ c.alumnoNombre }}
+              <div class="sub">{{ c.gradoNombre }} {{ c.seccion }}</div>
+            </td>
+            <td class="conceptos">{{ c.conceptos }}</td>
+            <td class="num">{{ fmt(c.total) }}</td>
+            <td>
+              <span class="estado" [ngClass]="c.estado.toLowerCase()">{{ c.estado }}</span>
+              <div class="sub" *ngIf="c.noFactura">Factura {{ c.noFactura }}</div>
+              <div class="sub" *ngIf="c.estado === 'Anulado' && c.motivoAnulacion">{{ c.motivoAnulacion }}</div>
+            </td>
+            <td class="acciones">
+              <button mat-icon-button title="Imprimir comprobante" (click)="imprimir(c)">
+                <mat-icon>print</mat-icon>
+              </button>
+              <button mat-icon-button title="Emitir factura (sin cobrar de nuevo)" *ngIf="c.estado === 'Vigente'"
+                      [disabled]="procesando === c.id" (click)="facturar(c)">
+                <mat-icon>receipt</mat-icon>
+              </button>
+              <button mat-icon-button title="Anular comprobante" *ngIf="c.estado === 'Vigente'"
+                      [disabled]="procesando === c.id" (click)="anular(c)">
+                <mat-icon>block</mat-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="comprobantesVisibles.length === 0">
+            <td colspan="7" class="vacio">No hay comprobantes para {{ anio }}.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+</div>

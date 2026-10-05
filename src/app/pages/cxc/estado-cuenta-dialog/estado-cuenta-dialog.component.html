@@ -64,7 +64,8 @@
       <ng-container matColumnDef="estado">
         <th mat-header-cell *matHeaderCellDef>Estado</th>
         <td mat-cell *matCellDef="let row">
-          <span [class]="'chip ' + (row.estado === 'Pagado' ? 'chip-verde' : row.estado === 'Cancelado' ? 'chip-gris' : 'chip-rojo')">
+          <span [class]="'chip ' + (row.estado === 'Pagado' ? 'chip-verde' : row.estado === 'Cancelado' ? 'chip-gris' : row.estado === 'Anticipado' ? 'chip-azul' : 'chip-rojo')"
+                [title]="row.estado === 'Anticipado' ? 'Pagada con anticipo de prematrícula; falta emitir la factura' : ''">
             {{ row.estado }}
           </span>
           <div *ngIf="row.estado === 'Cancelado' && row.motivo" class="motivo-texto">

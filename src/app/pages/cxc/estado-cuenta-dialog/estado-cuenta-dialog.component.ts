@@ -144,7 +144,7 @@ export class EstadoCuentaDialogComponent implements OnInit {
         <td>${this.mesLabel(d.mes)}</td>
         <td>${d.fechaVence ? parseLocalDate(d.fechaVence).toLocaleDateString('es-HN') : '—'}</td>
         <td class="monto">${this.formatLps(d.monto)}</td>
-        <td><span class="chip ${d.estado === 'Pagado' ? 'chip-v' : 'chip-r'}">${this.escHtml(d.estado)}</span></td>
+        <td><span class="chip ${d.estado === 'Pagado' || d.estado === 'Anticipado' ? 'chip-v' : 'chip-r'}">${this.escHtml(d.estado)}</span></td>
         <td>${d.fechaPago ? parseLocalDate(d.fechaPago).toLocaleDateString('es-HN') : '—'}</td>
       </tr>`).join('');
 

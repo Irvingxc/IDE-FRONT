@@ -71,6 +71,7 @@
               <mat-icon>edit</mat-icon>
             </button>
           </span>
+          <span class="mini-chip" *ngIf="f.esPrematriculado" title="Prematriculado para el año destino: grado y sección vienen de la prematrícula">prematriculado</span>
           <span class="mini-chip" *ngIf="f.estado && f.estado !== 'Activo'">{{ f.estado }}</span>
         </td>
       </ng-container>

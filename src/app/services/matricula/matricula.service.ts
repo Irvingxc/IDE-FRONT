@@ -72,6 +72,8 @@ export interface PromocionAlumno {
   gradoReal:         string | null;
   seccionReal:       string | null;
   idNivelInglesReal: number | null;
+  /** Tiene prematricula para el año destino: se puede promover y el destino viene de ella. */
+  esPrematriculado:  boolean;
 }
 
 export interface PromoverAlumnoItem {

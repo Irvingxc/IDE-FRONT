@@ -145,7 +145,7 @@ export class FacturacionService {
     return 'L. ' + v.toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  private numToLetras(n: number): string {
+  numToLetras(n: number): string {
     const UNIDADES = ['', 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE',
                       'DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISÉIS',
                       'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'];

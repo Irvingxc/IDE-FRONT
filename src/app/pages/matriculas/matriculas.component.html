@@ -43,6 +43,7 @@
               <mat-option value="">Todos</mat-option>
               <mat-option value="Activo">Activo</mat-option>
               <mat-option value="Inactivo">Inactivo</mat-option>
+              <mat-option value="Prematriculado">Prematriculado</mat-option>
             </mat-select>
           </mat-form-field>
 
@@ -255,6 +256,18 @@
       </ng-template>
 
       <app-promocion></app-promocion>
+    </mat-tab>
+
+    <!-- TAB PREMATRÍCULA (año siguiente) -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">event_available</mat-icon>
+        Prematrícula
+      </ng-template>
+
+      <ng-template matTabContent>
+        <app-prematricula></app-prematricula>
+      </ng-template>
     </mat-tab>
 
   </mat-tab-group>
