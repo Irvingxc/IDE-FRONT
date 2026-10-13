@@ -71,7 +71,7 @@ export class EditClienteDialogComponent implements OnInit {
       direccion:          [this.data.direccion      || ''],
       paisTelefono:       [tel.codigo],
       telefono:           [tel.numero],
-      correoElectronico:  [this.data.correoElectronico, Validators.email],
+      correoElectronico:  [this.data.correoElectronico, [Validators.required, Validators.email]],
       rtn:                [this.data.rtn            || ''],
     });
   }

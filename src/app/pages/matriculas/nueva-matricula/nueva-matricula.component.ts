@@ -10,6 +10,7 @@ import { PAISES_TELEFONO, PaisTelefono } from '../telefono-mask.directive';
 import { NotificationService } from '@app/services';
 import { MatDialog } from '@angular/material/dialog';
 import { AnticipoDialogComponent } from '../anticipo-dialog/anticipo-dialog.component';
+import { EditClienteDialogComponent } from '../edit-cliente-dialog/edit-cliente-dialog.component';
 
 @Component({
   selector: 'app-nueva-matricula',
@@ -159,7 +160,7 @@ export class NuevaMatriculaComponent implements OnInit {
       direccion:          [''],
       paisTelefono:       ['+504'],
       telefono:           [''],
-      correoElectronico:  ['', Validators.email],
+      correoElectronico:  ['', [Validators.required, Validators.email]],
       rtn:                ['', Validators.pattern(/^\d{4}-\d{4}-\d{6}$/)],
     });
 
@@ -193,8 +194,26 @@ export class NuevaMatriculaComponent implements OnInit {
   }
 
   get padreValido(): boolean {
-    return this.padreSeleccionado !== null ||
+    return (this.padreSeleccionado !== null && this.padreTieneCorreo) ||
            (this.mostrarFormPadre && this.padreForm.valid);
+  }
+
+  /** El correo del cliente es obligatorio (portal, avisos y comprobantes). */
+  get padreTieneCorreo(): boolean {
+    return !!this.padreSeleccionado?.correoElectronico?.trim();
+  }
+
+  // Cliente existente sin correo: se completa aquí mismo con el diálogo de edición.
+  agregarCorreoPadre(): void {
+    const padre = this.padreSeleccionado;
+    if (!padre) return;
+    const ref = this.dialog.open(EditClienteDialogComponent, { width: '660px', data: padre });
+    ref.afterClosed().subscribe(actualizado => {
+      if (!actualizado || !padre.identidad) return;
+      this.clienteService.buscarPorIdentidad(padre.identidad).subscribe(c => {
+        if (c) this.padreSeleccionado = c;
+      });
+    });
   }
 
   onFotoSeleccionada(event: Event): void {

@@ -26,9 +26,19 @@
           <div class="padre-info">
             <span class="padre-nombre">{{ padreSeleccionado.nombreCompleto }}</span>
             <span class="padre-id">ID: {{ padreSeleccionado.id }}</span>
+            <span class="padre-id" *ngIf="padreSeleccionado.correoElectronico">{{ padreSeleccionado.correoElectronico }}</span>
           </div>
           <button mat-stroked-button color="warn" (click)="deseleccionarPadre()">
             <mat-icon>close</mat-icon> Cambiar
+          </button>
+        </div>
+
+        <!-- El correo del cliente es obligatorio: un cliente existente sin correo debe completarlo -->
+        <div *ngIf="padreSeleccionado && !padreTieneCorreo" class="aviso-sin-correo">
+          <mat-icon>warning</mat-icon>
+          <span>Este cliente no tiene correo electrónico registrado. El correo es obligatorio para continuar.</span>
+          <button mat-stroked-button color="primary" (click)="agregarCorreoPadre()">
+            <mat-icon>edit</mat-icon> Agregar correo
           </button>
         </div>
 
@@ -237,9 +247,9 @@
                 </div>
 
                 <mat-form-field appearance="outline">
-                  <mat-label>Correo electrónico</mat-label>
+                  <mat-label>Correo electrónico *</mat-label>
                   <input matInput formControlName="correoElectronico" type="email">
-                  <mat-error>Correo inválido</mat-error>
+                  <mat-error>{{ padreForm.get('correoElectronico')?.hasError('required') ? 'El correo es obligatorio' : 'Correo inválido' }}</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
