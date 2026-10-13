@@ -58,6 +58,7 @@ export interface ComprobanteResumen {
   idPago:          number | null;
   noFactura:       string | null;
   motivoAnulacion: string | null;
+  clienteNombre:   string | null;
 }
 
 export interface ComprobanteLinea {

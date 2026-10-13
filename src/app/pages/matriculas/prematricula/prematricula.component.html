@@ -38,6 +38,7 @@
         <thead>
           <tr>
             <th>Alumno</th>
+            <th>Padre / Encargado</th>
             <th>Este año</th>
             <th>Grado {{ anio }}</th>
             <th>Inicio</th>
@@ -50,8 +51,8 @@
             <td>
               {{ p.nombreCompleto }}
               <span class="chip" [class.nuevo]="p.tipo === 'Nuevo'">{{ p.tipo === 'Nuevo' ? 'Nuevo' : 'Actual' }}</span>
-              <div class="sub">{{ p.clienteNombre }}</div>
             </td>
+            <td>{{ p.clienteNombre || '—' }}</td>
             <td>{{ p.tipo === 'Nuevo' ? '—' : (p.gradoActual + ' ' + (p.seccionActual || '')) }}</td>
             <td>{{ p.gradoNombre }} {{ p.seccion }}</td>
             <td>{{ p.fechaInicioClases | date:'dd/MM/yyyy' }}</td>
@@ -71,7 +72,7 @@
             </td>
           </tr>
           <tr *ngIf="prematriculadosVisibles.length === 0">
-            <td colspan="6" class="vacio">No hay alumnos prematriculados para {{ anio }}.</td>
+            <td colspan="7" class="vacio">No hay alumnos prematriculados para {{ anio }}.</td>
           </tr>
         </tbody>
       </table>
@@ -89,6 +90,7 @@
             <th>No.</th>
             <th>Fecha</th>
             <th>Alumno</th>
+            <th>Padre / Encargado</th>
             <th>Conceptos</th>
             <th class="num">Total</th>
             <th>Estado</th>
@@ -103,6 +105,7 @@
               {{ c.alumnoNombre }}
               <div class="sub">{{ c.gradoNombre }} {{ c.seccion }}</div>
             </td>
+            <td>{{ c.clienteNombre || '—' }}</td>
             <td class="conceptos">{{ c.conceptos }}</td>
             <td class="num">{{ fmt(c.total) }}</td>
             <td>
@@ -125,7 +128,7 @@
             </td>
           </tr>
           <tr *ngIf="comprobantesVisibles.length === 0">
-            <td colspan="7" class="vacio">No hay comprobantes para {{ anio }}.</td>
+            <td colspan="8" class="vacio">No hay comprobantes para {{ anio }}.</td>
           </tr>
         </tbody>
       </table>

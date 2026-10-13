@@ -61,7 +61,7 @@ export class PrematriculaComponent implements OnInit {
   }
 
   get comprobantesVisibles(): ComprobanteResumen[] {
-    return this.comprobantes.filter(c => this.coincide(c.alumnoNombre, c.noComprobante, c.idAlumno, c.noFactura));
+    return this.comprobantes.filter(c => this.coincide(c.alumnoNombre, c.noComprobante, c.idAlumno, c.noFactura, c.clienteNombre));
   }
 
   get totalVigente(): number {
