@@ -11,9 +11,9 @@
 
   <ng-container *ngIf="!cargando">
 
-    <!-- Sin estudiantes activos -->
+    <!-- Sin estudiantes activos ni prematriculados -->
     <div *ngIf="alumnos.length === 0" style="padding:12px 0;color:#888">
-      Este cliente no tiene estudiantes activos. Se generará el contrato con el nombre del estudiante en blanco.
+      Este cliente no tiene estudiantes activos ni prematriculados. Se generará el contrato con el nombre del estudiante en blanco.
     </div>
 
     <!-- Selección de alumno -->
@@ -26,19 +26,37 @@
         <mat-list-option
           *ngFor="let a of alumnos"
           [value]="a"
-          [selected]="alumnoSeleccionado?.identidad === a.identidad"
-          (click)="seleccionar(a)">
+          [selected]="alumnoElegido?.identidad === a.identidad"
+          (click)="elegirAlumno(a)">
           <span matListItemTitle>{{ a.nombreCompleto }}</span>
-          <span matListItemLine>{{ a.grado }}</span>
+          <span matListItemLine>
+            {{ a.estado === 'Prematriculado' ? 'Alumno nuevo' : a.grado }}
+            <strong *ngIf="esPrematriculado(a)" style="color:#2e7d32">· prematriculado</strong>
+          </span>
         </mat-list-option>
       </mat-selection-list>
     </ng-container>
+
+    <!-- Año lectivo del contrato -->
+    <div style="margin-top:16px">
+      <p style="margin-bottom:8px;font-size:14px;color:#555">Año lectivo del contrato:</p>
+      <mat-button-toggle-group [value]="anio" (change)="elegirAnio($event.value)" aria-label="Año lectivo">
+        <mat-button-toggle *ngFor="let y of anios" [value]="y">{{ y }}</mat-button-toggle>
+      </mat-button-toggle-group>
+      <div *ngIf="alumnoSeleccionado" style="margin-top:8px;font-size:13px;color:#555">
+        Grado {{ anio }}: <strong>{{ alumnoSeleccionado.grado || '—' }}</strong>
+        <span *ngIf="prematriculaDe(alumnoElegido, anio)" style="color:#2e7d32"> (según su prematrícula)</span>
+      </div>
+    </div>
 
     <!-- Resumen financiero del contrato -->
     <div *ngIf="alumnoSeleccionado" class="resumen-financiero">
       <div class="resumen-fila">
         <span class="resumen-etiqueta">Mensualidad del grado</span>
-        <span class="resumen-valor">L. {{ alumnoSeleccionado.valorMensualidad | number:'1.2-2' }}</span>
+        <span class="resumen-valor">
+          <ng-container *ngIf="!cargandoPrecio">L. {{ alumnoSeleccionado.valorMensualidad | number:'1.2-2' }}</ng-container>
+          <ng-container *ngIf="cargandoPrecio">calculando...</ng-container>
+        </span>
       </div>
       <div class="resumen-fila descuento-fila" *ngIf="alumnoSeleccionado.descuento && alumnoSeleccionado.descuento > 0">
         <span class="resumen-etiqueta">
@@ -63,7 +81,7 @@
 
 <mat-dialog-actions align="end">
   <button mat-stroked-button mat-dialog-close>Cancelar</button>
-  <button mat-raised-button color="primary" (click)="generar()" [disabled]="cargando">
+  <button mat-raised-button color="primary" (click)="generar()" [disabled]="cargando || cargandoPrecio">
     <mat-icon>print</mat-icon> Generar e imprimir
   </button>
 </mat-dialog-actions>

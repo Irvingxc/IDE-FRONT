@@ -5,14 +5,16 @@ import { AlumnoResponse } from '@app/services/alumno/alumno.service';
 @Injectable({ providedIn: 'root' })
 export class ContratoService {
 
+  /** @param anioLectivo año del contrato; por defecto el actual (para una prematrícula, el del año siguiente). */
   generarContrato(
     cliente: ClienteResponse,
-    alumno:  AlumnoResponse | null
+    alumno:  AlumnoResponse | null,
+    anioLectivo?: number
   ): void {
     const colegiaturaMensual = alumno?.valorMensualidad ?? 0;
     const colegiaturaAnual   = colegiaturaMensual * 12;
     const hoy  = new Date();
-    const anio = hoy.getFullYear();
+    const anio = anioLectivo ?? hoy.getFullYear();
     const dia  = hoy.getDate();
     const meses = ['enero','febrero','marzo','abril','mayo','junio','julio',
                    'agosto','septiembre','octubre','noviembre','diciembre'];
@@ -216,13 +218,18 @@ export class ContratoService {
   </div>
 
   <div class="clausula">
-    <div class="clausula-titulo">Octava: Duración</div>
-    <div class="clausula-body">El presente contrato finaliza en diciembre de ${anio}, condicionado al cumplimiento de las obligaciones académicas, económicas y conductuales aquí pactadas.</div>
+    <div class="clausula-titulo">Octava: Duración y Renovación</div>
+    <div class="clausula-body">El presente contrato entra en vigor en el año lectivo ${anio} y se renovará automáticamente para cada año lectivo siguiente en que el estudiante continúe matriculado en EL INSTITUTO, sin necesidad de suscribir un nuevo contrato, condicionado al cumplimiento de las obligaciones académicas, económicas y conductuales aquí pactadas.</div>
+  </div>
+
+  <div class="clausula">
+    <div class="clausula-titulo">Novena: Vigencia y Continuidad del Servicio</div>
+    <div class="clausula-body">Este contrato se mantiene válido mientras el estudiante continúe recibiendo los servicios educativos de EL INSTITUTO, aun cuando sea promovido a otro grado o nivel. En cada año lectivo de renovación, los montos de matrícula, colegiatura y demás cuotas serán los vigentes para ese año, según las tarifas que EL INSTITUTO establezca y comunique oportunamente. Si el estudiante se retira, es dado de baja o deja de recibir dichos servicios por cualquier causa, el contrato quedará sin efecto a partir de esa fecha, sin perjuicio de las obligaciones económicas pendientes a la fecha del retiro, las cuales deberán ser canceladas por EL PADRE DE FAMILIA, MADRE, TUTOR O ENCARGADO.</div>
   </div>
 
   <div class="cierre">
     <p style="text-align:justify;">
-      Se firma en dos ejemplares en la ciudad de Danlí, El Paraíso, Honduras, el ${dia} de ${mes} de ${anio}.
+      Se firma en dos ejemplares en la ciudad de Danlí, El Paraíso, Honduras, el ${dia} de ${mes} de ${new Date().getFullYear()}.
     </p>
 
     <div class="firmas">
