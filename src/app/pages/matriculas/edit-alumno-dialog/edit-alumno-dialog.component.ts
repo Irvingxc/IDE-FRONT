@@ -1,10 +1,13 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { AlumnoResponse, AlumnoService } from '@app/services/alumno/alumno.service';
+import { switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { AlumnoResponse, AlumnoService, DocumentoEntregado } from '@app/services/alumno/alumno.service';
 import { ClienteService, ClienteResponse } from '@app/services/cliente/cliente.service';
 import { CatalogoService, GradoDto, NivelIngles } from '@app/services/catalogo/catalogo.service';
 import { NotificationService } from '@app/services';
+import { FichaAlumnoComponent } from '../ficha-alumno/ficha-alumno.component';
 
 @Component({
   selector: 'app-edit-alumno-dialog',
@@ -14,6 +17,11 @@ import { NotificationService } from '@app/services';
 export class EditAlumnoDialogComponent implements OnInit {
 
   form!: FormGroup;
+  fichaForm!: FormGroup;
+  documentos: DocumentoEntregado[] | null = null;
+  anioDocumentos: number | null = null;
+  /** La ficha solo se guarda si se pudo cargar (evita borrar datos por un error de red). */
+  fichaCargada = false;
   guardando = false;
   fotoBase64: string | null = null;
   private fotoManual = false;
@@ -80,6 +88,17 @@ export class EditAlumnoDialogComponent implements OnInit {
       telefono:           [this.data.telefono],
       correoElectronico:  [this.data.correoElectronico, Validators.email],
     });
+
+    this.fichaForm = FichaAlumnoComponent.crearForm(this.fb);
+    this.alumnoService.getFicha(this.data.identidad).subscribe({
+      next: (ficha) => {
+        FichaAlumnoComponent.cargar(this.fichaForm, ficha);
+        this.documentos     = ficha.documentos ?? [];
+        this.anioDocumentos = ficha.anioDocumentos;
+        this.fichaCargada   = true;
+      },
+      error: () => this.notification.error('No se pudo cargar la ficha del estudiante')
+    });
   }
 
   onFotoSeleccionada(event: Event): void {
@@ -139,7 +158,13 @@ export class EditAlumnoDialogComponent implements OnInit {
       correoElectronico:  f.correoElectronico   || undefined,
       direccion:          up(f.direccion),
       foto:               this.fotoBase64       ?? undefined,
-    }).subscribe({
+    }).pipe(
+      switchMap(() => this.fichaCargada
+        ? this.alumnoService.guardarFicha(
+            this.data.identidad,
+            FichaAlumnoComponent.aDto(this.fichaForm, this.documentos, this.anioDocumentos))
+        : of(null))
+    ).subscribe({
       next: () => {
         this.notification.success('Estudiante actualizado correctamente');
         this.dialogRef.close(true);

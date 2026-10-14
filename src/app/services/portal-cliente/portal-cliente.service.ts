@@ -139,6 +139,11 @@ export class PortalClienteService {
     return this.http.get<PortalClaseNota[]>(`${this.base}/mis-notas`, { params });
   }
 
+  /** Deja constancia en bitácora de que se descargó el reporte de notas. */
+  registrarDescargaNotas(identidad: string, idPeriodo: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/descarga-notas`, { identidad, idPeriodo });
+  }
+
   miAsistencia(identidad: string, anio: number, mes: number): Observable<PortalAsistenciaDto[]> {
     const params = new HttpParams().set('identidad', identidad).set('anio', anio.toString()).set('mes', mes.toString());
     return this.http.get<PortalAsistenciaDto[]>(`${this.base}/mi-asistencia`, { params });

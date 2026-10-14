@@ -55,6 +55,6 @@
 <mat-dialog-actions align="end">
   <button mat-stroked-button [mat-dialog-close]="false" [disabled]="guardando">Ahora no</button>
   <button mat-raised-button color="primary" (click)="registrar()" [disabled]="lineas.length === 0 || guardando">
-    <mat-icon>receipt_long</mat-icon> {{ guardando ? 'Registrando...' : 'Registrar y emitir comprobante' }}
+    <mat-icon>receipt_long</mat-icon> {{ guardando ? 'Registrando...' : 'Registrar y ver comprobante' }}
   </button>
 </mat-dialog-actions>

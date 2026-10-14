@@ -2,15 +2,30 @@ import { Injectable } from '@angular/core';
 import { ClienteResponse } from '@app/services/cliente/cliente.service';
 import { AlumnoResponse } from '@app/services/alumno/alumno.service';
 
+/** Datos del padre / encargado que usa el contrato. */
+export type ContratoCliente = Pick<ClienteResponse, 'nombreCompleto' | 'identidad'>;
+/** Datos del alumno que usa el contrato (grado ya con sección, mensualidad del año del contrato). */
+export type ContratoAlumno = Pick<AlumnoResponse, 'nombreCompleto' | 'grado' | 'valorMensualidad' | 'descuento'>;
+
 @Injectable({ providedIn: 'root' })
 export class ContratoService {
 
   /** @param anioLectivo año del contrato; por defecto el actual (para una prematrícula, el del año siguiente). */
   generarContrato(
-    cliente: ClienteResponse,
-    alumno:  AlumnoResponse | null,
+    cliente: ContratoCliente,
+    alumno:  ContratoAlumno | null,
     anioLectivo?: number
   ): void {
+    const html = this.construirHtml(cliente, alumno, anioLectivo);
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    setTimeout(() => { win.focus(); win.print(); }, 600);
+  }
+
+  /** HTML del contrato listo para mostrar o imprimir. */
+  construirHtml(cliente: ContratoCliente, alumno: ContratoAlumno | null, anioLectivo?: number): string {
     const colegiaturaMensual = alumno?.valorMensualidad ?? 0;
     const colegiaturaAnual   = colegiaturaMensual * 12;
     const hoy  = new Date();
@@ -20,12 +35,7 @@ export class ContratoService {
                    'agosto','septiembre','octubre','noviembre','diciembre'];
     const mes = meses[hoy.getMonth()];
 
-    const html = this.buildHtml(cliente, alumno, colegiaturaMensual, colegiaturaAnual, anio, dia, mes);
-    const win = window.open('', '_blank');
-    if (!win) return;
-    win.document.write(html);
-    win.document.close();
-    setTimeout(() => { win.focus(); win.print(); }, 600);
+    return this.buildHtml(cliente, alumno, colegiaturaMensual, colegiaturaAnual, anio, dia, mes);
   }
 
   private formatLps(value: number): string {
@@ -33,8 +43,8 @@ export class ContratoService {
   }
 
   private buildHtml(
-    cliente:            ClienteResponse,
-    alumno:             AlumnoResponse | null,
+    cliente:            ContratoCliente,
+    alumno:             ContratoAlumno | null,
     colegiaturaMensual: number,
     colegiaturaAnual:   number,
     anio:               number,

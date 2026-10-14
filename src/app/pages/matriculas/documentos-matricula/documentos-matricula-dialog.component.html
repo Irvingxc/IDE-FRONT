@@ -1,0 +1,60 @@
+<div class="pantalla">
+
+  <!-- ── Barra superior ───────────────────────────────────────── -->
+  <header class="barra">
+    <div class="titulo">
+      <span class="paso-num" *ngIf="pasos.length > 1">Paso {{ indice + 1 }} de {{ pasos.length }}</span>
+      <span class="paso-num" *ngIf="pasos.length === 1">Matrícula registrada</span>
+      <h2>{{ paso === 'comprobante' ? 'Comprobante del anticipo' : 'Contrato del padre / encargado' }}</h2>
+      <span class="detalle" *ngIf="alumnoNombre">
+        {{ alumnoNombre }} · {{ clienteNombre || 'Sin encargado' }}
+        <ng-container *ngIf="paso === 'comprobante' && noComprobante"> · No. {{ noComprobante }}</ng-container>
+        <ng-container *ngIf="paso === 'contrato'"> · Año {{ anio }}</ng-container>
+      </span>
+    </div>
+
+    <div class="acciones" *ngIf="!cargando && !error">
+      <button mat-stroked-button class="btn-grande" *ngIf="indice > 0" (click)="atras()">
+        <mat-icon>arrow_back</mat-icon> Atrás
+      </button>
+
+      <button mat-stroked-button color="primary" class="btn-grande" (click)="imprimir()" [disabled]="!listo">
+        <mat-icon>print</mat-icon> Imprimir
+      </button>
+
+      <button mat-raised-button color="primary" class="btn-grande" *ngIf="!esUltimo" (click)="siguiente()">
+        Siguiente <mat-icon>arrow_forward</mat-icon>
+      </button>
+
+      <button mat-raised-button color="primary" class="btn-grande" *ngIf="esUltimo" (click)="finalizar()">
+        <mat-icon>check</mat-icon> Finalizar
+      </button>
+    </div>
+
+    <div class="acciones" *ngIf="error">
+      <button mat-raised-button color="primary" class="btn-grande" (click)="finalizar()">
+        <mat-icon>close</mat-icon> Cerrar
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Documento ────────────────────────────────────────────── -->
+  <main class="hoja">
+    <div *ngIf="cargando" class="estado">
+      <mat-icon class="spin-icon">sync</mat-icon>
+      <span>Preparando {{ pasos.length > 1 ? 'el comprobante y el contrato' : 'el contrato' }}...</span>
+    </div>
+
+    <div *ngIf="error" class="estado estado-error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <iframe #vista *ngIf="!cargando && !error"
+            class="vista"
+            [title]="paso === 'comprobante' ? 'Comprobante del anticipo' : 'Contrato'"
+            [srcdoc]="htmlActual"
+            (load)="alCargarVista()"></iframe>
+  </main>
+
+</div>

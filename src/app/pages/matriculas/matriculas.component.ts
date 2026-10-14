@@ -113,7 +113,8 @@ export class MatriculasComponent implements OnInit {
 
   editarAlumno(alumno: AlumnoResponse): void {
     const ref = this.dialog.open(EditAlumnoDialogComponent, {
-      width: '680px',
+      width: '760px',
+      maxWidth: '96vw',
       data: alumno
     });
     ref.afterClosed().subscribe((actualizado) => {

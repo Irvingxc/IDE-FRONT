@@ -24,6 +24,16 @@ $guinda: #6B0F1A;
 
 mat-dialog-content { max-height: 72vh; }
 
+.tabs-alumno ::ng-deep .mat-tab-label {
+  height: 52px;
+  font-size: 15px;
+  opacity: .85;
+}
+
+.tab-icon { margin-right: 8px; }
+
+.cargando-ficha { padding: 24px 0; color: #777; font-size: 15px; }
+
 input[matInput] { text-transform: uppercase; }
 
 .tutor-actual {

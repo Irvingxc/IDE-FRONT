@@ -1,7 +1,9 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ClienteResponse, ClienteService } from '@app/services/cliente/cliente.service';
+import { switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { ClienteResponse, ClienteService, NIVELES_EDUCATIVOS } from '@app/services/cliente/cliente.service';
 import { NotificationService } from '@app/services';
 import { PAISES_TELEFONO, PaisTelefono } from '../telefono-mask.directive';
 
@@ -16,6 +18,9 @@ export class EditClienteDialogComponent implements OnInit {
   guardando = false;
   correoOriginal = '';
   confirmaCambioCorreo = false;
+  /** La ficha solo se guarda si se pudo cargar (evita borrar datos por un error de red). */
+  fichaCargada = false;
+  nivelesEducativos = NIVELES_EDUCATIVOS;
 
   paises: PaisTelefono[] = PAISES_TELEFONO;
   tiposId = ['DNI / Identidad', 'Pasaporte'];
@@ -73,6 +78,16 @@ export class EditClienteDialogComponent implements OnInit {
       telefono:           [tel.numero],
       correoElectronico:  [this.data.correoElectronico, [Validators.required, Validators.email]],
       rtn:                [this.data.rtn            || ''],
+      ocupacion:          [''],
+      nivelEducativo:     [null],
+    });
+
+    this.clienteService.getFicha(this.data.id).subscribe({
+      next: (ficha) => {
+        this.form.patchValue({ ocupacion: ficha.ocupacion ?? '', nivelEducativo: ficha.nivelEducativo });
+        this.fichaCargada = true;
+      },
+      error: () => this.notification.error('No se pudo cargar la ocupación y el nivel educativo')
     });
   }
 
@@ -112,7 +127,14 @@ export class EditClienteDialogComponent implements OnInit {
       correoElectronico:  f.correoElectronico    || undefined,
       direccion:          up(f.direccion),
       rtn:                f.rtn                  || undefined,
-    }).subscribe({
+    }).pipe(
+      switchMap(() => this.fichaCargada
+        ? this.clienteService.guardarFicha(this.data.id, {
+            ocupacion:      (f.ocupacion ?? '').trim().toUpperCase() || null,
+            nivelEducativo: f.nivelEducativo || null,
+          })
+        : of(null))
+    ).subscribe({
       next: () => {
         const msg = this.requiereConfirmarCorreo
           ? 'Cliente actualizado. El correo de acceso al portal también se actualizó.'

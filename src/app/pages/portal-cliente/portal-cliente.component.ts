@@ -273,6 +273,12 @@ export class PortalClienteComponent implements OnInit {
 
       const limpio = (s: string) => (s || '').trim().replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ');
       doc.save(`NOTAS ${limpio(this.hijoSeleccionado.nombreCompleto)} ${limpio(periodo?.nombre ?? 'PERIODO')}.pdf`);
+
+      // Bitácora de la descarga; si falla no se interrumpe al padre (el PDF ya se descargó).
+      if (this.periodoSeleccionadoId != null) {
+        this.svc.registrarDescargaNotas(this.hijoSeleccionado.identidad, this.periodoSeleccionadoId)
+          .subscribe({ error: () => { /* sin aviso al padre */ } });
+      }
     } finally {
       this.descargandoPdf = false;
     }

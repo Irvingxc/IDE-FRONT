@@ -263,6 +263,17 @@ mat-stepper {
 
 .hint-prematricula { color: #2e7d32; font-weight: 600; }
 
+/* Paso 3: ficha opcional */
+.paso-opcional {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  color: #555;
+  font-size: 15px;
+  mat-icon { color: #1565c0; flex-shrink: 0; }
+}
+
 /* Actions */
 .step-actions {
   display: flex;

@@ -2,14 +2,18 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatStepper } from '@angular/material/stepper';
 import { Router } from '@angular/router';
-import { ClienteService, ClienteResponse, GuardarClienteDto } from '@app/services/cliente/cliente.service';
-import { AlumnoService, GuardarAlumnoDto } from '@app/services/alumno/alumno.service';
+import { forkJoin, Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { ClienteService, ClienteResponse, GuardarClienteDto, NIVELES_EDUCATIVOS } from '@app/services/cliente/cliente.service';
+import { AlumnoService, DocumentoEntregado, GuardarAlumnoDto } from '@app/services/alumno/alumno.service';
+import { FichaAlumnoComponent } from '../ficha-alumno/ficha-alumno.component';
 import { MatriculaService, GuardarMatriculaDto } from '@app/services/matricula/matricula.service';
 import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.service';
 import { PAISES_TELEFONO, PaisTelefono } from '../telefono-mask.directive';
 import { NotificationService } from '@app/services';
 import { MatDialog } from '@angular/material/dialog';
-import { AnticipoDialogComponent } from '../anticipo-dialog/anticipo-dialog.component';
+import { AnticipoDialogComponent, AnticipoResultado } from '../anticipo-dialog/anticipo-dialog.component';
+import { DocumentosMatriculaDialogComponent } from '../documentos-matricula/documentos-matricula-dialog.component';
 import { EditClienteDialogComponent } from '../edit-cliente-dialog/edit-cliente-dialog.component';
 
 @Component({
@@ -40,6 +44,11 @@ export class NuevaMatriculaComponent implements OnInit {
   // ── Formularios ──
   padreForm!: FormGroup;
   alumnoForm!: FormGroup;
+  fichaForm!: FormGroup;
+
+  // ── Ficha complementaria (paso 3) ──
+  documentos: DocumentoEntregado[] | null = null;
+  nivelesEducativos = NIVELES_EDUCATIVOS;
 
   // ── Opciones de dropdowns ──
   paises: PaisTelefono[] = PAISES_TELEFONO;
@@ -118,27 +127,75 @@ export class NuevaMatriculaComponent implements OnInit {
     return anio != null && anio > new Date().getFullYear();
   }
 
-  // Tras guardar: si es prematrícula se ofrece registrar el anticipo y emitir el comprobante.
+  /** Nombre completo del alumno tal como se guarda (en mayúsculas). */
+  private get nombreAlumno(): string {
+    const a = this.alumnoForm.value;
+    return [a.nombres, a.segundoNombre, a.apellidos, a.segundoApellido]
+      .map((v: string) => (v ?? '').trim()).filter(Boolean).join(' ').toUpperCase();
+  }
+
+  /** Padre / encargado para el contrato: el existente seleccionado o el recién registrado. */
+  private get padreContrato(): { nombreCompleto: string; identidad: string } {
+    const p = this.padreSeleccionado;
+    if (p) {
+      // "Buscar por identidad" devuelve en nombreCompleto solo los nombres: se arma con las partes.
+      const partes = [p.nombres, p.segundoNombre, p.apellidos, p.segundoApellido]
+        .map(v => (v ?? '').trim()).filter(Boolean);
+      return {
+        nombreCompleto: (p.apellidos ? partes.join(' ') : (p.nombreCompleto ?? '')).replace(/\s+/g, ' ').trim(),
+        identidad:      p.identidad ?? '',
+      };
+    }
+    const f = this.padreForm.value;
+    return {
+      nombreCompleto: [f.primerNombre, f.segundoNombre, f.primerApellido, f.segundoApellido]
+        .map((v: string) => (v ?? '').trim()).filter(Boolean).join(' ').toUpperCase(),
+      identidad: f.identificacion ?? '',
+    };
+  }
+
+  // Tras guardar: matrícula normal → contrato; prematrícula → anticipo, comprobante y contrato.
   private alGuardar(): void {
+    const a = this.alumnoForm.value;
+
     if (!this.esPrematricula) {
       this.notification.success('Matrícula registrada correctamente');
-      this.router.navigate(['/matriculas']);
+      const grado = this.grados.find(g => g.idGrado === a.idGrado)?.gradoNombre ?? '';
+      DocumentosMatriculaDialogComponent.abrir(this.dialog, {
+        modo:    'contrato',
+        cliente: this.padreContrato,
+        alumno:  {
+          nombreCompleto: this.nombreAlumno,
+          grado:          [grado, (a.seccion ?? '').toUpperCase()].filter(Boolean).join(' '),
+          descuento:      a.descuento ?? 0,
+        },
+        idGrado: a.idGrado,
+        anio:    this.anioInicio ?? new Date().getFullYear(),
+      }).afterClosed().subscribe(() => this.router.navigate(['/matriculas']));
       return;
     }
 
     this.notification.success('Alumno prematriculado correctamente');
-    const a = this.alumnoForm.value;
     const ref = this.dialog.open(AnticipoDialogComponent, {
       width: '640px',
       disableClose: true,
       data: {
         identidad:    a.identidad,
         anio:         this.anioInicio,
-        alumnoNombre: [a.nombres, a.segundoNombre, a.apellidos, a.segundoApellido].filter(Boolean).join(' ').toUpperCase(),
+        alumnoNombre: this.nombreAlumno,
         gradoNombre:  this.grados.find(g => g.idGrado === a.idGrado)?.gradoNombre ?? null,
       }
     });
-    ref.afterClosed().subscribe(() => this.router.navigate(['/matriculas']));
+    ref.afterClosed().subscribe((r?: AnticipoResultado | false) => {
+      if (!r) { this.router.navigate(['/matriculas']); return; }
+      // Comprobante (Imprimir / Siguiente) y luego el contrato del padre para este alumno.
+      DocumentosMatriculaDialogComponent.abrir(this.dialog, {
+        modo:          'prematricula',
+        idComprobante: r.idComprobante,
+        identidad:     a.identidad,
+        anio:          this.anioInicio!,
+      }).afterClosed().subscribe(() => this.router.navigate(['/matriculas']));
+    });
   }
 
   ngOnInit(): void {
@@ -162,6 +219,14 @@ export class NuevaMatriculaComponent implements OnInit {
       telefono:           [''],
       correoElectronico:  ['', [Validators.required, Validators.email]],
       rtn:                ['', Validators.pattern(/^\d{4}-\d{4}-\d{6}$/)],
+      ocupacion:          [''],
+      nivelEducativo:     [null],
+    });
+
+    this.fichaForm = FichaAlumnoComponent.crearForm(this.fb);
+    this.alumnoService.getDocumentosMatricula().subscribe({
+      next: (docs) => this.documentos = docs ?? [],
+      error: () => this.documentos = null
     });
 
     this.alumnoForm = this.fb.group({
@@ -296,9 +361,58 @@ export class NuevaMatriculaComponent implements OnInit {
     this.stepper.next();
   }
 
+  continuarAFicha(): void {
+    if (this.alumnoForm.invalid) {
+      this.alumnoForm.markAllAsTouched();
+      this.notification.error('Faltan datos obligatorios del estudiante (marcados en rojo)');
+      return;
+    }
+    this.stepper.next();
+  }
+
+  /**
+   * Guarda la ficha del alumno (y ocupación / nivel educativo del padre nuevo)
+   * después de registrar la matrícula. Si falla, la matrícula ya quedó guardada:
+   * solo se avisa para completarla desde "Editar estudiante".
+   */
+  private guardarFichas(idClienteNuevo: number | null): Observable<boolean> {
+    const a = this.alumnoForm.value;
+    const tareas: Observable<unknown>[] = [
+      this.alumnoService.guardarFicha(
+        a.identidad,
+        FichaAlumnoComponent.aDto(this.fichaForm, this.documentos, this.anioInicio))
+    ];
+
+    const p = this.padreForm.value;
+    const ocupacion = (p.ocupacion ?? '').trim().toUpperCase() || null;
+    if (idClienteNuevo && (ocupacion || p.nivelEducativo)) {
+      tareas.push(this.clienteService.guardarFicha(idClienteNuevo, {
+        ocupacion,
+        nivelEducativo: p.nivelEducativo || null,
+      }));
+    }
+
+    return forkJoin(tareas).pipe(
+      map(() => true),
+      catchError(() => of(false))
+    );
+  }
+
+  private finalizar(idClienteNuevo: number | null): void {
+    this.guardarFichas(idClienteNuevo).subscribe(ok => {
+      if (!ok) {
+        this.notification.error(
+          'La matrícula se guardó, pero no la ficha (salud, uniforme, documentos). Complétela desde "Editar estudiante".');
+      }
+      this.alGuardar();
+    });
+  }
+
   guardar(): void {
     if (this.alumnoForm.invalid) {
       this.alumnoForm.markAllAsTouched();
+      this.stepper.selectedIndex = 1;
+      this.notification.error('Faltan datos obligatorios del estudiante (marcados en rojo)');
       return;
     }
     this.guardando = true;
@@ -360,7 +474,7 @@ export class NuevaMatriculaComponent implements OnInit {
       };
 
       this.matriculaService.guardarMatricula(dto).subscribe({
-        next: () => this.alGuardar(),
+        next: (r) => this.finalizar(r?.idCliente ?? null),
         error: () => {
           this.notification.error('Error al registrar la matrícula. No se guardaron datos.');
           this.guardando = false;
@@ -403,7 +517,7 @@ export class NuevaMatriculaComponent implements OnInit {
     };
 
     this.alumnoService.guardarAlumno(dto).subscribe({
-      next: () => this.alGuardar(),
+      next: () => this.finalizar(null),
       error: () => {
         this.notification.error('Error al registrar el estudiante');
         this.guardando = false;

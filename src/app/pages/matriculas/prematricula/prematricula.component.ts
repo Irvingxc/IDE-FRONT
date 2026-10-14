@@ -4,7 +4,8 @@ import { forkJoin } from 'rxjs';
 import { NotificationService } from '@app/services';
 import { FacturacionService } from '@app/services/facturacion/facturacion.service';
 import { ComprobanteResumen, Prematriculado, PrematriculaService } from '@app/services/prematricula/prematricula.service';
-import { AnticipoDialogComponent } from '../anticipo-dialog/anticipo-dialog.component';
+import { AnticipoDialogComponent, AnticipoResultado } from '../anticipo-dialog/anticipo-dialog.component';
+import { DocumentosMatriculaDialogComponent } from '../documentos-matricula/documentos-matricula-dialog.component';
 import { PrematricularAlumnoDialogComponent, PrematricularAlumnoResultado } from './prematricular-alumno-dialog.component';
 
 // Pestaña Prematrícula: alumnos prematriculados para el año siguiente (nuevos desde
@@ -82,7 +83,17 @@ export class PrematriculaComponent implements OnInit {
       width: '640px',
       data: { identidad, anio: this.anio, alumnoNombre, gradoNombre },
     });
-    ref.afterClosed().subscribe(ok => { if (ok) this.cargar(); });
+    ref.afterClosed().subscribe((r?: AnticipoResultado | false) => {
+      if (!r) return;
+      this.cargar();
+      // Comprobante (Imprimir / Siguiente) y luego el contrato del padre para este alumno.
+      DocumentosMatriculaDialogComponent.abrir(this.dialog, {
+        modo:          'prematricula',
+        idComprobante: r.idComprobante,
+        identidad,
+        anio: this.anio,
+      });
+    });
   }
 
   cancelarPrematricula(p: Prematriculado): void {

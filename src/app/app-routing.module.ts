@@ -13,6 +13,7 @@ const routes: Routes = [
         path: '',
         pathMatch: 'full',
         canLoad: [LandingGuard],
+        canActivate: [LandingGuard],
         loadChildren: () => import('./pages/landing/landing.module').then(m => m.LandingModule)
       },
       {

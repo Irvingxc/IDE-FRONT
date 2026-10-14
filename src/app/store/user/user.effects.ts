@@ -58,7 +58,7 @@ export class UserEffects {
               const esCliente = response.roles?.includes('Cliente') ?? false;
               const destino = esCliente
                 ? '/portal-cliente'
-                : (response.sucursalId == null ? '/seleccionar-sucursal' : '/');
+                : (response.sucursalId == null ? '/seleccionar-sucursal' : '/static/welcome');
               this.router.navigate([destino]);
             }),
             map((response: UserResponse) => new fromActions.SignInEmailSuccess(response.email, response || null)),

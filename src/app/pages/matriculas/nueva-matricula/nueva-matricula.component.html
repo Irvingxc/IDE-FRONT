@@ -260,6 +260,22 @@
                 </mat-form-field>
               </div>
 
+              <p class="section-label">Trabajo y estudios</p>
+              <div class="form-grid">
+                <mat-form-field appearance="outline">
+                  <mat-label>Ocupación</mat-label>
+                  <input matInput formControlName="ocupacion" maxlength="100" placeholder="Ejemplo: comerciante, maestra">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Nivel educativo</mat-label>
+                  <mat-select formControlName="nivelEducativo">
+                    <mat-option [value]="null">— Sin indicar —</mat-option>
+                    <mat-option *ngFor="let n of nivelesEducativos" [value]="n">{{ n }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
             </form>
           </ng-container>
         </ng-container>
@@ -450,6 +466,36 @@
           </div>
 
         </form>
+
+        <div class="step-actions">
+          <button mat-stroked-button matStepperPrevious>
+            <mat-icon>arrow_back</mat-icon> Atrás
+          </button>
+          <button mat-raised-button color="primary" (click)="continuarAFicha()">
+            Continuar <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+
+      </div>
+    </mat-step>
+
+    <!-- ══════════════════════════════════════════
+         STEP 3 — SALUD, UNIFORME Y DOCUMENTOS
+    ══════════════════════════════════════════ -->
+    <mat-step>
+      <ng-template matStepLabel>Salud, uniforme y documentos</ng-template>
+
+      <div class="step-content">
+        <h3 class="sub-title">Más datos del estudiante</h3>
+        <p class="paso-opcional">
+          <mat-icon>info</mat-icon>
+          Llene lo que el padre le indique. Lo que falte se puede completar después en "Editar estudiante".
+        </p>
+
+        <app-ficha-alumno [form]="fichaForm"
+                          [documentos]="documentos"
+                          [anioDocumentos]="anioInicio">
+        </app-ficha-alumno>
 
         <div class="aviso-prematricula" *ngIf="esPrematricula">
           <mat-icon>event_available</mat-icon>

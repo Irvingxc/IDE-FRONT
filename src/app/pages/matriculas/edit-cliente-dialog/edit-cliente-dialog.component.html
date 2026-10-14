@@ -72,6 +72,21 @@
       <input matInput formControlName="municipio">
     </mat-form-field>
 
+    <p class="section-label full-width">Trabajo y estudios</p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Ocupación</mat-label>
+      <input matInput formControlName="ocupacion" maxlength="100" placeholder="Ejemplo: comerciante, maestra">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nivel educativo</mat-label>
+      <mat-select formControlName="nivelEducativo">
+        <mat-option [value]="null">— Sin indicar —</mat-option>
+        <mat-option *ngFor="let n of nivelesEducativos" [value]="n">{{ n }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <p class="section-label full-width">Contacto</p>
 
     <div class="telefono-row">

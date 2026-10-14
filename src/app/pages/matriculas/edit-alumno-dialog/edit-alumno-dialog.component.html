@@ -1,6 +1,11 @@
 <h2 mat-dialog-title>Editar estudiante — {{ data.nombreCompleto }}</h2>
 
 <mat-dialog-content>
+ <mat-tab-group animationDuration="150ms" class="tabs-alumno">
+  <mat-tab>
+   <ng-template mat-tab-label>
+     <mat-icon class="tab-icon">badge</mat-icon> Datos del estudiante
+   </ng-template>
   <form [formGroup]="form" class="form-grid">
 
     <p class="section-label">Nombre</p>
@@ -184,6 +189,22 @@
     </mat-form-field>
 
   </form>
+  </mat-tab>
+
+  <mat-tab>
+   <ng-template mat-tab-label>
+     <mat-icon class="tab-icon">medical_information</mat-icon> Salud, uniforme y documentos
+   </ng-template>
+   <app-ficha-alumno *ngIf="fichaCargada; else cargandoFicha"
+                     [form]="fichaForm"
+                     [documentos]="documentos"
+                     [anioDocumentos]="anioDocumentos">
+   </app-ficha-alumno>
+   <ng-template #cargandoFicha>
+     <p class="cargando-ficha">Cargando ficha...</p>
+   </ng-template>
+  </mat-tab>
+ </mat-tab-group>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

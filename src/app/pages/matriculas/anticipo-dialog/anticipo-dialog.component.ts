@@ -10,8 +10,15 @@ export interface AnticipoDialogData {
   gradoNombre?:  string | null;
 }
 
+/** Resultado al registrar; null/false si se eligió "Ahora no". */
+export interface AnticipoResultado {
+  idComprobante: number;
+  noComprobante: string;
+}
+
 // Registra el anticipo de una prematrícula: se eligen los conceptos (matrícula, libros,
-// mensualidad de uno o más meses), se emite el comprobante PM y se imprime.
+// mensualidad de uno o más meses) y se emite el comprobante PM. Quien abre el diálogo
+// muestra luego el comprobante y el contrato (DocumentosMatriculaDialogComponent).
 @Component({
   selector: 'app-anticipo-dialog',
   templateUrl: './anticipo-dialog.component.html',
@@ -71,8 +78,8 @@ export class AnticipoDialogComponent implements OnInit {
       .subscribe({
         next: (r) => {
           this.notification.success(`Comprobante ${r.noComprobante} registrado`);
-          this.prematriculaService.imprimirComprobante(r.idComprobante);
-          this.dialogRef.close(true);
+          const resultado: AnticipoResultado = { idComprobante: r.idComprobante, noComprobante: r.noComprobante };
+          this.dialogRef.close(resultado);
         },
         error: (err) => {
           this.guardando = false;

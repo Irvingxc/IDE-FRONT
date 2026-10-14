@@ -96,6 +96,40 @@ export interface ActualizarAlumnoDto {
   foto?:               string;
 }
 
+/** Datos complementarios de la hoja de matrícula (salud, procedencia, uniforme...). */
+export interface FichaAlumnoDatos {
+  parentesco:            string | null;
+  tipoSangre:            string | null;
+  alergias:              string | null;
+  condicionEspecial:     string | null;
+  vacunado:              boolean | null;
+  repitente:             boolean | null;
+  centroProcedencia:     string | null;
+  tipoCentroProcedencia: string | null;
+  tallaCamisa:           string | null;
+  tallaPantalon:         string | null;
+  requiereTransporte:    boolean | null;
+}
+
+export interface DocumentoEntregado {
+  idDocumento:  number;
+  nombre:       string;
+  entregado:    boolean;
+  fechaEntrega: string | null;
+}
+
+export interface FichaAlumno extends FichaAlumnoDatos {
+  identidad:      string;
+  anioDocumentos: number;
+  documentos:     DocumentoEntregado[];
+}
+
+export interface GuardarFichaAlumnoDto extends FichaAlumnoDatos {
+  anio?:                 number | null;
+  /** Ids de documentos entregados; omitir para no modificarlos. */
+  documentosEntregados?: number[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class AlumnoService {
   constructor(private http: HttpClient) {}
@@ -138,5 +172,20 @@ export class AlumnoService {
 
   actualizarDescuento(identidad: string, descuento: number, motivoDescuento: string | null): Observable<void> {
     return this.http.patch<void>(`${environment.url}api/alumno/${identidad}/descuento`, { descuento, motivoDescuento });
+  }
+
+  /** Documentos que se piden en la matrícula, todos sin marcar (para un alumno nuevo). */
+  getDocumentosMatricula(): Observable<DocumentoEntregado[]> {
+    return this.http.get<DocumentoEntregado[]>(`${environment.url}api/alumno/documentos-matricula`);
+  }
+
+  getFicha(identidad: string, anio?: number): Observable<FichaAlumno> {
+    let params = new HttpParams();
+    if (anio != null) params = params.set('anio', anio);
+    return this.http.get<FichaAlumno>(`${environment.url}api/alumno/${identidad}/ficha`, { params });
+  }
+
+  guardarFicha(identidad: string, dto: GuardarFichaAlumnoDto): Observable<void> {
+    return this.http.put<void>(`${environment.url}api/alumno/${identidad}/ficha`, dto);
   }
 }

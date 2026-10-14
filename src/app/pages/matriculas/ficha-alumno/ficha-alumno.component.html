@@ -1,0 +1,152 @@
+<div class="ficha" [formGroup]="form">
+
+  <p class="ayuda">
+    <mat-icon>touch_app</mat-icon>
+    Toque una opción para elegirla. Tóquela otra vez si quiere quitarla.
+  </p>
+
+  <!-- ── Parentesco ─────────────────────────────────────────────── -->
+  <section class="bloque">
+    <h4><mat-icon>family_restroom</mat-icon> ¿Qué es el encargado del estudiante?</h4>
+    <div class="chips">
+      <button type="button" class="chip" *ngFor="let p of parentescos"
+              [class.activo]="esta('parentesco', p)" [attr.aria-pressed]="esta('parentesco', p)"
+              (click)="elegir('parentesco', p)">{{ p }}</button>
+    </div>
+  </section>
+
+  <!-- ── Salud ──────────────────────────────────────────────────── -->
+  <section class="bloque">
+    <h4><mat-icon>favorite</mat-icon> Salud</h4>
+
+    <div class="pregunta">
+      <span class="pregunta-texto">Tipo de sangre</span>
+      <div class="chips">
+        <button type="button" class="chip chip-corto" *ngFor="let t of tiposSangre"
+                [class.activo]="esta('tipoSangre', t)" [attr.aria-pressed]="esta('tipoSangre', t)"
+                (click)="elegir('tipoSangre', t)">{{ t }}</button>
+      </div>
+      <span class="nota">Si no lo sabe, déjelo sin marcar.</span>
+    </div>
+
+    <div class="pregunta">
+      <span class="pregunta-texto">¿Tiene sus vacunas al día?</span>
+      <div class="chips">
+        <button type="button" class="chip chip-si-no" *ngFor="let o of siNo"
+                [class.activo]="esta('vacunado', o.valor)" [attr.aria-pressed]="esta('vacunado', o.valor)"
+                (click)="elegir('vacunado', o.valor)">{{ o.texto }}</button>
+      </div>
+    </div>
+
+    <mat-form-field appearance="outline" class="campo">
+      <mat-label>Alergias</mat-label>
+      <textarea matInput formControlName="alergias" rows="2" maxlength="250"
+                placeholder="Ejemplo: penicilina, maní. Si no tiene, déjelo vacío."></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="campo">
+      <mat-label>Condición especial o enfermedad</mat-label>
+      <textarea matInput formControlName="condicionEspecial" rows="2" maxlength="250"
+                placeholder="Ejemplo: asma, TDAH, usa lentes. Si no tiene, déjelo vacío."></textarea>
+    </mat-form-field>
+  </section>
+
+  <!-- ── Escuela anterior ───────────────────────────────────────── -->
+  <section class="bloque">
+    <h4><mat-icon>school</mat-icon> Escuela anterior</h4>
+
+    <mat-form-field appearance="outline" class="campo">
+      <mat-label>Centro educativo de donde viene</mat-label>
+      <input matInput formControlName="centroProcedencia" maxlength="150"
+             placeholder="Nombre de la escuela o kínder anterior">
+    </mat-form-field>
+
+    <div class="fila-preguntas">
+      <div class="pregunta">
+        <span class="pregunta-texto">Ese centro es</span>
+        <div class="chips">
+          <button type="button" class="chip" *ngFor="let t of tiposCentro"
+                  [class.activo]="esta('tipoCentroProcedencia', t)" [attr.aria-pressed]="esta('tipoCentroProcedencia', t)"
+                  (click)="elegir('tipoCentroProcedencia', t)">{{ t }}</button>
+        </div>
+      </div>
+
+      <div class="pregunta">
+        <span class="pregunta-texto">¿Está repitiendo el grado?</span>
+        <div class="chips">
+          <button type="button" class="chip chip-si-no" *ngFor="let o of siNo"
+                  [class.activo]="esta('repitente', o.valor)" [attr.aria-pressed]="esta('repitente', o.valor)"
+                  (click)="elegir('repitente', o.valor)">{{ o.texto }}</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Uniforme y transporte ──────────────────────────────────── -->
+  <section class="bloque">
+    <h4><mat-icon>checkroom</mat-icon> Uniforme y transporte</h4>
+
+    <div class="pregunta">
+      <span class="pregunta-texto">Talla de camisa</span>
+      <div class="chips">
+        <button type="button" class="chip chip-corto" *ngFor="let t of tallasCamisa"
+                [class.activo]="esta('tallaCamisa', t)" [attr.aria-pressed]="esta('tallaCamisa', t)"
+                (click)="elegir('tallaCamisa', t)">{{ t }}</button>
+      </div>
+    </div>
+
+    <div class="pregunta">
+      <span class="pregunta-texto">Talla de pantalón o falda</span>
+      <div class="chips">
+        <button type="button" class="chip chip-corto" *ngFor="let t of tallasPantalon"
+                [class.activo]="esta('tallaPantalon', t)" [attr.aria-pressed]="esta('tallaPantalon', t)"
+                (click)="elegir('tallaPantalon', t)">{{ t }}</button>
+      </div>
+    </div>
+
+    <div class="pregunta">
+      <span class="pregunta-texto">¿Necesita transporte escolar?</span>
+      <div class="chips">
+        <button type="button" class="chip chip-si-no" *ngFor="let o of siNo"
+                [class.activo]="esta('requiereTransporte', o.valor)" [attr.aria-pressed]="esta('requiereTransporte', o.valor)"
+                (click)="elegir('requiereTransporte', o.valor)">{{ o.texto }}</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Documentos ─────────────────────────────────────────────── -->
+  <section class="bloque" *ngIf="documentos">
+    <div class="titulo-documentos">
+      <h4>
+        <mat-icon>folder_open</mat-icon>
+        Documentos entregados<span *ngIf="anioDocumentos"> — año {{ anioDocumentos }}</span>
+      </h4>
+      <span class="contador" [class.completo]="entregados === documentos.length">
+        {{ entregados }} de {{ documentos.length }}
+      </span>
+    </div>
+    <p class="nota">Toque cada documento que el padre ya entregó. Quedará en verde.</p>
+
+    <div class="documentos">
+      <button type="button" class="documento" *ngFor="let d of documentos"
+              [class.entregado]="d.entregado" [attr.aria-pressed]="d.entregado"
+              (click)="alternarDocumento(d)">
+        <mat-icon class="doc-icono">{{ iconoDocumento(d.nombre) }}</mat-icon>
+        <span class="doc-nombre">{{ d.nombre }}</span>
+        <span class="doc-estado">
+          <mat-icon>{{ d.entregado ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+          {{ d.entregado ? 'Entregado' : 'Pendiente' }}
+        </span>
+        <span class="doc-fecha" *ngIf="d.entregado && d.fechaEntrega">
+          {{ d.fechaEntrega | date:'dd/MM/yyyy' }}
+        </span>
+      </button>
+    </div>
+
+    <button type="button" mat-stroked-button color="primary" class="btn-todos"
+            *ngIf="entregados < documentos.length" (click)="marcarTodos()">
+      <mat-icon>done_all</mat-icon> Marcar todos como entregados
+    </button>
+  </section>
+
+</div>

@@ -19,6 +19,8 @@ import { PrematricularAlumnoDialogComponent } from './prematricula/prematricular
 import { AnticipoDialogComponent } from './anticipo-dialog/anticipo-dialog.component';
 import { IdentidadMaskDirective } from './identidad-mask.directive';
 import { TelefonoMaskDirective } from './telefono-mask.directive';
+import { FichaAlumnoComponent } from './ficha-alumno/ficha-alumno.component';
+import { DocumentosMatriculaDialogComponent } from './documentos-matricula/documentos-matricula-dialog.component';
 
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
@@ -57,6 +59,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     AnticipoDialogComponent,
     IdentidadMaskDirective,
     TelefonoMaskDirective,
+    FichaAlumnoComponent,
+    DocumentosMatriculaDialogComponent,
   ],
   imports: [
     CommonModule,

@@ -67,6 +67,15 @@ export interface ActualizarClienteDto {
   rtn?:                string;
 }
 
+export const NIVELES_EDUCATIVOS = [
+  'Sin estudios', 'Primaria', 'Secundaria / Bachillerato', 'Técnico', 'Universitario', 'Posgrado'
+];
+
+export interface FichaCliente {
+  ocupacion:      string | null;
+  nivelEducativo: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ClienteService {
   constructor(private http: HttpClient) {}
@@ -89,6 +98,14 @@ export class ClienteService {
 
   actualizarCliente(dto: ActualizarClienteDto): Observable<{ filasAfectadas: number }> {
     return this.http.put<{ filasAfectadas: number }>(`${environment.url}api/cliente/${dto.id}`, dto);
+  }
+
+  getFicha(id: number): Observable<FichaCliente> {
+    return this.http.get<FichaCliente>(`${environment.url}api/cliente/${id}/ficha`);
+  }
+
+  guardarFicha(id: number, dto: FichaCliente): Observable<void> {
+    return this.http.put<void>(`${environment.url}api/cliente/${id}/ficha`, dto);
   }
 
   buscarPorNombre(nombre: string): Observable<ClienteResponse[]> {
