@@ -228,12 +228,7 @@ export class ContratoService {
   </div>
 
   <div class="clausula">
-    <div class="clausula-titulo">Octava: Duración y Renovación</div>
-    <div class="clausula-body">El presente contrato entra en vigor en el año lectivo ${anio} y se renovará automáticamente para cada año lectivo siguiente en que el estudiante continúe matriculado en EL INSTITUTO, sin necesidad de suscribir un nuevo contrato, condicionado al cumplimiento de las obligaciones académicas, económicas y conductuales aquí pactadas.</div>
-  </div>
-
-  <div class="clausula">
-    <div class="clausula-titulo">Novena: Vigencia, renovación automática, continuidad y terminación del servicio educativo</div>
+    <div class="clausula-titulo">Octava: Vigencia, renovación automática, continuidad y terminación del servicio educativo</div>
     <div class="clausula-body">El presente contrato tendrá vigencia por tiempo indefinido y se renovará automáticamente con la matrícula del estudiante para cada nuevo año lectivo, sin necesidad de suscribir un nuevo documento, manteniéndose vigente aun cuando el estudiante sea promovido a otro grado o nivel educativo. La terminación del contrato únicamente procederá por las causas y conforme a los procedimientos establecidos en el Reglamento Interno de EL INSTITUTO, siempre que estas sean compatibles con la legislación vigente. Las tarifas educativas serán las correspondientes a cada año lectivo, las cuales serán comunicadas oportunamente por el Instituto. La terminación del contrato no eximirá al PADRE DE FAMILIA, MADRE, TUTOR O ENCARGADO del pago de las obligaciones económicas pendientes legítimamente devengadas.</div>
   </div>
 
