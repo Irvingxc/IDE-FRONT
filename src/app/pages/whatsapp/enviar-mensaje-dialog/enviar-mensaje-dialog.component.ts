@@ -1,13 +1,18 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ClienteResponse } from '@app/services/cliente/cliente.service';
 import {
   EmailService, EXTENSIONES_BLOQUEADAS, MAX_ADJUNTOS, MAX_BYTES_ADJUNTOS
 } from '@app/services/email/email.service';
 
+/** Lo mínimo que el diálogo necesita de cada padre. */
+export interface DestinatarioVista {
+  nombreCompleto:    string;
+  correoElectronico: string | null;
+}
+
 export interface EnviarMensajeData {
   /** Padres con correo a quienes se envía. Uno solo = envío individual. */
-  destinatarios: ClienteResponse[];
+  destinatarios: DestinatarioVista[];
 }
 
 /** Envío de correo a uno o a todos los padres con correo, con archivos adjuntos. */
@@ -36,7 +41,7 @@ export class EnviarMensajeDialogComponent {
   ) {}
 
   get individual(): boolean { return this.data.destinatarios.length === 1; }
-  get destinatario(): ClienteResponse { return this.data.destinatarios[0]; }
+  get destinatario(): DestinatarioVista { return this.data.destinatarios[0]; }
 
   get pesoTotal(): number {
     return this.adjuntos.reduce((s, a) => s + a.size, 0);
@@ -102,7 +107,9 @@ export class EnviarMensajeDialogComponent {
     this.errorEnvio = null;
 
     this.emailService.enviarMasivo({
-      destinatarios: this.data.destinatarios.map(c => ({ email: c.correoElectronico, nombre: c.nombreCompleto })),
+      destinatarios: this.data.destinatarios
+        .filter(c => !!c.correoElectronico)
+        .map(c => ({ email: c.correoElectronico!, nombre: c.nombreCompleto })),
       asunto:  this.asunto.trim(),
       mensaje: this.mensaje,
       adjuntos: this.adjuntos,

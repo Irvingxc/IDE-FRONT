@@ -71,6 +71,16 @@ export const NIVELES_EDUCATIVOS = [
   'Sin estudios', 'Primaria', 'Secundaria / Bachillerato', 'Técnico', 'Universitario', 'Posgrado'
 ];
 
+/** Cliente para la pantalla Correos, con cuántos alumnos activos o prematriculados tiene. */
+export interface ContactoCorreo {
+  id:                number;
+  nombreCompleto:    string;
+  identidad:         string | null;
+  correoElectronico: string | null;
+  telefono:          string | null;
+  alumnosActivos:    number;
+}
+
 export interface FichaCliente {
   ocupacion:      string | null;
   nivelEducativo: string | null;
@@ -98,6 +108,10 @@ export class ClienteService {
 
   actualizarCliente(dto: ActualizarClienteDto): Observable<{ filasAfectadas: number }> {
     return this.http.put<{ filasAfectadas: number }>(`${environment.url}api/cliente/${dto.id}`, dto);
+  }
+
+  getContactosCorreo(): Observable<ContactoCorreo[]> {
+    return this.http.get<ContactoCorreo[]>(`${environment.url}api/cliente/contactos-correo`);
   }
 
   getFicha(id: number): Observable<FichaCliente> {

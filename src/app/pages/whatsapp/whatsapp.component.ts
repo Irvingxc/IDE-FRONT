@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ClienteService, ClienteResponse } from '@app/services/cliente/cliente.service';
+import { ClienteService, ContactoCorreo } from '@app/services/cliente/cliente.service';
 import { EnviarMensajeDialogComponent, EnviarMensajeData } from './enviar-mensaje-dialog/enviar-mensaje-dialog.component';
 import { AvisoAusenciaDialogComponent } from './aviso-ausencia-dialog/aviso-ausencia-dialog.component';
 
 /**
- * Comunicaciones por correo con los padres (antes era WhatsApp; la ruta y el permiso
- * siguen siendo los del módulo WHATSAPP). Pestañas: padres con correo (envío individual
- * o masivo, con adjuntos) y padres sin correo (para completarles el dato).
+ * Comunicaciones por correo con los padres (antes era WhatsApp; el permiso sigue siendo
+ * el del módulo WHATSAPP). Pestañas: padres con correo (envío individual o masivo, con
+ * adjuntos) y padres sin correo (para completarles el dato).
+ * Por defecto solo se consideran los clientes con al menos un alumno activo o
+ * prematriculado; el interruptor permite incluir a los demás (y el masivo los incluye).
  */
 @Component({
   selector: 'app-whatsapp',
@@ -15,8 +17,8 @@ import { AvisoAusenciaDialogComponent } from './aviso-ausencia-dialog/aviso-ause
   styleUrls: ['./whatsapp.component.scss']
 })
 export class WhatsappComponent implements OnInit {
-  conCorreo: ClienteResponse[] = [];
-  sinCorreo: ClienteResponse[] = [];
+  private contactos: ContactoCorreo[] = [];
+  incluirSinAlumnos = false;
   filtro = '';
   loading = true;
 
@@ -34,18 +36,33 @@ export class WhatsappComponent implements OnInit {
 
   cargarClientes(): void {
     this.loading = true;
-    this.clienteService.getClientes(1, 1000).subscribe({
+    this.clienteService.getContactosCorreo().subscribe({
       next: (data) => {
-        const tieneCorreo = (c: ClienteResponse) => !!c.correoElectronico && c.correoElectronico.trim() !== '';
-        this.conCorreo = (data ?? []).filter(tieneCorreo);
-        this.sinCorreo = (data ?? []).filter(c => !tieneCorreo(c));
+        this.contactos = data ?? [];
         this.loading = false;
       },
       error: () => { this.loading = false; }
     });
   }
 
-  private filtrar(lista: ClienteResponse[]): ClienteResponse[] {
+  /** Clientes según el interruptor (sin aplicar la búsqueda). */
+  private get visibles(): ContactoCorreo[] {
+    return this.incluirSinAlumnos ? this.contactos : this.contactos.filter(c => c.alumnosActivos > 0);
+  }
+
+  get conCorreo(): ContactoCorreo[] { return this.visibles.filter(c => this.tieneCorreo(c)); }
+  get sinCorreo(): ContactoCorreo[] { return this.visibles.filter(c => !this.tieneCorreo(c)); }
+
+  /** Cuántos clientes quedan fuera por no tener alumnos activos. */
+  get ocultosSinAlumnos(): number {
+    return this.contactos.filter(c => c.alumnosActivos === 0).length;
+  }
+
+  private tieneCorreo(c: ContactoCorreo): boolean {
+    return !!c.correoElectronico && c.correoElectronico.trim() !== '';
+  }
+
+  private filtrar(lista: ContactoCorreo[]): ContactoCorreo[] {
     const f = this.normalizar(this.filtro);
     if (!f) return lista;
     return lista.filter(c =>
@@ -56,25 +73,26 @@ export class WhatsappComponent implements OnInit {
     return (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
   }
 
-  get conCorreoFiltrados(): ClienteResponse[] { return this.filtrar(this.conCorreo); }
-  get sinCorreoFiltrados(): ClienteResponse[] { return this.filtrar(this.sinCorreo); }
+  get conCorreoFiltrados(): ContactoCorreo[] { return this.filtrar(this.conCorreo); }
+  get sinCorreoFiltrados(): ContactoCorreo[] { return this.filtrar(this.sinCorreo); }
 
   /** Teléfono útil para mostrar ("+504 -" y similares cuentan como vacío). */
-  telefono(c: ClienteResponse): string | null {
+  telefono(c: ContactoCorreo): string | null {
     const t = (c.telefono ?? '').trim();
     return /\d{4}/.test(t) ? t : null;
   }
 
-  private abrirEnvio(destinatarios: ClienteResponse[]): void {
+  private abrirEnvio(destinatarios: ContactoCorreo[]): void {
     const data: EnviarMensajeData = { destinatarios };
     this.dialog.open(EnviarMensajeDialogComponent, { width: '600px', maxWidth: '96vw', disableClose: true, data });
   }
 
+  /** Masivo: todos los padres con correo según el interruptor (la búsqueda no lo limita). */
   abrirEnvioMasivo(): void {
     this.abrirEnvio(this.conCorreo);
   }
 
-  enviarIndividual(cliente: ClienteResponse): void {
+  enviarIndividual(cliente: ContactoCorreo): void {
     this.abrirEnvio([cliente]);
   }
 
