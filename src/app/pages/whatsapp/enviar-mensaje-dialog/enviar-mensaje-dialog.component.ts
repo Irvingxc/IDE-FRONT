@@ -1,28 +1,33 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ClienteResponse } from '@app/services/cliente/cliente.service';
-import { EmailService } from '@app/services/email/email.service';
+import {
+  EmailService, EXTENSIONES_BLOQUEADAS, MAX_ADJUNTOS, MAX_BYTES_ADJUNTOS
+} from '@app/services/email/email.service';
 
 export interface EnviarMensajeData {
-  clientesTelefono: ClienteResponse[];
-  clientesCorreo:   ClienteResponse[];
+  /** Padres con correo a quienes se envía. Uno solo = envío individual. */
+  destinatarios: ClienteResponse[];
 }
 
-export type CanalEnvio = 'whatsapp' | 'email';
-
+/** Envío de correo a uno o a todos los padres con correo, con archivos adjuntos. */
 @Component({
   selector: 'app-enviar-mensaje-dialog',
   templateUrl: './enviar-mensaje-dialog.component.html',
   styleUrls: ['./enviar-mensaje-dialog.component.scss']
 })
 export class EnviarMensajeDialogComponent {
-  canal: CanalEnvio = 'whatsapp';
+  readonly maxAdjuntos = MAX_ADJUNTOS;
+
   asunto = '';
   mensaje = '';
+  adjuntos: File[] = [];
+  errorAdjuntos: string | null = null;
+
   enviando = false;
   enviado = false;
-  progreso = 0;
-  resultadoCorreo: { enviados: number; fallidos: number } | null = null;
+  errorEnvio: string | null = null;
+  resultado: { enviados: number; fallidos: number; erroresEmails: string[] } | null = null;
 
   constructor(
     public dialogRef: MatDialogRef<EnviarMensajeDialogComponent>,
@@ -30,78 +35,92 @@ export class EnviarMensajeDialogComponent {
     private emailService: EmailService
   ) {}
 
-  get destinatarios(): ClienteResponse[] {
-    return this.canal === 'whatsapp' ? this.data.clientesTelefono : this.data.clientesCorreo;
-  }
+  get individual(): boolean { return this.data.destinatarios.length === 1; }
+  get destinatario(): ClienteResponse { return this.data.destinatarios[0]; }
 
-  get totalDestinatarios(): number {
-    return this.destinatarios.length;
+  get pesoTotal(): number {
+    return this.adjuntos.reduce((s, a) => s + a.size, 0);
   }
 
   get puedeEnviar(): boolean {
-    if (!this.mensaje.trim() || this.totalDestinatarios === 0) return false;
-    if (this.canal === 'email' && !this.asunto.trim()) return false;
-    return true;
+    return !!this.asunto.trim() && !!this.mensaje.trim()
+      && this.data.destinatarios.length > 0 && !this.enviando && !this.enviado;
   }
 
-  cambiarCanal(canal: CanalEnvio): void {
-    if (this.enviando || this.enviado) return;
-    this.canal = canal;
-  }
+  agregarArchivos(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const nuevos = Array.from(input.files ?? []);
+    input.value = '';   // permite volver a elegir el mismo archivo
+    this.errorAdjuntos = null;
 
-  async enviar(): Promise<void> {
-    if (!this.puedeEnviar) return;
-    this.canal === 'whatsapp' ? await this.enviarPorWhatsapp() : await this.enviarPorCorreo();
-  }
-
-  private async enviarPorWhatsapp(): Promise<void> {
-    this.enviando = true;
-    this.progreso = 0;
-
-    const total = this.data.clientesTelefono.length;
-    for (let i = 0; i < total; i++) {
-      const cliente = this.data.clientesTelefono[i];
-      const telefono = cliente.telefono.replace(/\D/g, '');
-      const url = `https://wa.me/${telefono}?text=${encodeURIComponent(this.mensaje)}`;
-      window.open(url, '_blank');
-      this.progreso = Math.round(((i + 1) / total) * 100);
-      await this.delay(400);
+    for (const archivo of nuevos) {
+      const ext = archivo.name.slice(archivo.name.lastIndexOf('.')).toLowerCase();
+      if (EXTENSIONES_BLOQUEADAS.includes(ext)) {
+        this.errorAdjuntos = `No se permite adjuntar "${archivo.name}" (archivo ejecutable).`;
+        continue;
+      }
+      if (archivo.size === 0) {
+        this.errorAdjuntos = `El archivo "${archivo.name}" está vacío.`;
+        continue;
+      }
+      if (this.adjuntos.some(a => a.name === archivo.name && a.size === archivo.size)) continue;
+      if (this.adjuntos.length >= MAX_ADJUNTOS) {
+        this.errorAdjuntos = `Máximo ${MAX_ADJUNTOS} archivos.`;
+        break;
+      }
+      if (this.pesoTotal + archivo.size > MAX_BYTES_ADJUNTOS) {
+        this.errorAdjuntos = `"${archivo.name}" no cabe: los adjuntos no pueden pasar de 15 MB en total.`;
+        continue;
+      }
+      this.adjuntos.push(archivo);
     }
-
-    this.enviando = false;
-    this.enviado = true;
   }
 
-  private async enviarPorCorreo(): Promise<void> {
-    this.enviando = true;
-    this.progreso = 0;
+  quitarArchivo(i: number): void {
+    this.adjuntos.splice(i, 1);
+    this.errorAdjuntos = null;
+  }
 
-    const destinatarios = this.data.clientesCorreo.map(c => ({
-      email:  c.correoElectronico,
-      nombre: c.nombreCompleto
-    }));
+  tamano(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  icono(nombre: string): string {
+    const ext = nombre.slice(nombre.lastIndexOf('.') + 1).toLowerCase();
+    if (ext === 'pdf') return 'picture_as_pdf';
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic'].includes(ext)) return 'image';
+    if (['xls', 'xlsx', 'csv'].includes(ext)) return 'table_chart';
+    if (['doc', 'docx', 'txt'].includes(ext)) return 'description';
+    return 'attach_file';
+  }
+
+  enviar(): void {
+    if (!this.puedeEnviar) return;
+    this.enviando = true;
+    this.errorEnvio = null;
 
     this.emailService.enviarMasivo({
-      destinatarios,
-      asunto:  this.asunto,
-      mensaje: this.mensaje
+      destinatarios: this.data.destinatarios.map(c => ({ email: c.correoElectronico, nombre: c.nombreCompleto })),
+      asunto:  this.asunto.trim(),
+      mensaje: this.mensaje,
+      adjuntos: this.adjuntos,
     }).subscribe({
       next: (res) => {
-        this.resultadoCorreo = { enviados: res.enviados, fallidos: res.fallidos };
+        this.resultado = res;
         this.enviando = false;
         this.enviado = true;
       },
-      error: () => {
+      error: (err) => {
         this.enviando = false;
+        this.errorEnvio = err?.error?.errores?.mensaje
+          ?? (err?.status === 413 ? 'Los adjuntos son demasiado grandes.' : 'No se pudo enviar el correo. Intente de nuevo.');
       }
     });
   }
 
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   cerrar(): void {
-    this.dialogRef.close();
+    this.dialogRef.close(this.enviado);
   }
 }

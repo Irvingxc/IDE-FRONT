@@ -49,10 +49,16 @@ const routes: Routes = [
         loadChildren: () => import('./pages/empleados/empleados.module').then(m => m.EmpleadosModule)
       },
       {
-        path: 'whatsapp',
+        // Correos a padres (antes WhatsApp; el permiso sigue siendo el del módulo WHATSAPP)
+        path: 'correos',
         canLoad: [AuthGuard, ModuloGuard],
         data: { modulo: 'WHATSAPP' },
         loadChildren: () => import('./pages/whatsapp/whatsapp.module').then(m => m.WhatsappModule)
+      },
+      {
+        path: 'whatsapp',
+        pathMatch: 'full',
+        redirectTo: 'correos'
       },
       {
         path: 'academico',

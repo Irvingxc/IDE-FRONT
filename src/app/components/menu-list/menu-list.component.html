@@ -56,9 +56,9 @@
       <mat-icon>verified</mat-icon>
       <span class="navegacion-list-label">SAR / Autorizaciones</span>
     </a>
-    <a mat-list-item (click)="closeMenu()" routerLink="/whatsapp" *ngIf="tieneModulo('WHATSAPP')">
-      <mat-icon>chat</mat-icon>
-      <span class="navegacion-list-label">WhatsApp</span>
+    <a mat-list-item (click)="closeMenu()" routerLink="/correos" *ngIf="tieneModulo('WHATSAPP')">
+      <mat-icon>mail</mat-icon>
+      <span class="navegacion-list-label">Correos</span>
     </a>
     <a mat-list-item (click)="closeMenu()" routerLink="/reportes" *ngIf="tieneModulo('REPORTES')">
       <mat-icon>bar_chart</mat-icon>

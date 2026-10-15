@@ -1,3 +1,5 @@
+$guinda: #6B0F1A;
+
 .page-container {
   padding: 24px;
 }
@@ -6,6 +8,8 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 24px;
 
   h1 { margin: 0; font-size: 24px; font-weight: 600; }
@@ -19,20 +23,40 @@
   gap: 12px;
 }
 
+.resumen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
 .resumen-card {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
   border-radius: 10px;
   padding: 16px 24px;
-  margin-bottom: 24px;
-  width: fit-content;
 
-  .resumen-icon { font-size: 36px; width: 36px; height: 36px; color: #25D366; }
-  .resumen-numero { font-size: 28px; font-weight: 700; color: #15803d; display: block; line-height: 1; }
+  .resumen-icon { font-size: 36px; width: 36px; height: 36px; }
+  .resumen-numero { font-size: 28px; font-weight: 700; display: block; line-height: 1; }
   .resumen-label { font-size: 13px; color: #666; }
+
+  &.con {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    .resumen-icon, .resumen-numero { color: #15803d; }
+  }
+
+  &.sin {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    .resumen-icon, .resumen-numero { color: #c2410c; }
+  }
+}
+
+.buscador {
+  width: 100%;
+  max-width: 480px;
 }
 
 .loading-row {
@@ -52,20 +76,42 @@
   to { transform: rotate(360deg); }
 }
 
+.tab-icon { margin-right: 8px; }
+
 .data-table {
   width: 100%;
+  margin-top: 8px;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
-.telefono-chip {
+.dato {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   font-size: 13px;
 
-  mat-icon { font-size: 16px; width: 16px; height: 16px; color: #25D366; }
+  mat-icon { font-size: 16px; width: 16px; height: 16px; color: #888; }
+}
+
+.sin-dato { font-size: 13px; color: #aaa; }
+
+.col-accion { text-align: right; white-space: nowrap; }
+
+.nota-sin-correo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 4px;
+  padding: 10px 14px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #7c2d12;
+
+  mat-icon { color: #c2410c; flex-shrink: 0; }
 }
 
 .no-data-row td {

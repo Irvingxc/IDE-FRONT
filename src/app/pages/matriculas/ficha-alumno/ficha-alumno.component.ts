@@ -23,9 +23,9 @@ export class FichaAlumnoComponent {
 
   readonly parentescos   = ['Padre', 'Madre', 'Abuelo/a', 'Tío/a', 'Hermano/a', 'Tutor legal', 'Otro'];
   readonly tiposSangre   = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
-  readonly tiposCentro   = ['Público', 'Privado'];
+  readonly tiposCentro   = ['Público', 'Privado', 'No aplica'];
   readonly tallasCamisa  = ['4', '6', '8', '10', '12', '14', '16', 'S', 'M', 'L', 'XL'];
-  readonly tallasPantalon = ['4', '6', '8', '10', '12', '14', '16', '28', '30', '32', '34', '36'];
+  readonly tallasPantalon = this.tallasCamisa;   // mismas tallas que la camisa
   readonly siNo: { valor: boolean; texto: string }[] = [
     { valor: true,  texto: 'Sí' },
     { valor: false, texto: 'No' },

@@ -58,6 +58,14 @@
     </mat-form-field>
   </div>
 
+  <p class="aviso-rango error" *ngIf="errorRango">
+    <mat-icon>error_outline</mat-icon> {{ errorRango }}
+  </p>
+  <p class="aviso-rango ok" *ngIf="totalFacturas !== null">
+    <mat-icon>receipt_long</mat-icon>
+    Autoriza {{ totalFacturas | number }} factura(s). La primera se emitirá con el número {{ rangoDel }}.
+  </p>
+
   <div class="extra-grid">
     <!-- Fecha Límite -->
     <mat-form-field appearance="outline">
@@ -65,6 +73,7 @@
       <input matInput [matDatepicker]="picker" [(ngModel)]="fechaLim">
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
+      <mat-hint *ngIf="fechaVencida" class="hint-error">La fecha límite ya pasó</mat-hint>
     </mat-form-field>
 
     <!-- Impuesto -->

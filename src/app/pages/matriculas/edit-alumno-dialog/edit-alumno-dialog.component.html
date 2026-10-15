@@ -98,18 +98,6 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Valor matrícula (L.) *</mat-label>
-      <input matInput formControlName="valorMatricula" type="number" min="0">
-      <mat-error>Requerido</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Valor mensualidad (L.) *</mat-label>
-      <input matInput formControlName="valorMensualidad" type="number" min="0">
-      <mat-error>Requerido</mat-error>
-    </mat-form-field>
-
     <div class="full-width foto-upload-row">
       <img *ngIf="fotoBase64" [src]="fotoBase64" class="foto-preview" alt="Foto estudiante">
       <div *ngIf="!fotoBase64" class="foto-placeholder">

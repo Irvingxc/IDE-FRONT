@@ -52,8 +52,9 @@ formatFecha(f: string): string {
     return `${usadas.toLocaleString()} / ${total.toLocaleString()}`;
   }
 
+  /** Correlativo del número: sus últimos 8 dígitos (el prefijo no cuenta). */
   private numFinal(rango: string | null | undefined): number {
     if (!rango) return 0;
-    return parseInt(rango.replace(/\D/g, ''), 10) || 0;
+    return parseInt(rango.replace(/\D/g, '').slice(-8), 10) || 0;
   }
 }

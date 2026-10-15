@@ -15,6 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
@@ -37,6 +38,7 @@ import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
     MatInputModule,
     MatProgressBarModule,
     MatButtonToggleModule,
+    MatTabsModule,
     MatDatepickerModule,
     MatNativeDateModule
   ],

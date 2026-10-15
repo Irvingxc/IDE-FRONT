@@ -233,8 +233,8 @@ export class ContratoService {
   </div>
 
   <div class="clausula">
-    <div class="clausula-titulo">Novena: Vigencia y Continuidad del Servicio</div>
-    <div class="clausula-body">Este contrato se mantiene válido mientras el estudiante continúe recibiendo los servicios educativos de EL INSTITUTO, aun cuando sea promovido a otro grado o nivel. En cada año lectivo de renovación, los montos de matrícula, colegiatura y demás cuotas serán los vigentes para ese año, según las tarifas que EL INSTITUTO establezca y comunique oportunamente. Si el estudiante se retira, es dado de baja o deja de recibir dichos servicios por cualquier causa, el contrato quedará sin efecto a partir de esa fecha, sin perjuicio de las obligaciones económicas pendientes a la fecha del retiro, las cuales deberán ser canceladas por EL PADRE DE FAMILIA, MADRE, TUTOR O ENCARGADO.</div>
+    <div class="clausula-titulo">Novena: Vigencia, renovación automática, continuidad y terminación del servicio educativo</div>
+    <div class="clausula-body">El presente contrato tendrá vigencia por tiempo indefinido y se renovará automáticamente con la matrícula del estudiante para cada nuevo año lectivo, sin necesidad de suscribir un nuevo documento, manteniéndose vigente aun cuando el estudiante sea promovido a otro grado o nivel educativo. La terminación del contrato únicamente procederá por las causas y conforme a los procedimientos establecidos en el Reglamento Interno de EL INSTITUTO, siempre que estas sean compatibles con la legislación vigente. Las tarifas educativas serán las correspondientes a cada año lectivo, las cuales serán comunicadas oportunamente por el Instituto. La terminación del contrato no eximirá al PADRE DE FAMILIA, MADRE, TUTOR O ENCARGADO del pago de las obligaciones económicas pendientes legítimamente devengadas.</div>
   </div>
 
   <div class="cierre">

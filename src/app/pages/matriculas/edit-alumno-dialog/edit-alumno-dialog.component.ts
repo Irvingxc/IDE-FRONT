@@ -76,8 +76,6 @@ export class EditAlumnoDialogComponent implements OnInit {
       seccion:            [this.data.seccion || 'A',   Validators.required],
       idNivelIngles:      [this.data.idNivelIngles ?? null],
       estado:             [this.data.estado],
-      valorMatricula:     [this.data.valorMatricula,   [Validators.required, Validators.min(0)]],
-      valorMensualidad:   [this.data.valorMensualidad, [Validators.required, Validators.min(0)]],
       sexo:               [this.data.sexo               || null],
       fechaNacimiento:    [this.data.fechaNacimiento ? new Date(this.data.fechaNacimiento) : null],
       nacionalidad:       [this.data.nacionalidad       || null],
@@ -145,8 +143,8 @@ export class EditAlumnoDialogComponent implements OnInit {
       seccion:            up(f.seccion),
       idNivelIngles:      f.idNivelIngles == null ? 0 : f.idNivelIngles,
       estado:             f.estado              || undefined,
-      valorMatricula:     f.valorMatricula      ?? undefined,
-      valorMensualidad:   f.valorMensualidad    ?? undefined,
+      // Valor de matrícula y mensualidad no se editan aquí: salen del catálogo de precios
+      // (sin enviarlos, sp_EST_ActualizarAlumno conserva los guardados).
       nacionalidad:       f.nacionalidad        || undefined,
       sexo:               f.sexo                || undefined,
       fechaNacimiento:    f.fechaNacimiento

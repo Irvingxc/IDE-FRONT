@@ -2,8 +2,8 @@
 
   <div class="page-header">
     <div>
-      <h1>WhatsApp</h1>
-      <p class="breadcrumb">Inicio / WhatsApp</p>
+      <h1>Correos</h1>
+      <p class="breadcrumb">Inicio / Correos</p>
     </div>
     <div class="header-acciones">
       <button mat-stroked-button color="primary" (click)="abrirAvisoAusencia()">
@@ -11,57 +11,124 @@
       </button>
       <button mat-raised-button color="primary"
         (click)="abrirEnvioMasivo()"
-        [disabled]="loading || clientes.length === 0">
-        <mat-icon>send</mat-icon> Enviar mensaje masivo
+        [disabled]="loading || conCorreo.length === 0">
+        <mat-icon>forward_to_inbox</mat-icon> Enviar correo masivo
       </button>
     </div>
   </div>
 
-  <div class="resumen-card">
-    <mat-icon class="resumen-icon">smartphone</mat-icon>
-    <div>
-      <span class="resumen-numero">{{ clientes.length }}</span>
-      <span class="resumen-label">clientes con teléfono registrado</span>
+  <div class="resumen">
+    <div class="resumen-card con">
+      <mat-icon class="resumen-icon">mark_email_read</mat-icon>
+      <div>
+        <span class="resumen-numero">{{ conCorreo.length }}</span>
+        <span class="resumen-label">padres con correo</span>
+      </div>
+    </div>
+    <div class="resumen-card sin">
+      <mat-icon class="resumen-icon">unsubscribe</mat-icon>
+      <div>
+        <span class="resumen-numero">{{ sinCorreo.length }}</span>
+        <span class="resumen-label">padres sin correo</span>
+      </div>
     </div>
   </div>
 
+  <mat-form-field appearance="outline" class="buscador">
+    <mat-label>Buscar padre</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput [(ngModel)]="filtro" placeholder="Nombre, correo, teléfono o identidad">
+    <button mat-icon-button matSuffix *ngIf="filtro" (click)="filtro = ''" title="Limpiar"><mat-icon>close</mat-icon></button>
+  </mat-form-field>
+
   <div *ngIf="loading" class="loading-row">
     <mat-icon class="spin-icon">sync</mat-icon>
-    <span>Cargando clientes...</span>
+    <span>Cargando padres...</span>
   </div>
 
-  <table mat-table [dataSource]="clientes" class="data-table" *ngIf="!loading">
+  <mat-tab-group *ngIf="!loading" animationDuration="150ms" class="tabs">
 
-    <ng-container matColumnDef="nombre">
-      <th mat-header-cell *matHeaderCellDef>Nombre completo</th>
-      <td mat-cell *matCellDef="let row">{{ row.nombreCompleto }}</td>
-    </ng-container>
+    <!-- ── Con correo ─────────────────────────────────────────── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">mark_email_read</mat-icon>
+        Con correo ({{ conCorreoFiltrados.length }})
+      </ng-template>
 
-    <ng-container matColumnDef="telefono">
-      <th mat-header-cell *matHeaderCellDef>Teléfono</th>
-      <td mat-cell *matCellDef="let row">
-        <span class="telefono-chip">
-          <mat-icon>phone</mat-icon> {{ row.telefono }}
-        </span>
-      </td>
-    </ng-container>
+      <table mat-table [dataSource]="conCorreoFiltrados" class="data-table">
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Nombre completo</th>
+          <td mat-cell *matCellDef="let row">{{ row.nombreCompleto }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="acciones">
-      <th mat-header-cell *matHeaderCellDef>Acciones</th>
-      <td mat-cell *matCellDef="let row">
-        <button mat-icon-button title="Enviar mensaje" (click)="enviarIndividual(row)">
-          <mat-icon style="color:#25D366">chat</mat-icon>
-        </button>
-      </td>
-    </ng-container>
+        <ng-container matColumnDef="correo">
+          <th mat-header-cell *matHeaderCellDef>Correo</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="dato"><mat-icon>mail</mat-icon> {{ row.correoElectronico }}</span>
+          </td>
+        </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="columnas"></tr>
-    <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
-    <tr class="mat-row no-data-row" *matNoDataRow>
-      <td class="mat-cell" [attr.colspan]="columnas.length">
-        <span>No hay clientes con teléfono registrado.</span>
-      </td>
-    </tr>
-  </table>
+        <ng-container matColumnDef="telefono">
+          <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+          <td mat-cell *matCellDef="let row">{{ telefono(row) || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let row" class="col-accion">
+            <button mat-stroked-button color="primary" (click)="enviarIndividual(row)">
+              <mat-icon>send</mat-icon> Enviar correo
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columnasConCorreo"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnasConCorreo;"></tr>
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="columnasConCorreo.length">
+            {{ filtro ? 'Ningún padre con correo coincide con la búsqueda.' : 'No hay padres con correo registrado.' }}
+          </td>
+        </tr>
+      </table>
+    </mat-tab>
+
+    <!-- ── Sin correo ─────────────────────────────────────────── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">unsubscribe</mat-icon>
+        Sin correo ({{ sinCorreoFiltrados.length }})
+      </ng-template>
+
+      <p class="nota-sin-correo">
+        <mat-icon>info</mat-icon>
+        Estos padres no reciben correos, avisos de ausencia ni acceso al Portal de Padres.
+        Agrégueles el correo desde <strong>Estudiantes &gt; Clientes &gt; Editar</strong>.
+      </p>
+
+      <table mat-table [dataSource]="sinCorreoFiltrados" class="data-table">
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Nombre completo</th>
+          <td mat-cell *matCellDef="let row">{{ row.nombreCompleto }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="telefono">
+          <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="dato" *ngIf="telefono(row) as t"><mat-icon>phone</mat-icon> {{ t }}</span>
+            <span *ngIf="!telefono(row)" class="sin-dato">Sin teléfono</span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columnasSinCorreo"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnasSinCorreo;"></tr>
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="columnasSinCorreo.length">
+            {{ filtro ? 'Ningún padre sin correo coincide con la búsqueda.' : 'Todos los padres tienen correo registrado.' }}
+          </td>
+        </tr>
+      </table>
+    </mat-tab>
+
+  </mat-tab-group>
 
 </div>
