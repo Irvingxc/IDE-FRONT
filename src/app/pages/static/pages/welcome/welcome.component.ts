@@ -3,8 +3,24 @@ import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { DashboardService } from '@app/services/dashboard/dashboard.service';
+import { MatriculaService } from '@app/services/matricula/matricula.service';
 import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
+
+/** Alerta "Promover grado antes de..." (fin de año lectivo). */
+interface AlertaPromocion {
+  nivel:       'info' | 'advertencia' | 'urgente';
+  titulo:      string;
+  detalle:     string;
+  puedeIr:     boolean;   // Administrador/Director: botón a Promoción de grado
+}
+
+/** Roles que ven la alerta de promoción. */
+const ROLES_ALERTA_PROMOCION = ['Administrador', 'Director', 'Secretaria'];
+/** Roles que pueden promover (el backend lo exige). */
+const ROLES_PROMUEVEN = ['Administrador', 'Director'];
+/** Desde qué mes se avisa (0 = enero): octubre. */
+const MES_INICIO_AVISO = 9;
 
 interface StatCard {
   icon: string;
@@ -59,8 +75,11 @@ export class WelcomeComponent implements OnInit {
     { icon: 'fact_check',    label: 'Asistencia hoy',      value: '—', sub: '' },
   ];
 
+  alertaPromocion: AlertaPromocion | null = null;
+
   constructor(
     private dashboardService: DashboardService,
+    private matriculaService: MatriculaService,
     private store: Store<fromRoot.State>
   ) {}
 
@@ -96,6 +115,59 @@ export class WelcomeComponent implements OnInit {
     this.mostrarStats$.pipe(take(1)).subscribe(mostrar => {
       if (mostrar) this.loadStats();
       else this.loadingStats = false;
+    });
+
+    this.store.pipe(select(fromUser.getUser), take(1)).subscribe(u => this.cargarAlertaPromocion(u?.roles ?? []));
+  }
+
+  /**
+   * Del 1 de octubre al 31 de diciembre: "Promover grado antes del 31 de diciembre",
+   * con los días que faltan (el 1 de enero se activan las prematrículas del año nuevo).
+   * En enero, si quedaron alumnos sin promover, la misma alerta como vencida.
+   * Solo se muestra si hay alumnos activos pendientes de promover.
+   */
+  private cargarAlertaPromocion(roles: string[]): void {
+    if (!roles.some(r => ROLES_ALERTA_PROMOCION.includes(r))) return;
+
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const mes = hoy.getMonth();
+    const enAviso = mes >= MES_INICIO_AVISO;
+    const vencida = mes === 0;
+    if (!enAviso && !vencida) return;
+
+    const anioOrigen = vencida ? hoy.getFullYear() - 1 : hoy.getFullYear();
+    const limite = new Date(anioOrigen, 11, 31);
+    const dias = Math.round((limite.getTime() - hoy.getTime()) / 86_400_000);
+    const puedeIr = roles.some(r => ROLES_PROMUEVEN.includes(r));
+
+    this.matriculaService.pendientesPromocion(anioOrigen).subscribe({
+      next: (r) => {
+        if (!r || r.pendientes <= 0) return;
+        const alumnos = `${r.pendientes} de ${r.totalActivos} alumno(s) activo(s) de ${anioOrigen} aún no se han promovido a ${anioOrigen + 1}.`;
+
+        if (vencida) {
+          this.alertaPromocion = {
+            nivel: 'urgente',
+            titulo: `Promoción de grado ${anioOrigen} pendiente`,
+            detalle: `Ya inició ${anioOrigen + 1} y ${alumnos.charAt(0).toLowerCase()}${alumnos.slice(1)} ` +
+                     `Promuévalos antes de generar las cuotas de ${anioOrigen + 1}.`,
+            puedeIr,
+          };
+          return;
+        }
+
+        const cuando = dias === 0 ? 'Hoy es el último día.'
+                     : dias === 1 ? 'Falta 1 día.'
+                     : `Faltan ${dias} días.`;
+        this.alertaPromocion = {
+          nivel: dias <= 7 ? 'urgente' : dias <= 30 ? 'advertencia' : 'info',
+          titulo: `Promover grado antes del 31 de diciembre de ${anioOrigen}`,
+          detalle: `${cuando} ${alumnos}`,
+          puedeIr,
+        };
+      },
+      error: () => { /* sin alerta si no se pudo consultar */ }
     });
   }
 

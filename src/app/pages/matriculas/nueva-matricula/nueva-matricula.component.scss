@@ -283,3 +283,17 @@ mat-stepper {
   padding-top: 16px;
   border-top: 1px solid #eee;
 }
+
+/* Matrícula gratis (solo para el año de esta matrícula) */
+.matricula-gratis {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1px dashed #c9c9c9;
+  border-radius: 8px;
+
+  .matricula-gratis-ayuda { font-size: 12px; color: #666; padding-left: 30px; }
+  &.marcada { border: 1px solid #2e7d32; background: #e8f5e9; }
+}

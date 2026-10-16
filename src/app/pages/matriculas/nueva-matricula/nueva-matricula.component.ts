@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatStepper } from '@angular/material/stepper';
 import { Router } from '@angular/router';
 import { forkJoin, Observable, of } from 'rxjs';
@@ -15,6 +15,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { AnticipoDialogComponent, AnticipoResultado } from '../anticipo-dialog/anticipo-dialog.component';
 import { DocumentosMatriculaDialogComponent } from '../documentos-matricula/documentos-matricula-dialog.component';
 import { EditClienteDialogComponent } from '../edit-cliente-dialog/edit-cliente-dialog.component';
+import {
+  LIMITES, TIPO_DNI, anioEntreValidator, correoValidator, fechaNacimientoValidator, identidadValidator,
+  juntoCon, mensajeApi, mensajeError, motivoDescuentoValidator, nombreValidator, telefonoCompletoValidator,
+  telefonoLibreValidator, texto, vincular,
+} from '../validaciones-formulario';
 
 @Component({
   selector: 'app-nueva-matricula',
@@ -62,6 +67,11 @@ export class NuevaMatriculaComponent implements OnInit {
   ];
 
   sexos = ['Masculino', 'Femenino'];
+
+  // Límites de los calendarios (las mismas reglas que los validadores).
+  hoy = new Date();
+  inicioMin = new Date(this.hoy.getFullYear(), 0, 1);
+  inicioMax = new Date(this.hoy.getFullYear() + 1, 11, 31);
 
   departamentos = [
     'Atlántida', 'Choluteca', 'Colón', 'Comayagua', 'Copán', 'Cortés',
@@ -202,26 +212,32 @@ export class NuevaMatriculaComponent implements OnInit {
     this.catalogoService.getGrados().subscribe({ next: (data) => this.grados = data ?? [] });
 
     this.padreForm = this.fb.group({
-      tipoIdentificacion: ['', Validators.required],
-      identificacion:     ['', Validators.required],
-      primerNombre:       ['', Validators.required],
-      segundoNombre:      [''],
-      primerApellido:     ['', Validators.required],
-      segundoApellido:    [''],
+      tipoIdentificacion: [TIPO_DNI, Validators.required],
+      identificacion:     ['', [Validators.required, identidadValidator()]],
+      primerNombre:       ['', [Validators.required, nombreValidator, juntoCon('segundoNombre')]],
+      segundoNombre:      ['', [nombreValidator, juntoCon('primerNombre')]],
+      primerApellido:     ['', [Validators.required, nombreValidator, juntoCon('segundoApellido')]],
+      segundoApellido:    ['', [nombreValidator, juntoCon('primerApellido')]],
       sexo:               ['', Validators.required],
-      fechaNacimiento:    [null],
+      fechaNacimiento:    [null, fechaNacimientoValidator(100)],
       nacionalidad:       ['', Validators.required],
-      lugarNacimiento:    [''],
+      lugarNacimiento:    ['', Validators.maxLength(LIMITES.lugarNacimiento)],
       departamento:       ['', Validators.required],
       municipio:          ['', Validators.required],
-      direccion:          [''],
+      direccion:          ['', Validators.maxLength(LIMITES.direccion)],
       paisTelefono:       ['+504'],
-      telefono:           [''],
-      correoElectronico:  ['', [Validators.required, Validators.email]],
+      telefono:           ['', telefonoCompletoValidator()],
+      correoElectronico:  ['', [Validators.required, correoValidator, Validators.maxLength(LIMITES.correo)]],
       rtn:                ['', Validators.pattern(/^\d{4}-\d{4}-\d{6}$/)],
-      ocupacion:          [''],
+      ocupacion:          ['', Validators.maxLength(LIMITES.ocupacion)],
       nivelEducativo:     [null],
     });
+    vincular(this.padreForm, 'primerNombre', 'segundoNombre');
+    vincular(this.padreForm, 'segundoNombre', 'primerNombre');
+    vincular(this.padreForm, 'primerApellido', 'segundoApellido');
+    vincular(this.padreForm, 'segundoApellido', 'primerApellido');
+    vincular(this.padreForm, 'paisTelefono', 'telefono');
+    vincular(this.padreForm, 'tipoIdentificacion', 'identificacion');
 
     this.fichaForm = FichaAlumnoComponent.crearForm(this.fb);
     this.alumnoService.getDocumentosMatricula().subscribe({
@@ -229,29 +245,71 @@ export class NuevaMatriculaComponent implements OnInit {
       error: () => this.documentos = null
     });
 
+    const anioActual = new Date().getFullYear();
     this.alumnoForm = this.fb.group({
-      tipoIdentificacion: [''],
-      identidad:          ['', Validators.required],
-      nombres:            ['', Validators.required],
-      segundoNombre:      [''],
-      apellidos:          ['', Validators.required],
-      segundoApellido:    [''],
+      // Obligatorio: sin tipo, la máscara no pone guiones y la identidad se guardaba sin formato.
+      tipoIdentificacion: [TIPO_DNI, Validators.required],
+      identidad:          ['', [Validators.required, identidadValidator(), this.identidadNoDuplicada]],
+      nombres:            ['', [Validators.required, nombreValidator, juntoCon('segundoNombre')]],
+      segundoNombre:      ['', [nombreValidator, juntoCon('nombres')]],
+      apellidos:          ['', [Validators.required, nombreValidator, juntoCon('segundoApellido')]],
+      segundoApellido:    ['', [nombreValidator, juntoCon('apellidos')]],
       idGrado:            [null, Validators.required],
       seccion:            ['A', Validators.required],
-      fechaInicioClases:  [null, Validators.required],
-      descuento:          [null, Validators.min(0)],
-      motivoDescuento:    [''],
+      // Año actual = matrícula; año siguiente = prematrícula.
+      fechaInicioClases:  [null, [Validators.required, anioEntreValidator(anioActual, anioActual + 1)]],
+      descuento:          [null, [Validators.min(0), Validators.max(100)]],
+      motivoDescuento:    ['', [Validators.maxLength(LIMITES.motivoDescuento), motivoDescuentoValidator()]],
+      matriculaGratis:    [false],
       nacionalidad:       [''],
       sexo:               [''],
-      fechaNacimiento:    [null],
+      fechaNacimiento:    [null, fechaNacimientoValidator(25)],
       departamento:       [''],
       municipio:          [''],
-      lugarNacimiento:    [''],
-      direccion:          [''],
-      telefono:           [''],
-      correoElectronico:  ['', Validators.email],
+      lugarNacimiento:    ['', Validators.maxLength(LIMITES.lugarNacimiento)],
+      direccion:          ['', Validators.maxLength(LIMITES.direccion)],
+      telefono:           ['', [Validators.maxLength(LIMITES.telefono), telefonoLibreValidator]],
+      correoElectronico:  ['', [correoValidator, Validators.maxLength(LIMITES.correo)]],
+    });
+    vincular(this.alumnoForm, 'nombres', 'segundoNombre');
+    vincular(this.alumnoForm, 'segundoNombre', 'nombres');
+    vincular(this.alumnoForm, 'apellidos', 'segundoApellido');
+    vincular(this.alumnoForm, 'segundoApellido', 'apellidos');
+    vincular(this.alumnoForm, 'tipoIdentificacion', 'identidad');
+    vincular(this.alumnoForm, 'descuento', 'motivoDescuento');
+  }
+
+  /** Identidades de estudiante que ya existen (consultadas al salir del campo). */
+  private identidadesExistentes = new Set<string>();
+  validandoIdentidadAlumno = false;
+
+  private readonly identidadNoDuplicada: ValidatorFn = c =>
+    this.identidadesExistentes.has(texto(c.value).replace(/-/g, '')) ? { identidadDuplicada: true } : null;
+
+  /**
+   * Avisa antes de guardar si la identidad del estudiante ya está registrada
+   * (con o sin guiones: hay registros viejos guardados sin guiones).
+   */
+  validarIdentidadAlumno(): void {
+    const ctrl = this.alumnoForm.get('identidad')!;
+    const identidad = texto(ctrl.value);
+    if (!identidad || ctrl.hasError('dni') || ctrl.hasError('pasaporte')) return;
+
+    const variantes = Array.from(new Set([identidad, identidad.replace(/-/g, '')]));
+    const existe = (id: string) => this.alumnoService.getFicha(id).pipe(
+      map(() => true),
+      catchError(() => of(false))   // 404 = no existe; otro error no bloquea (el backend valida al guardar)
+    );
+    this.validandoIdentidadAlumno = true;
+    forkJoin(variantes.map(existe)).subscribe(r => {
+      this.validandoIdentidadAlumno = false;
+      if (r.some(Boolean)) this.identidadesExistentes.add(identidad.replace(/-/g, ''));
+      ctrl.updateValueAndValidity();
+      ctrl.markAsTouched();
     });
   }
+
+  err = mensajeError;
 
   get paisPadreSeleccionado(): PaisTelefono {
     const codigo = this.padreForm?.get('paisTelefono')?.value ?? '+504';
@@ -422,7 +480,7 @@ export class NuevaMatriculaComponent implements OnInit {
     } else {
       const f = this.padreForm.value;
       const a = this.alumnoForm.value;
-      const up = (v: string) => v ? v.toUpperCase() : undefined;
+      const up = (v: string) => v?.trim() ? v.trim().replace(/\s+/g, ' ').toUpperCase() : undefined;
 
       const dto: GuardarMatriculaDto = {
         // Cliente
@@ -442,7 +500,7 @@ export class NuevaMatriculaComponent implements OnInit {
         municipioCliente:          f.municipio,
         direccionCliente:          up(f.direccion),
         telefonoCliente:           f.telefono ? `${f.paisTelefono} ${f.telefono}` : '',
-        correoElectronicoCliente:  f.correoElectronico || undefined,
+        correoElectronicoCliente:  texto(f.correoElectronico) || undefined,
         rtnCliente:                f.rtn               || undefined,
 
         // Alumno
@@ -462,21 +520,22 @@ export class NuevaMatriculaComponent implements OnInit {
         fechaNacimientoAlumno:     a.fechaNacimiento
                                      ? new Date(a.fechaNacimiento).toISOString().split('T')[0]
                                      : null,
-        lugarNacimientoAlumno:     a.lugarNacimiento    || undefined,
+        lugarNacimientoAlumno:     up(a.lugarNacimiento),
         departamentoAlumno:        a.departamento       || undefined,
         municipioAlumno:           a.municipio          || undefined,
-        direccionAlumno:           a.direccion          || undefined,
-        telefonoAlumno:            a.telefono           || undefined,
-        correoElectronicoAlumno:   a.correoElectronico  || undefined,
+        direccionAlumno:           up(a.direccion),
+        telefonoAlumno:            texto(a.telefono) || undefined,
+        correoElectronicoAlumno:   texto(a.correoElectronico) || undefined,
         descuento:                 a.descuento          ?? undefined,
-        motivoDescuento:           a.motivoDescuento    || undefined,
+        motivoDescuento:           texto(a.motivoDescuento) || undefined,
         foto:                      this.fotoBase64      ?? undefined,
+        matriculaGratis:           !!a.matriculaGratis,
       };
 
       this.matriculaService.guardarMatricula(dto).subscribe({
         next: (r) => this.finalizar(r?.idCliente ?? null),
-        error: () => {
-          this.notification.error('Error al registrar la matrícula. No se guardaron datos.');
+        error: (err) => {
+          this.notification.error(mensajeApi(err, 'Error al registrar la matrícula. No se guardaron datos.'));
           this.guardando = false;
         }
       });
@@ -485,7 +544,7 @@ export class NuevaMatriculaComponent implements OnInit {
 
   private enviarAlumno(idCliente: number): void {
     const a = this.alumnoForm.value;
-    const up = (v: string) => v ? v.toUpperCase() : undefined;
+    const up = (v: string) => v?.trim() ? v.trim().replace(/\s+/g, ' ').toUpperCase() : undefined;
     const dto: GuardarAlumnoDto = {
       identidad:          a.identidad,
       tipoIdentificacion: a.tipoIdentificacion || undefined,
@@ -501,25 +560,26 @@ export class NuevaMatriculaComponent implements OnInit {
                             ? new Date(a.fechaInicioClases).toISOString().split('T')[0]
                             : null,
       descuento:          a.descuento          ?? undefined,
-      motivoDescuento:    a.motivoDescuento    || undefined,
+      motivoDescuento:    texto(a.motivoDescuento) || undefined,
       foto:               this.fotoBase64      ?? undefined,
+      matriculaGratis:    !!a.matriculaGratis,
       nacionalidad:       a.nacionalidad       || undefined,
       sexo:               a.sexo               || undefined,
       fechaNacimiento:    a.fechaNacimiento
                             ? new Date(a.fechaNacimiento).toISOString().split('T')[0]
                             : null,
-      lugarNacimiento:    a.lugarNacimiento    || undefined,
+      lugarNacimiento:    up(a.lugarNacimiento),
       departamento:       a.departamento       || undefined,
       municipio:          a.municipio          || undefined,
-      direccion:          a.direccion          || undefined,
-      telefono:           a.telefono           || undefined,
-      correoElectronico:  a.correoElectronico  || undefined,
+      direccion:          up(a.direccion),
+      telefono:           texto(a.telefono) || undefined,
+      correoElectronico:  texto(a.correoElectronico) || undefined,
     };
 
     this.alumnoService.guardarAlumno(dto).subscribe({
       next: () => this.finalizar(null),
-      error: () => {
-        this.notification.error('Error al registrar el estudiante');
+      error: (err) => {
+        this.notification.error(mensajeApi(err, 'Error al registrar el estudiante. No se guardaron datos.'));
         this.guardando = false;
       }
     });

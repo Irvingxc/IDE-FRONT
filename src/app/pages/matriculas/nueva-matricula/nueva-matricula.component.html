@@ -130,7 +130,7 @@
                          [placeholder]="padreForm.get('tipoIdentificacion')?.value === 'Pasaporte' ? 'Ej: A1234567' : '0000-0000-00000'"
                          (blur)="validarIdentidadExistente()">
                   <mat-icon matSuffix *ngIf="validandoIdentidad" class="spin-icon">sync</mat-icon>
-                  <mat-error>Requerido</mat-error>
+                  <mat-error>{{ err(padreForm.get('identificacion')) }}</mat-error>
                 </mat-form-field>
               </div>
 
@@ -150,24 +150,26 @@
               <div class="form-grid">
                 <mat-form-field appearance="outline">
                   <mat-label>Primer nombre *</mat-label>
-                  <input matInput formControlName="primerNombre">
-                  <mat-error>Requerido</mat-error>
+                  <input matInput formControlName="primerNombre" maxlength="500">
+                  <mat-error>{{ err(padreForm.get('primerNombre')) }}</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
                   <mat-label>Segundo nombre</mat-label>
-                  <input matInput formControlName="segundoNombre">
+                  <input matInput formControlName="segundoNombre" maxlength="500">
+                  <mat-error>{{ err(padreForm.get('segundoNombre')) }}</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
                   <mat-label>Primer apellido *</mat-label>
-                  <input matInput formControlName="primerApellido">
-                  <mat-error>Requerido</mat-error>
+                  <input matInput formControlName="primerApellido" maxlength="500">
+                  <mat-error>{{ err(padreForm.get('primerApellido')) }}</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
                   <mat-label>Segundo apellido</mat-label>
-                  <input matInput formControlName="segundoApellido">
+                  <input matInput formControlName="segundoApellido" maxlength="500">
+                  <mat-error>{{ err(padreForm.get('segundoApellido')) }}</mat-error>
                 </mat-form-field>
               </div>
 
@@ -183,9 +185,10 @@
 
                 <mat-form-field appearance="outline">
                   <mat-label>Fecha de nacimiento</mat-label>
-                  <input matInput [matDatepicker]="dpPadre" formControlName="fechaNacimiento">
+                  <input matInput [matDatepicker]="dpPadre" formControlName="fechaNacimiento" [max]="hoy">
                   <mat-datepicker-toggle matSuffix [for]="dpPadre"></mat-datepicker-toggle>
-                  <mat-datepicker #dpPadre></mat-datepicker>
+                  <mat-datepicker #dpPadre startView="multi-year"></mat-datepicker>
+                  <mat-error>{{ err(padreForm.get('fechaNacimiento')) }}</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
@@ -198,7 +201,8 @@
 
                 <mat-form-field appearance="outline">
                   <mat-label>Lugar de nacimiento</mat-label>
-                  <input matInput formControlName="lugarNacimiento">
+                  <input matInput formControlName="lugarNacimiento" maxlength="100">
+                  <mat-error>{{ err(padreForm.get('lugarNacimiento')) }}</mat-error>
                 </mat-form-field>
               </div>
 
@@ -222,7 +226,9 @@
 
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Dirección</mat-label>
-                  <textarea matInput formControlName="direccion" rows="2"></textarea>
+                  <textarea matInput formControlName="direccion" rows="2" maxlength="250"></textarea>
+                  <mat-hint align="end">{{ padreForm.get('direccion')?.value?.length || 0 }} / 250</mat-hint>
+                  <mat-error>{{ err(padreForm.get('direccion')) }}</mat-error>
                 </mat-form-field>
               </div>
 
@@ -243,18 +249,19 @@
                            [appTelefonoMask]="paisPadreSeleccionado.formato"
                            [placeholder]="paisPadreSeleccionado.placeholder">
                     <mat-hint>{{ paisPadreSeleccionado.codigo }}</mat-hint>
+                    <mat-error>{{ err(padreForm.get('telefono')) }}</mat-error>
                   </mat-form-field>
                 </div>
 
                 <mat-form-field appearance="outline">
                   <mat-label>Correo electrónico *</mat-label>
-                  <input matInput formControlName="correoElectronico" type="email">
-                  <mat-error>{{ padreForm.get('correoElectronico')?.hasError('required') ? 'El correo es obligatorio' : 'Correo inválido' }}</mat-error>
+                  <input matInput formControlName="correoElectronico" type="email" maxlength="150">
+                  <mat-error>{{ padreForm.get('correoElectronico')?.hasError('required') ? 'El correo es obligatorio' : err(padreForm.get('correoElectronico')) }}</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
                   <mat-label>RTN</mat-label>
-                  <input matInput formControlName="rtn" placeholder="0000-0000-000000">
+                  <input matInput formControlName="rtn" placeholder="0000-0000-000000" maxlength="16">
                   <mat-hint>Formato: 0000-0000-000000</mat-hint>
                   <mat-error>Formato inválido. Use: 0000-0000-000000</mat-error>
                 </mat-form-field>
@@ -323,23 +330,35 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Fecha inicio de clases *</mat-label>
-              <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicioClases">
+              <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicioClases" [min]="inicioMin" [max]="inicioMax">
               <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
               <mat-datepicker #pickerInicio></mat-datepicker>
               <mat-hint *ngIf="esPrematricula" class="hint-prematricula">Año {{ anioInicio }}: se registrará como prematrícula</mat-hint>
-              <mat-error>Requerido</mat-error>
+              <mat-error>{{ err(alumnoForm.get('fechaInicioClases')) }}</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Descuento mensual (%)</mat-label>
               <input matInput formControlName="descuento" type="number" min="0" max="100" step="1" placeholder="0">
               <span matSuffix>%</span>
+              <mat-error>Entre 0 y 100</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Motivo del descuento</mat-label>
-              <input matInput formControlName="motivoDescuento">
+              <mat-label>Motivo del descuento{{ alumnoForm.get('descuento')?.value > 0 ? ' *' : '' }}</mat-label>
+              <input matInput formControlName="motivoDescuento" maxlength="150">
+              <mat-error>{{ err(alumnoForm.get('motivoDescuento')) }}</mat-error>
             </mat-form-field>
+
+            <div class="full-width matricula-gratis" [class.marcada]="alumnoForm.get('matriculaGratis')?.value">
+              <mat-checkbox formControlName="matriculaGratis" color="primary">
+                <strong>Matrícula gratis</strong>
+              </mat-checkbox>
+              <span class="matricula-gratis-ayuda">
+                Solo para el año {{ anioInicio || 'de esta matrícula' }}: la matrícula se cobra en L. 0.00
+                (comprobante y factura). Las mensualidades y otros cobros no cambian.
+              </span>
+            </div>
           </div>
 
           <p class="section-label">Foto del estudiante</p>
@@ -360,18 +379,21 @@
           <p class="section-label">Identificación</p>
           <div class="form-grid">
             <mat-form-field appearance="outline">
-              <mat-label>Tipo de identificación</mat-label>
+              <mat-label>Tipo de identificación *</mat-label>
               <mat-select formControlName="tipoIdentificacion">
                 <mat-option *ngFor="let t of tiposId" [value]="t">{{ t }}</mat-option>
               </mat-select>
+              <mat-error>Requerido</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Número de identidad *</mat-label>
               <input matInput formControlName="identidad"
                      [appIdentidadMask]="alumnoForm.get('tipoIdentificacion')?.value || ''"
-                     [placeholder]="alumnoForm.get('tipoIdentificacion')?.value === 'Pasaporte' ? 'Ej: A1234567' : '0000-0000-00000'">
-              <mat-error>Requerido</mat-error>
+                     [placeholder]="alumnoForm.get('tipoIdentificacion')?.value === 'Pasaporte' ? 'Ej: A1234567' : '0000-0000-00000'"
+                     (blur)="validarIdentidadAlumno()">
+              <mat-icon matSuffix *ngIf="validandoIdentidadAlumno" class="spin-icon">sync</mat-icon>
+              <mat-error>{{ err(alumnoForm.get('identidad')) }}</mat-error>
             </mat-form-field>
           </div>
 
@@ -379,24 +401,26 @@
           <div class="form-grid">
             <mat-form-field appearance="outline">
               <mat-label>Primer nombre *</mat-label>
-              <input matInput formControlName="nombres">
-              <mat-error>Requerido</mat-error>
+              <input matInput formControlName="nombres" maxlength="500">
+              <mat-error>{{ err(alumnoForm.get('nombres')) }}</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Segundo nombre</mat-label>
-              <input matInput formControlName="segundoNombre">
+              <input matInput formControlName="segundoNombre" maxlength="500">
+              <mat-error>{{ err(alumnoForm.get('segundoNombre')) }}</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Primer apellido *</mat-label>
-              <input matInput formControlName="apellidos">
-              <mat-error>Requerido</mat-error>
+              <input matInput formControlName="apellidos" maxlength="500">
+              <mat-error>{{ err(alumnoForm.get('apellidos')) }}</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Segundo apellido</mat-label>
-              <input matInput formControlName="segundoApellido">
+              <input matInput formControlName="segundoApellido" maxlength="500">
+              <mat-error>{{ err(alumnoForm.get('segundoApellido')) }}</mat-error>
             </mat-form-field>
           </div>
 
@@ -411,9 +435,10 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Fecha de nacimiento</mat-label>
-              <input matInput [matDatepicker]="dpAlumno" formControlName="fechaNacimiento">
+              <input matInput [matDatepicker]="dpAlumno" formControlName="fechaNacimiento" [max]="hoy">
               <mat-datepicker-toggle matSuffix [for]="dpAlumno"></mat-datepicker-toggle>
-              <mat-datepicker #dpAlumno></mat-datepicker>
+              <mat-datepicker #dpAlumno startView="multi-year"></mat-datepicker>
+              <mat-error>{{ err(alumnoForm.get('fechaNacimiento')) }}</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
@@ -425,7 +450,8 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Lugar de nacimiento</mat-label>
-              <input matInput formControlName="lugarNacimiento">
+              <input matInput formControlName="lugarNacimiento" maxlength="100">
+              <mat-error>{{ err(alumnoForm.get('lugarNacimiento')) }}</mat-error>
             </mat-form-field>
           </div>
 
@@ -447,7 +473,9 @@
 
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Dirección</mat-label>
-              <textarea matInput formControlName="direccion" rows="2"></textarea>
+              <textarea matInput formControlName="direccion" rows="2" maxlength="250"></textarea>
+              <mat-hint align="end">{{ alumnoForm.get('direccion')?.value?.length || 0 }} / 250</mat-hint>
+              <mat-error>{{ err(alumnoForm.get('direccion')) }}</mat-error>
             </mat-form-field>
           </div>
 
@@ -455,13 +483,14 @@
           <div class="form-grid">
             <mat-form-field appearance="outline">
               <mat-label>Teléfono</mat-label>
-              <input matInput formControlName="telefono">
+              <input matInput formControlName="telefono" maxlength="20" placeholder="Ej: 9999-9999">
+              <mat-error>{{ err(alumnoForm.get('telefono')) }}</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Correo electrónico</mat-label>
-              <input matInput formControlName="correoElectronico" type="email">
-              <mat-error>Correo inválido</mat-error>
+              <input matInput formControlName="correoElectronico" type="email" maxlength="150">
+              <mat-error>{{ err(alumnoForm.get('correoElectronico')) }}</mat-error>
             </mat-form-field>
           </div>
 

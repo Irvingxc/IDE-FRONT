@@ -5,6 +5,7 @@ import { AlumnoResponse, AlumnoService } from '@app/services/alumno/alumno.servi
 import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.service';
 import { PrematriculaService } from '@app/services/prematricula/prematricula.service';
 import { toLocalDateStr } from '@app/utils/date.utils';
+import { mensajeApi } from '../validaciones-formulario';
 
 export interface PrematricularAlumnoResultado {
   identidad:    string;
@@ -29,7 +30,9 @@ export class PrematricularAlumnoDialogComponent implements OnInit {
   grados: GradoDto[] = [];
   idGrado: number | null = null;
   seccion = 'A';
+  secciones: string[] = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
   fechaInicio: Date;
+  matriculaGratis = false;
   guardando = false;
 
   constructor(
@@ -58,7 +61,8 @@ export class PrematricularAlumnoDialogComponent implements OnInit {
 
   elegir(a: AlumnoResponse): void {
     this.alumno = a;
-    this.seccion = a.seccion || 'A';
+    const seccion = (a.seccion || '').trim().toUpperCase();
+    this.seccion = this.secciones.includes(seccion) ? seccion : 'A';
     // Grado sugerido: el siguiente por orden (si no hay, el mismo)
     const actual = this.grados.find(g => g.idGrado === a.idGrado);
     const siguiente = actual ? this.grados.find(g => g.orden > actual.orden) : undefined;
@@ -80,6 +84,7 @@ export class PrematricularAlumnoDialogComponent implements OnInit {
       idGrado,
       seccion:           (this.seccion || 'A').toUpperCase(),
       fechaInicioClases: toLocalDateStr(this.fechaInicio),
+      matriculaGratis:   this.matriculaGratis,
     }).subscribe({
       next: () => {
         this.notification.success('Alumno prematriculado');
@@ -91,7 +96,7 @@ export class PrematricularAlumnoDialogComponent implements OnInit {
       },
       error: (err) => {
         this.guardando = false;
-        this.notification.error(err.error?.errores?.mensaje ?? 'Error al prematricular');
+        this.notification.error(mensajeApi(err, 'Error al prematricular'));
       }
     });
   }

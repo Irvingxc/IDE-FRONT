@@ -8,6 +8,10 @@ import { ClienteService, ClienteResponse } from '@app/services/cliente/cliente.s
 import { CatalogoService, GradoDto, NivelIngles } from '@app/services/catalogo/catalogo.service';
 import { NotificationService } from '@app/services';
 import { FichaAlumnoComponent } from '../ficha-alumno/ficha-alumno.component';
+import {
+  LIMITES, correoValidator, fechaNacimientoValidator, mensajeApi, mensajeError, nombreValidator,
+  siCambia, telefonoLibreValidator, texto,
+} from '../validaciones-formulario';
 
 @Component({
   selector: 'app-edit-alumno-dialog',
@@ -23,6 +27,8 @@ export class EditAlumnoDialogComponent implements OnInit {
   /** La ficha solo se guarda si se pudo cargar (evita borrar datos por un error de red). */
   fichaCargada = false;
   guardando = false;
+  err = mensajeError;
+  hoy = new Date();
   fotoBase64: string | null = null;
   private fotoManual = false;
 
@@ -67,9 +73,13 @@ export class EditAlumnoDialogComponent implements OnInit {
     });
 
     this.form = this.fb.group({
-      primerNombre:       [this.data.nombres         || '', Validators.required],
+      // Nombres y Apellidos guardan los dos nombres (o apellidos) juntos: máximo 500 en la base (SQL 038).
+      // Los formatos se validan solo si el usuario cambia el dato (hay datos viejos con otro formato).
+      primerNombre:       [this.data.nombres         || '', [Validators.required, Validators.maxLength(LIMITES.nombresJuntos),
+                                                            siCambia(this.data.nombres, nombreValidator)]],
       segundoNombre:      [this.data.segundoNombre   || ''],
-      primerApellido:     [this.data.apellidos       || ''],
+      primerApellido:     [this.data.apellidos       || '', [Validators.maxLength(LIMITES.nombresJuntos),
+                                                            siCambia(this.data.apellidos, nombreValidator)]],
       segundoApellido:    [this.data.segundoApellido || ''],
       tipoIdentificacion: [this.data.tipoIdentificacion],
       idGrado:            [this.data.idGrado,          Validators.required],
@@ -77,14 +87,16 @@ export class EditAlumnoDialogComponent implements OnInit {
       idNivelIngles:      [this.data.idNivelIngles ?? null],
       estado:             [this.data.estado],
       sexo:               [this.data.sexo               || null],
-      fechaNacimiento:    [this.data.fechaNacimiento ? new Date(this.data.fechaNacimiento) : null],
+      fechaNacimiento:    [this.data.fechaNacimiento ? new Date(this.data.fechaNacimiento) : null, fechaNacimientoValidator(30)],
       nacionalidad:       [this.data.nacionalidad       || null],
       lugarNacimiento:    [this.data.lugarNacimiento    || ''],
       departamento:       [this.data.departamento       || null],
-      municipio:          [this.data.municipio          || ''],
-      direccion:          [this.data.direccion          || ''],
-      telefono:           [this.data.telefono],
-      correoElectronico:  [this.data.correoElectronico, Validators.email],
+      municipio:          [this.data.municipio          || '', Validators.maxLength(100)],
+      direccion:          [this.data.direccion          || '', Validators.maxLength(LIMITES.direccion)],
+      telefono:           [this.data.telefono, [Validators.maxLength(LIMITES.telefono),
+                                                siCambia(this.data.telefono, telefonoLibreValidator)]],
+      correoElectronico:  [this.data.correoElectronico, [Validators.maxLength(LIMITES.correo),
+                                                         siCambia(this.data.correoElectronico, correoValidator)]],
     });
 
     this.fichaForm = FichaAlumnoComponent.crearForm(this.fb);
@@ -125,11 +137,15 @@ export class EditAlumnoDialogComponent implements OnInit {
   }
 
   guardar(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.notification.error('Revise los datos marcados en rojo en "Datos del estudiante"');
+      return;
+    }
     this.guardando = true;
     const f = this.form.value;
 
-    const up = (v: string) => v ? v.toUpperCase() : undefined;
+    const up = (v: string) => v?.trim() ? v.trim().replace(/\s+/g, ' ').toUpperCase() : undefined;
 
     this.alumnoService.actualizarAlumno({
       identidad:          this.data.identidad,
@@ -152,8 +168,8 @@ export class EditAlumnoDialogComponent implements OnInit {
                             : undefined,
       departamento:       f.departamento        || undefined,
       municipio:          up(f.municipio),
-      telefono:           f.telefono            || undefined,
-      correoElectronico:  f.correoElectronico   || undefined,
+      telefono:           texto(f.telefono)          || undefined,
+      correoElectronico:  texto(f.correoElectronico) || undefined,
       direccion:          up(f.direccion),
       foto:               this.fotoBase64       ?? undefined,
     }).pipe(
@@ -167,8 +183,8 @@ export class EditAlumnoDialogComponent implements OnInit {
         this.notification.success('Estudiante actualizado correctamente');
         this.dialogRef.close(true);
       },
-      error: () => {
-        this.notification.error('Error al actualizar el estudiante');
+      error: (err) => {
+        this.notification.error(mensajeApi(err, 'Error al actualizar el estudiante'));
         this.guardando = false;
       }
     });

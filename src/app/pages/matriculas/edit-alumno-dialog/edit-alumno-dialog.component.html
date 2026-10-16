@@ -12,13 +12,16 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Nombres *</mat-label>
-      <input matInput formControlName="primerNombre">
-      <mat-error>Requerido</mat-error>
+      <input matInput formControlName="primerNombre" maxlength="500">
+      <mat-hint>Primer y segundo nombre (máx. 500)</mat-hint>
+      <mat-error>{{ err(form.get('primerNombre')) }}</mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>Apellidos</mat-label>
-      <input matInput formControlName="primerApellido">
+      <input matInput formControlName="primerApellido" maxlength="500">
+      <mat-hint>Primer y segundo apellido (máx. 500)</mat-hint>
+      <mat-error>{{ err(form.get('primerApellido')) }}</mat-error>
     </mat-form-field>
 
     <p class="section-label full-width">Padre / Tutor</p>
@@ -134,9 +137,10 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Fecha de nacimiento</mat-label>
-      <input matInput [matDatepicker]="dp" formControlName="fechaNacimiento">
+      <input matInput [matDatepicker]="dp" formControlName="fechaNacimiento" [max]="hoy">
       <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
-      <mat-datepicker #dp></mat-datepicker>
+      <mat-datepicker #dp startView="multi-year"></mat-datepicker>
+      <mat-error>{{ err(form.get('fechaNacimiento')) }}</mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
@@ -155,25 +159,28 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Municipio</mat-label>
-      <input matInput formControlName="municipio">
+      <input matInput formControlName="municipio" maxlength="100">
     </mat-form-field>
 
     <p class="section-label full-width">Contacto</p>
 
     <mat-form-field appearance="outline">
       <mat-label>Teléfono</mat-label>
-      <input matInput formControlName="telefono">
+      <input matInput formControlName="telefono" maxlength="20" placeholder="Ej: 9999-9999">
+      <mat-error>{{ err(form.get('telefono')) }}</mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>Correo electrónico</mat-label>
-      <input matInput formControlName="correoElectronico" type="email">
-      <mat-error>Correo inválido</mat-error>
+      <input matInput formControlName="correoElectronico" type="email" maxlength="150">
+      <mat-error>{{ err(form.get('correoElectronico')) }}</mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Dirección</mat-label>
-      <textarea matInput formControlName="direccion" rows="2"></textarea>
+      <textarea matInput formControlName="direccion" rows="2" maxlength="250"></textarea>
+      <mat-hint align="end">{{ form.get('direccion')?.value?.length || 0 }} / 250</mat-hint>
+      <mat-error>{{ err(form.get('direccion')) }}</mat-error>
     </mat-form-field>
 
   </form>

@@ -46,9 +46,17 @@ export interface GuardarMatriculaDto {
   descuento?:                   number;
   motivoDescuento?:             string;
   foto?:                        string;
+  /** Matrícula gratis solo para el año de esta matrícula. */
+  matriculaGratis?:             boolean;
 }
 
 // ── Promoción de grado / cierre de año lectivo ──
+
+export interface PendientesPromocion {
+  anioOrigen:   number;
+  totalActivos: number;
+  pendientes:   number;
+}
 
 export interface PromocionAlumno {
   identidad:       string;
@@ -118,6 +126,12 @@ export class MatriculaService {
   listarPromocion(anioOrigen: number): Observable<PromocionAlumno[]> {
     return this.http.get<PromocionAlumno[]>(
       `${environment.url}api/Matricula/promocion?anioOrigen=${anioOrigen}`);
+  }
+
+  /** Alumnos activos de `anioOrigen` que faltan por promover (alerta del inicio). */
+  pendientesPromocion(anioOrigen: number): Observable<PendientesPromocion> {
+    return this.http.get<PendientesPromocion>(
+      `${environment.url}api/Matricula/promocion/pendientes?anioOrigen=${anioOrigen}`);
   }
 
   estadoPromocion(anioOrigen: number): Observable<PromocionEstado> {

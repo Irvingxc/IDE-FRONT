@@ -5,6 +5,18 @@
     <p class="date-info">{{ currentDate }} · Año escolar {{ schoolYear }}</p>
   </div>
 
+  <div class="alerta-promocion" *ngIf="alertaPromocion as a" [ngClass]="a.nivel" role="alert">
+    <mat-icon class="alerta-icono">{{ a.nivel === 'info' ? 'event' : 'warning_amber' }}</mat-icon>
+    <div class="alerta-texto">
+      <strong>{{ a.titulo }}</strong>
+      <span>{{ a.detalle }}</span>
+      <span class="alerta-nota" *ngIf="!a.puedeIr">La promoción la realiza Dirección o Administración; coordine con ellos para hacerla a tiempo.</span>
+    </div>
+    <a class="alerta-boton" *ngIf="a.puedeIr" routerLink="/matriculas" [queryParams]="{ tab: 'promocion' }">
+      Ir a Promoción de grado <mat-icon>arrow_forward</mat-icon>
+    </a>
+  </div>
+
   <div class="stats-grid" *ngIf="mostrarStats$ | async">
     <mat-card class="stat-card" *ngFor="let stat of stats">
       <div class="stat-icon-wrap">

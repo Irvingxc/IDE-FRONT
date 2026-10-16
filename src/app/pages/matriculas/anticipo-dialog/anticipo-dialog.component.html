@@ -16,6 +16,7 @@
     <div class="concepto" *ngFor="let c of cuotasUnicas">
       <mat-checkbox [checked]="seleccionados.has(c.idProducto)" (change)="alternar(c, $event.checked)">
         {{ c.nombre }} {{ data.anio }}
+        <span class="gratis" *ngIf="c.descuento >= 100 && c.monto === 0">Gratis</span>
       </mat-checkbox>
       <span class="monto">{{ fmt(c.monto) }}</span>
     </div>

@@ -27,6 +27,8 @@ export interface PrematricularAlumnoDto {
   idGrado:           number;
   seccion:           string;
   fechaInicioClases: string;   // yyyy-MM-dd
+  /** Matrícula gratis solo para el año de la prematrícula. */
+  matriculaGratis?:  boolean;
 }
 
 export interface ConceptoAnticipo {

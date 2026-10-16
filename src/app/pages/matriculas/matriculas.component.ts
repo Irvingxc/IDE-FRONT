@@ -14,6 +14,7 @@ import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.servi
 import { PortalClienteService } from '@app/services/portal-cliente/portal-cliente.service';
 import { NotificationService } from '@app/services';
 import { Store, select } from '@ngrx/store';
+import { ActivatedRoute } from '@angular/router';
 import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
 
@@ -54,6 +55,9 @@ export class MatriculasComponent implements OnInit {
   puedeInvitarPortal = false;
   puedePromover = false;
 
+  /** Pestaña inicial: ?tab=promocion abre "Promoción de grado" (lo usa la alerta del inicio). */
+  tabInicial = 0;
+
   constructor(
     private dialog: MatDialog,
     private clienteService: ClienteService,
@@ -61,7 +65,8 @@ export class MatriculasComponent implements OnInit {
     private catalogoService: CatalogoService,
     private portalService: PortalClienteService,
     private notification: NotificationService,
-    private store: Store<fromRoot.State>
+    private store: Store<fromRoot.State>,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -69,6 +74,8 @@ export class MatriculasComponent implements OnInit {
       const roles: string[] = (u?.entity as any)?.roles ?? [];
       this.puedeInvitarPortal = roles.some(r => r === 'Administrador' || r === 'Director');
       this.puedePromover = this.puedeInvitarPortal;
+      // Pestañas: Estudiantes (0), Clientes (1), Promoción de grado (2, solo si puede promover), Prematrícula
+      if (this.route.snapshot.queryParamMap.get('tab') === 'promocion' && this.puedePromover) this.tabInicial = 2;
     });
     this.catalogoService.getGrados().subscribe({ next: (data) => this.grados = data ?? [] });
     this.cargarAlumnos();

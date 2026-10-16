@@ -169,3 +169,17 @@
     .campos { grid-template-columns: 1fr; }
   }
 }
+
+/* Matrícula gratis (diálogo Prematricular alumno actual) */
+.matricula-gratis {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0 8px;
+  padding: 10px 14px;
+  border: 1px dashed #c9c9c9;
+  border-radius: 8px;
+
+  .matricula-gratis-ayuda { font-size: 12px; color: #666; padding-left: 30px; }
+  &.marcada { border: 1px solid #2e7d32; background: #e8f5e9; }
+}
