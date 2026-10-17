@@ -9,6 +9,7 @@ import * as fromRoot from './store';
 import * as fromUser from './store/user';
 import { SessionWarningDialogComponent } from './session-warning-dialog.component';
 import { TokenService } from './services/token/token.service';
+import { VersionService } from './services/version/version.service';
 
 @Component({
   selector: 'app-root',
@@ -31,10 +32,13 @@ export class AppComponent implements OnInit, OnDestroy {
     private store: Store<fromRoot.State>,
     private router: Router,
     private dialog: MatDialog,
-    private tokenService: TokenService
+    private tokenService: TokenService,
+    private versionService: VersionService
   ) {}
 
   ngOnInit(): void {
+    this.versionService.iniciar();
+
     this.user$ = this.store.pipe(select(fromUser.getUser)) as Observable<fromUser.UserResponse>;
     this.isAuthorized$ = this.store.pipe(select(fromUser.getIsAuthorized)) as Observable<boolean>;
     const sinHeader = (url: string) =>
