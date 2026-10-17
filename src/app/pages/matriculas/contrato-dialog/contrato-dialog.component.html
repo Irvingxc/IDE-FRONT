@@ -30,7 +30,7 @@
           (click)="elegirAlumno(a)">
           <span matListItemTitle>{{ a.nombreCompleto }}</span>
           <span matListItemLine>
-            {{ a.estado === 'Prematriculado' ? 'Alumno nuevo' : a.grado }}
+            {{ a.estado !== 'Prematriculado' ? a.grado : (esReingreso(a) ? 'Reingreso' : 'Alumno nuevo') }}
             <strong *ngIf="esPrematriculado(a)" style="color:#2e7d32">· prematriculado</strong>
           </span>
         </mat-list-option>

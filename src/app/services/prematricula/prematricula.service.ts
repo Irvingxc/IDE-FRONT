@@ -9,7 +9,8 @@ export interface Prematriculado {
   identidad:         string;
   codigo:            number;
   nombreCompleto:    string;
-  tipo:              'Nuevo' | 'Actual';
+  /** Reingreso: alumno que ya estudió en el IDE, estaba inactivo y regresa (SQL 039). */
+  tipo:              'Nuevo' | 'Actual' | 'Reingreso';
   anioLectivo:       number;
   idGrado:           number | null;
   gradoNombre:       string | null;
@@ -159,6 +160,8 @@ export class PrematriculaService {
     const lps = (v: number) => this.facturacion.formatLps(v);
     const fecha = (s: string | null) => s ? parseLocalDate(s).toLocaleDateString('es-HN') : '—';
     const logoUrl = window.location.origin + '/assets/logo.png';
+    // Misma imagen de firma y sello del director que usa el carnet.
+    const firmaUrl = window.location.origin + '/assets/firma_carnet.png';
     const grado = [c.gradoNombre, c.seccion].filter(Boolean).join(' — ');
 
     let totalBruto = 0;
@@ -238,8 +241,8 @@ export class PrematriculaService {
     .t-row.grand { font-size: 12pt; font-weight: bold; color: #6B0F1A; border-top: 2px solid #6B0F1A; border-bottom: 2px solid #6B0F1A; padding: 5px 0; }
     .nota { margin-top: 14px; font-size: 8.5pt; color: #444; line-height: 1.5; }
     .nota strong { color: #6B0F1A; }
-    .firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 50px; font-size: 8.5pt; text-align: center; }
-    .firmas div { border-top: 1px solid #999; padding-top: 4px; }
+    .firma-colegio { margin: 24px auto 0; width: 6cm; text-align: center; font-size: 8pt; color: #6B0F1A; }
+    .firma-colegio img { width: 6cm; height: auto; display: block; mix-blend-mode: multiply; }
     .footer {
       text-align: center; margin-top: 24px; padding-top: 8px;
       border-top: 2px solid #6B0F1A; font-size: 7.5pt; letter-spacing: 2px; color: #888; text-transform: uppercase;
@@ -296,9 +299,9 @@ export class PrematriculaService {
     ${c.estado === 'Facturado' && c.noFactura ? `<div><strong>Facturado con la factura No.</strong> ${esc(c.noFactura)}</div>` : ''}
     ${c.estado === 'Anulado' ? `<div><strong>ANULADO:</strong> ${esc(c.motivoAnulacion)}</div>` : ''}
   </div>
-  <div class="firmas">
-    <div>Recibido por${c.creadoPorNombre ? ': ' + esc(c.creadoPorNombre) : ''}</div>
-    <div>Firma del padre / encargado</div>
+  <div class="firma-colegio">
+    <img src="${firmaUrl}" alt="Firma y sello del colegio">
+    <div>Firma y sello</div>
   </div>
   <div class="footer">Ethics, Science &amp; Technology</div>
 </body>

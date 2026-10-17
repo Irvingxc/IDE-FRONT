@@ -6,6 +6,8 @@ import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.servi
 import { PrematriculaService } from '@app/services/prematricula/prematricula.service';
 import { toLocalDateStr } from '@app/utils/date.utils';
 import { mensajeApi } from '../validaciones-formulario';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 export interface PrematricularAlumnoResultado {
   identidad:    string;
@@ -50,13 +52,20 @@ export class PrematricularAlumnoDialogComponent implements OnInit {
     this.catalogoService.getGrados().subscribe(g => this.grados = (g ?? []).sort((a, b) => a.orden - b.orden));
   }
 
+  // Activos (siguen el año siguiente) e inactivos (regresan: quedan Prematriculados, SQL 039).
   buscar(): void {
     if (!this.busqueda.trim()) return;
     this.buscando = true;
-    this.alumnoService.getAlumnos(1, 10, this.busqueda, undefined, 'Activo').subscribe({
-      next: (r) => { this.resultados = r ?? []; this.buscando = false; },
-      error: () => { this.resultados = []; this.buscando = false; }
+    const buscarEn = (estado: string) => this.alumnoService.getAlumnos(1, 10, this.busqueda, undefined, estado).pipe(
+      catchError(() => of([] as AlumnoResponse[])));
+    forkJoin([buscarEn('Activo'), buscarEn('Inactivo')]).subscribe(([activos, inactivos]) => {
+      this.resultados = [...(activos ?? []), ...(inactivos ?? [])];
+      this.buscando = false;
     });
+  }
+
+  esReingreso(a: AlumnoResponse | null): boolean {
+    return a?.estado === 'Inactivo';
   }
 
   elegir(a: AlumnoResponse): void {
@@ -87,7 +96,9 @@ export class PrematricularAlumnoDialogComponent implements OnInit {
       matriculaGratis:   this.matriculaGratis,
     }).subscribe({
       next: () => {
-        this.notification.success('Alumno prematriculado');
+        this.notification.success(this.esReingreso(alumno)
+          ? 'Alumno prematriculado (reingreso): se activa al iniciar el año'
+          : 'Alumno prematriculado');
         this.dialogRef.close({
           identidad:    alumno.identidad,
           alumnoNombre: alumno.nombreCompleto,

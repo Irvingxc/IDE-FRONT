@@ -87,6 +87,11 @@ export class ContratoDialogComponent implements OnInit {
     return a ? this.prematriculas.find(p => p.identidad === a.identidad && p.anioLectivo === anio) : undefined;
   }
 
+  /** Prematriculado que ya estudió en el IDE y regresa (SQL 039). */
+  esReingreso(a: AlumnoResponse): boolean {
+    return this.prematriculas.some(p => p.identidad === a.identidad && p.tipo === 'Reingreso');
+  }
+
   esPrematriculado(a: AlumnoResponse): boolean {
     return this.prematriculas.some(p => p.identidad === a.identidad);
   }

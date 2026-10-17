@@ -98,7 +98,8 @@ export class PrematriculaComponent implements OnInit {
 
   cancelarPrematricula(p: Prematriculado): void {
     const motivo = prompt(`Cancelar la prematrícula ${this.anio} de ${p.nombreCompleto}.` +
-      (p.tipo === 'Nuevo' ? ' El alumno quedará inactivo.' : '') + '\n\nMotivo:');
+      (p.tipo === 'Nuevo' ? ' El alumno quedará inactivo.' : '') +
+      (p.tipo === 'Reingreso' ? ' El alumno vuelve a quedar inactivo, como estaba.' : '') + '\n\nMotivo:');
     if (motivo === null) return;
     if (!motivo.trim()) { this.notification.error('Indique el motivo'); return; }
 
