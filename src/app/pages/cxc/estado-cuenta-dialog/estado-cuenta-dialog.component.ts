@@ -148,13 +148,14 @@ export class EstadoCuentaDialogComponent implements OnInit {
   }
 
   private buildHtml(): string {
-    const filas = this.detalle.map(d => `
-      <tr class="${d.estado === 'Pendiente' ? 'row-pend' : this.esAnulada(d.estado) ? 'row-anul' : 'row-pag'}">
+    // Las cuotas anuladas no se imprimen: el estado de cuenta es lo pagado y lo que se debe.
+    const filas = this.detalle.filter(d => !this.esAnulada(d.estado)).map(d => `
+      <tr class="${d.estado === 'Pendiente' ? 'row-pend' : 'row-pag'}">
         <td>${this.escHtml(d.tipoCuota)}</td>
         <td>${this.mesLabel(d.mes)}</td>
         <td>${d.fechaVence ? parseLocalDate(d.fechaVence).toLocaleDateString('es-HN') : '—'}</td>
         <td class="monto">${this.formatLps(d.monto)}</td>
-        <td><span class="chip ${d.estado === 'Pagado' || d.estado === 'Anticipado' ? 'chip-v' : this.esAnulada(d.estado) ? 'chip-g' : 'chip-r'}">${this.escHtml(this.estadoLabel(d.estado))}</span></td>
+        <td><span class="chip ${d.estado === 'Pagado' || d.estado === 'Anticipado' ? 'chip-v' : 'chip-r'}">${this.escHtml(d.estado)}</span></td>
         <td>${d.fechaPago ? parseLocalDate(d.fechaPago).toLocaleDateString('es-HN') : '—'}</td>
       </tr>`).join('');
 
@@ -178,12 +179,10 @@ export class EstadoCuentaDialogComponent implements OnInit {
     td { padding: 6px 8px; font-size: 10pt; border-bottom: 1px solid #eee; }
     .row-pend { background: #fff8f8; }
     .row-pag  { background: #f8fff8; }
-    .row-anul { background: #fafafa; color: #777; }
     .monto    { font-family: 'Courier New', monospace; text-align: right; }
     .chip { padding: 2px 8px; border-radius: 8px; font-size: 9pt; font-weight: 600; }
     .chip-v { background: #e8f5e9; color: #2e7d32; }
     .chip-r { background: #ffebee; color: #c62828; }
-    .chip-g { background: #eeeeee; color: #616161; }
     .totales { display: flex; justify-content: flex-end; gap: 32px; padding-top: 12px;
                border-top: 2px solid #6B0F1A; margin-top: 4px; }
     .total-bloque { text-align: right; }
