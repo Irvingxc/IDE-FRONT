@@ -98,6 +98,16 @@ export class EstadoCuentaDialogComponent implements OnInit {
     return 'L. ' + v.toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  // 'Cancelado' es el nombre anterior de 'Anulado' (SQL 042): en Honduras
+  // "cancelado" se entiende como pagado, así que nunca se muestra.
+  esAnulada(estado: string): boolean {
+    return estado === 'Anulado' || estado === 'Cancelado';
+  }
+
+  estadoLabel(estado: string): string {
+    return estado === 'Cancelado' ? 'Anulado' : estado;
+  }
+
   facturar(): void {
     if (!this.seleccionados.length) return;
 
@@ -139,12 +149,12 @@ export class EstadoCuentaDialogComponent implements OnInit {
 
   private buildHtml(): string {
     const filas = this.detalle.map(d => `
-      <tr class="${d.estado === 'Pendiente' ? 'row-pend' : 'row-pag'}">
+      <tr class="${d.estado === 'Pendiente' ? 'row-pend' : this.esAnulada(d.estado) ? 'row-anul' : 'row-pag'}">
         <td>${this.escHtml(d.tipoCuota)}</td>
         <td>${this.mesLabel(d.mes)}</td>
         <td>${d.fechaVence ? parseLocalDate(d.fechaVence).toLocaleDateString('es-HN') : '—'}</td>
         <td class="monto">${this.formatLps(d.monto)}</td>
-        <td><span class="chip ${d.estado === 'Pagado' || d.estado === 'Anticipado' ? 'chip-v' : 'chip-r'}">${this.escHtml(d.estado)}</span></td>
+        <td><span class="chip ${d.estado === 'Pagado' || d.estado === 'Anticipado' ? 'chip-v' : this.esAnulada(d.estado) ? 'chip-g' : 'chip-r'}">${this.escHtml(this.estadoLabel(d.estado))}</span></td>
         <td>${d.fechaPago ? parseLocalDate(d.fechaPago).toLocaleDateString('es-HN') : '—'}</td>
       </tr>`).join('');
 
@@ -168,10 +178,12 @@ export class EstadoCuentaDialogComponent implements OnInit {
     td { padding: 6px 8px; font-size: 10pt; border-bottom: 1px solid #eee; }
     .row-pend { background: #fff8f8; }
     .row-pag  { background: #f8fff8; }
+    .row-anul { background: #fafafa; color: #777; }
     .monto    { font-family: 'Courier New', monospace; text-align: right; }
     .chip { padding: 2px 8px; border-radius: 8px; font-size: 9pt; font-weight: 600; }
     .chip-v { background: #e8f5e9; color: #2e7d32; }
     .chip-r { background: #ffebee; color: #c62828; }
+    .chip-g { background: #eeeeee; color: #616161; }
     .totales { display: flex; justify-content: flex-end; gap: 32px; padding-top: 12px;
                border-top: 2px solid #6B0F1A; margin-top: 4px; }
     .total-bloque { text-align: right; }
@@ -213,14 +225,14 @@ export class EstadoCuentaDialogComponent implements OnInit {
   }
 
   cancelarCuota(item: CxcDetalleSeleccionable): void {
-    const motivo = prompt(`Motivo de cancelación para "${item.tipoCuota}":`);
-    if (motivo === null) return; // usuario canceló el prompt
+    const motivo = prompt(`Motivo de anulación para "${item.tipoCuota}":`);
+    if (motivo === null) return; // usuario cerró el prompt
     this.cxcService.cancelarCuota(item.id, motivo.trim()).subscribe({
       next: () => {
-        this.snack.open('Cuota cancelada', 'OK', { duration: 3000 });
+        this.snack.open('Cuota anulada', 'OK', { duration: 3000 });
         this.cargarDetalle();
       },
-      error: (err) => this.snack.open(err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al cancelar', '', { duration: 4000 })
+      error: (err) => this.snack.open(err?.error?.errores?.mensaje ?? err?.error?.errores ?? 'Error al anular la cuota', '', { duration: 4000 })
     });
   }
 
