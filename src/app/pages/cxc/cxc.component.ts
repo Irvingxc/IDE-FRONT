@@ -177,28 +177,87 @@ export class CxcComponent implements OnInit {
     return this.datos.reduce((s, r) => s + r.totalPagado, 0);
   }
 
-  exportarExcel(): void {
-    const lps = (v: number) => v.toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const headers = ['Estudiante', 'Estado', 'Padre/Tutor', 'Grado', 'Cuotas Pendientes', 'Total Vencido', 'Total Pagado', 'Total Año'];
-    const rows = this.datos.map(r => [
-      r.nombreCompleto,
-      r.estadoAlumno,
-      r.nombreTutor,
-      r.gradoNombre,
-      r.cuotasPendientes,
-      lps(r.totalPendiente),
-      lps(r.totalPagado),
-      lps(r.totalDeudaAnio),
-    ]);
-    const csv = [headers, ...rows]
-      .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
-      .join('\r\n');
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `CXC_${this.anio}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  exportando = false;
+
+  /** Excel (.xlsx) con título, fecha del reporte y filtros aplicados. */
+  async exportarExcel(): Promise<void> {
+    if (this.exportando || this.datos.length === 0) return;
+    this.exportando = true;
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const libro = new ExcelJS.Workbook();
+      const hoja  = libro.addWorksheet(`CxC ${this.anio}`, { views: [{ state: 'frozen', ySplit: 5 }] });
+
+      const hoy = new Date();
+      const fecha = hoy.toLocaleDateString('es-HN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const hora  = hoy.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
+      const estados: Record<string, string> = { '': 'Todos', Pendiente: 'Con pendientes', AlDia: 'Al día' };
+      const filtros = [
+        `Estado de cuenta: ${estados[this.filtroEstado] ?? this.filtroEstado}`,
+        `Alumnos: ${this.filtroEstadoAlumno === 'Activo' ? 'Activos' : this.filtroEstadoAlumno === 'Inactivo' ? 'Inactivos' : 'Todos'}`,
+        this.filtroNombre.trim() ? `Búsqueda: ${this.filtroNombre.trim()}` : '',
+      ].filter(f => f).join('   ·   ');
+
+      const columnas = ['Estudiante', 'Estado', 'Padre/Tutor', 'Grado', 'Cuotas Pendientes', 'Total Vencido', 'Total Pagado', 'Total Año'];
+      const GUINDA = 'FF6B0F1A';
+
+      hoja.mergeCells(1, 1, 1, columnas.length);
+      hoja.getCell(1, 1).value = `Reporte de Cuentas por Cobrar — Año ${this.anio}`;
+      hoja.getCell(1, 1).font  = { bold: true, size: 14, color: { argb: GUINDA } };
+
+      hoja.mergeCells(2, 1, 2, columnas.length);
+      hoja.getCell(2, 1).value = `Fecha del reporte: ${fecha} ${hora}`;
+      hoja.getCell(2, 1).font  = { italic: true, color: { argb: 'FF555555' } };
+
+      hoja.mergeCells(3, 1, 3, columnas.length);
+      hoja.getCell(3, 1).value = filtros;
+      hoja.getCell(3, 1).font  = { color: { argb: 'FF555555' } };
+
+      const encabezado = hoja.getRow(5);
+      encabezado.values = columnas;
+      encabezado.eachCell(c => {
+        c.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: GUINDA } };
+        c.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      });
+
+      this.datos.forEach(r => hoja.addRow([
+        r.nombreCompleto,
+        r.estadoAlumno,
+        r.nombreTutor,
+        r.gradoNombre,
+        r.cuotasPendientes,
+        r.totalPendiente,
+        r.totalPagado,
+        r.totalDeudaAnio,
+      ]));
+
+      const ultimaFila = hoja.rowCount;
+      const total = hoja.addRow(['Total', '', '', '', null, null, null, null]);
+      ['E', 'F', 'G', 'H'].forEach(col => {
+        hoja.getCell(`${col}${total.number}`).value = { formula: `SUM(${col}6:${col}${ultimaFila})` };
+      });
+      total.font = { bold: true };
+      total.eachCell(c => c.border = { top: { style: 'thin' } });
+
+      const anchos = [38, 12, 34, 18, 12, 16, 16, 16];
+      anchos.forEach((w, i) => hoja.getColumn(i + 1).width = w);
+      ['F', 'G', 'H'].forEach(col => hoja.getColumn(col).numFmt = '"L." #,##0.00');
+      hoja.getColumn('E').alignment = { horizontal: 'center' };
+      hoja.autoFilter = { from: { row: 5, column: 1 }, to: { row: ultimaFila, column: columnas.length } };
+
+      const buffer = await libro.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `Reporte CxC ${this.anio} - ${fecha.replace(/\//g, '-')}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      this.snack.open('No se pudo generar el Excel', '', { duration: 4000 });
+    } finally {
+      this.exportando = false;
+    }
   }
 }
