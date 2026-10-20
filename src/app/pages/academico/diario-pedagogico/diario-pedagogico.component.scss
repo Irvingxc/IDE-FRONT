@@ -1,0 +1,124 @@
+.diario-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.diario-clase {
+  min-width: 320px;
+  flex: 1 1 320px;
+  max-width: 560px;
+}
+
+.diario-acciones {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.diario-vacio {
+  text-align: center;
+  color: #777;
+  padding: 40px 0;
+
+  mat-icon { font-size: 40px; width: 40px; height: 40px; color: #bbb; }
+}
+
+.diario-tabla {
+  border: 1px solid #e0dad2;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.diario-head,
+.diario-fila {
+  display: grid;
+  grid-template-columns: 130px 300px 1fr 48px;
+  gap: 12px;
+  align-items: start;
+  padding: 8px 12px;
+}
+
+.diario-head {
+  background: #6b0f1a;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.diario-periodo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: #dec48c;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+
+  .btn-agregar-semana {
+    position: absolute;
+    right: 8px;
+    text-transform: none;
+  }
+}
+
+.diario-fila {
+  border-bottom: 1px solid #eee6dc;
+
+  &:nth-child(even) { background: #faf6f0; }
+  &.repaso { background: #ececf0; font-style: italic; }
+  &.sin-semanas { display: block; color: #888; font-style: italic; text-align: center; }
+}
+
+.col-semana {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 6px;
+
+  .chk-repaso { font-size: 12px; font-style: normal; }
+}
+
+.fechas-texto {
+  padding-top: 6px;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.fechas-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #666;
+}
+
+.campo-fecha {
+  width: 130px;
+  font-size: 12px;
+}
+
+.col-tema .tema {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.campo-tema {
+  flex: 1;
+}
+
+// Campos compactos dentro de la grilla
+:host ::ng-deep .diario-fila .mat-form-field-wrapper { padding-bottom: 0; margin: 2px 0; }
+:host ::ng-deep .diario-fila .mat-form-field-appearance-outline .mat-form-field-infix { padding: 6px 0 10px; border-top-width: 6px; }
+:host ::ng-deep .diario-fila .mat-form-field-appearance-outline .mat-form-field-suffix { top: 2px; }
+
+@media (max-width: 900px) {
+  .diario-head { display: none; }
+  .diario-fila { grid-template-columns: 1fr; }
+}

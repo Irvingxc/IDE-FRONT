@@ -348,6 +348,13 @@
       </div>
     </mat-tab>
 
+    <!-- ═══ DIARIO PEDAGÓGICO ═══ -->
+    <mat-tab label="Diario pedagógico">
+      <div class="tab-content">
+        <app-diario-pedagogico [clases]="clasesDisponiblesNotas" [esAdmin]="esAdmin"></app-diario-pedagogico>
+      </div>
+    </mat-tab>
+
     <!-- ═══ NOTAS DETALLADAS ═══ -->
     <mat-tab label="Notas detalladas" *ngIf="!soloMaestro">
       <div class="tab-content">

@@ -1,0 +1,105 @@
+<div class="diario-toolbar">
+  <mat-form-field appearance="outline" class="diario-clase">
+    <mat-label>Clase</mat-label>
+    <mat-select [ngModel]="idClase" (ngModelChange)="onClaseChange($event)">
+      <mat-option *ngFor="let c of clasesOrdenadas" [value]="c.id">{{ etiquetaClase(c) }}</mat-option>
+    </mat-select>
+    <mat-hint *ngIf="clases.length === 0">No tienes clases asignadas este año.</mat-hint>
+  </mat-form-field>
+
+  <div class="diario-acciones" *ngIf="idClase && !cargando">
+    <button mat-stroked-button (click)="descargarPdf()" [disabled]="descargandoPdf || hayCambios"
+            [title]="hayCambios ? 'Guarda los cambios antes de imprimir' : ''">
+      <mat-icon>picture_as_pdf</mat-icon> PDF
+    </button>
+    <button mat-raised-button color="primary" (click)="guardar()" [disabled]="guardando || !hayCambios">
+      <mat-icon>save</mat-icon> {{ guardando ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </div>
+</div>
+
+<div class="diario-vacio" *ngIf="!idClase">
+  <mat-icon>menu_book</mat-icon>
+  <p>Selecciona una clase para ver su diario pedagógico.</p>
+</div>
+
+<div class="diario-vacio" *ngIf="cargando">
+  <p>Cargando diario...</p>
+</div>
+
+<ng-container *ngIf="idClase && !cargando">
+  <div class="diario-vacio" *ngIf="grupos.length === 0">
+    <mat-icon>event_busy</mat-icon>
+    <p>No hay períodos activos para el año de esta clase. Créalos en la pestaña Períodos.</p>
+  </div>
+
+  <div class="diario-tabla" *ngIf="grupos.length > 0">
+    <div class="diario-head">
+      <span class="col-semana">Semana</span>
+      <span class="col-fechas">Fechas</span>
+      <span class="col-tema">Tema</span>
+      <span class="col-acc"></span>
+    </div>
+
+    <ng-container *ngFor="let g of grupos; let ig = index; trackBy: trackByIndex">
+      <div class="diario-periodo">
+        <span>{{ g.periodo.nombre }}</span>
+        <button mat-button class="btn-agregar-semana" (click)="agregarSemana(g)">
+          <mat-icon>add</mat-icon> Semana
+        </button>
+      </div>
+
+      <div class="diario-fila sin-semanas" *ngIf="g.semanas.length === 0">
+        Sin semanas en este período.
+      </div>
+
+      <div class="diario-fila" *ngFor="let s of g.semanas; let is = index; trackBy: trackByIndex"
+           [class.repaso]="s.esRepaso">
+        <div class="col-semana">
+          <strong>Semana {{ numeroSemana(ig, is) }}</strong>
+          <mat-checkbox [(ngModel)]="s.esRepaso" (ngModelChange)="marcarCambio()" class="chk-repaso">Repaso</mat-checkbox>
+        </div>
+
+        <div class="col-fechas">
+          <div class="fechas-texto">{{ textoFechas(s) }}</div>
+          <div class="fechas-inputs">
+            <mat-form-field appearance="outline" class="campo-fecha">
+              <input matInput [matDatepicker]="pDesde" [(ngModel)]="s.desde" (dateChange)="marcarCambio()"
+                     [min]="minPeriodo(g.periodo)" [max]="maxPeriodo(g.periodo)">
+              <mat-datepicker-toggle matSuffix [for]="pDesde"></mat-datepicker-toggle>
+              <mat-datepicker #pDesde></mat-datepicker>
+            </mat-form-field>
+            <span>al</span>
+            <mat-form-field appearance="outline" class="campo-fecha">
+              <input matInput [matDatepicker]="pHasta" [(ngModel)]="s.hasta" (dateChange)="marcarCambio()"
+                     [min]="s.desde || minPeriodo(g.periodo)" [max]="maxPeriodo(g.periodo)">
+              <mat-datepicker-toggle matSuffix [for]="pHasta"></mat-datepicker-toggle>
+              <mat-datepicker #pHasta></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="col-tema">
+          <div class="tema" *ngFor="let t of s.temas; let it = index; trackBy: trackByIndex">
+            <mat-form-field appearance="outline" class="campo-tema">
+              <input matInput [(ngModel)]="t.texto" (ngModelChange)="marcarCambio()" maxlength="500"
+                     [placeholder]="s.esRepaso ? 'Semana de repaso' : 'Tema'">
+            </mat-form-field>
+            <button mat-icon-button (click)="quitarTema(s, it)" title="Quitar tema">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <button mat-button color="primary" class="btn-agregar-tema" (click)="agregarTema(s)">
+            <mat-icon>add</mat-icon> Tema
+          </button>
+        </div>
+
+        <div class="col-acc">
+          <button mat-icon-button color="warn" (click)="quitarSemana(g, is)" title="Quitar semana">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</ng-container>

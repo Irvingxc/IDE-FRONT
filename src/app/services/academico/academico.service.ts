@@ -254,6 +254,34 @@ export class AcademicoService {
       .set('idAlumno', idAlumno);
     return this.http.get<HistorialNota[]>(`${this.base}/historial-notas`, { params });
   }
+
+  listarDiario(idClase: number): Observable<DiarioSemana[]> {
+    const params = new HttpParams().set('idClase', idClase);
+    return this.http.get<DiarioSemana[]>(`${this.base}/diario`, { params });
+  }
+
+  guardarDiario(idClase: number, semanas: GuardarDiarioSemana[]): Observable<DiarioSemana[]> {
+    const params = new HttpParams().set('idClase', idClase);
+    return this.http.put<DiarioSemana[]>(`${this.base}/diario`, semanas, { params });
+  }
+}
+
+export interface DiarioSemana {
+  id:            number;
+  idPeriodo:     number;
+  periodoNombre: string;
+  fechaDesde:    string;
+  fechaHasta:    string;
+  esRepaso:      boolean;
+  temas:         string[];
+}
+
+export interface GuardarDiarioSemana {
+  idPeriodo:  number;
+  fechaDesde: string;   // yyyy-MM-dd
+  fechaHasta: string;
+  esRepaso:   boolean;
+  temas:      string[];
 }
 
 export interface HistorialNota {
