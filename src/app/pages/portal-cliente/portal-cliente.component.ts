@@ -6,7 +6,8 @@ import { Observable } from 'rxjs';
 import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
 import {
-  PortalClienteService, HijoDto, PortalFacturaDto, PortalCxcDto, PortalPeriodo, PortalClaseNota, PortalAsistenciaDto
+  PortalClienteService, HijoDto, PortalFacturaDto, PortalCxcDto, PortalPeriodo, PortalClaseNota, PortalAsistenciaDto,
+  PortalDiarioClase
 } from '@app/services/portal-cliente/portal-cliente.service';
 import { TokenService } from '@app/services';
 import { MatDialog } from '@angular/material/dialog';
@@ -43,6 +44,9 @@ export class PortalClienteComponent implements OnInit {
   cargandoCxc      = false;
   cargandoNotas    = false;
   cargandoAsistencia = false;
+
+  diario: PortalDiarioClase[] = [];
+  cargandoDiario = false;
 
   tabActiva = 0;
 
@@ -91,6 +95,7 @@ export class PortalClienteComponent implements OnInit {
     this.cargarCxc();
     this.cargarNotas();
     this.cargarAsistencia();
+    this.cargarDiario();
   }
 
   cambiarPassword(): void {
@@ -156,6 +161,72 @@ export class PortalClienteComponent implements OnInit {
     this.anioAsistencia = anio;
     this.cargarAsistencia();
   }
+
+  // ── Diario pedagógico: lo que verán en la semana ──
+
+  /** Lunes de la semana mostrada. Sábado y domingo abren la semana que viene. */
+  private static lunesDe(fecha: Date): Date {
+    const d = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+    const dia = d.getDay();
+    const ajuste = dia === 0 ? 1 : dia === 6 ? 2 : 1 - dia;
+    d.setDate(d.getDate() + ajuste);
+    return d;
+  }
+
+  private lunesActual = PortalClienteComponent.lunesDe(new Date());
+  lunesDiario = this.lunesActual;
+
+  get esSemanaActual(): boolean {
+    return this.lunesDiario.getTime() === this.lunesActual.getTime();
+  }
+
+  get textoSemanaDiario(): string {
+    const viernes = new Date(this.lunesDiario);
+    viernes.setDate(viernes.getDate() + 4);
+    const mes = (d: Date) => d.toLocaleDateString('es-HN', { month: 'long' });
+    const desde = this.lunesDiario.getMonth() === viernes.getMonth()
+      ? `${this.lunesDiario.getDate()}`
+      : `${this.lunesDiario.getDate()} de ${mes(this.lunesDiario)}`;
+    return `Lunes ${desde} al viernes ${viernes.getDate()} de ${mes(viernes)}`;
+  }
+
+  cargarDiario(): void {
+    if (!this.hijoSeleccionado) { this.diario = []; return; }
+    const l = this.lunesDiario;
+    const fecha = `${l.getFullYear()}-${String(l.getMonth() + 1).padStart(2, '0')}-${String(l.getDate()).padStart(2, '0')}`;
+    this.cargandoDiario = true;
+    this.svc.miDiario(this.hijoSeleccionado.identidad, fecha).subscribe({
+      next: (d) => { this.diario = d; this.cargandoDiario = false; },
+      error: () => { this.diario = []; this.cargandoDiario = false; }
+    });
+  }
+
+  moverSemanaDiario(semanas: number): void {
+    const d = new Date(this.lunesDiario);
+    d.setDate(d.getDate() + semanas * 7);
+    this.lunesDiario = d;
+    this.cargarDiario();
+  }
+
+  irSemanaActualDiario(): void {
+    this.lunesDiario = this.lunesActual;
+    this.cargarDiario();
+  }
+
+  /** Clases que ya tienen temas o repaso registrados esta semana van primero. */
+  get diarioOrdenado(): PortalDiarioClase[] {
+    return [...this.diario].sort((a, b) => Number(this.tieneContenido(b)) - Number(this.tieneContenido(a)));
+  }
+
+  tieneContenido(c: PortalDiarioClase): boolean {
+    return c.semanas.some(s => s.temas.length > 0 || s.esRepaso);
+  }
+
+  get clasesConTemas(): number {
+    return this.diario.filter(c => this.tieneContenido(c)).length;
+  }
+
+  trackByClaseDiario(_: number, c: PortalDiarioClase): number { return c.idClase; }
 
   get totalPresentesAsistencia(): number {
     return this.asistencia.filter(a => a.estado === 'Presente').length;

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { AcademicoService, ClaseResponse, DiarioSemana, GuardarDiarioSemana, PeriodoResponse } from '@app/services/academico/academico.service';
 import { NotificationService } from '@app/services/notification/notification.service';
 
@@ -16,6 +16,20 @@ interface SemanaEdit {
 interface GrupoPeriodo {
   periodo: PeriodoResponse;
   semanas: SemanaEdit[];
+}
+
+interface OpcionFiltro<T> {
+  valor:  T;
+  nombre: string;
+}
+
+const SIN_MAESTRO = '__sin_maestro__';
+
+/** Agrupa las clases por grado (o por nivel de inglés) para el filtro. */
+function claveGradoDe(c: ClaseResponse): string {
+  if (c.idGrado != null) return `g${c.idGrado}`;
+  if (c.idNivelIngles != null) return `n${c.idNivelIngles}`;
+  return 'x';
 }
 
 const DIAS  = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -43,12 +57,18 @@ function sumarDias(fecha: Date, dias: number): Date {
   templateUrl: './diario-pedagogico.component.html',
   styleUrls: ['./diario-pedagogico.component.scss'],
 })
-export class DiarioPedagogicoComponent {
+export class DiarioPedagogicoComponent implements OnChanges {
   /** Clases que el usuario puede trabajar (un maestro solo recibe las suyas). */
   @Input() clases: ClaseResponse[] = [];
   @Input() esAdmin = false;
 
+  // Filtros en cascada: Maestro → Grado/Nivel → Clase → Período.
+  // El filtro de maestro solo aplica a administradores; un maestro ya recibe únicamente sus clases.
+  idMaestro: string | null = null;
+  claveGrado: string | null = null;
   idClase: number | null = null;
+  idPeriodo = 0;   // 0 = todos los períodos (null dejaría el mat-select en blanco)
+
   grupos: GrupoPeriodo[] = [];
   cargando = false;
   guardando = false;
@@ -60,29 +80,117 @@ export class DiarioPedagogicoComponent {
     private notification: NotificationService,
   ) {}
 
-  get clasesOrdenadas(): ClaseResponse[] {
-    return [...this.clases].sort((a, b) => this.etiquetaClase(a).localeCompare(this.etiquetaClase(b)));
-  }
+  // Opciones de cada filtro. Se recalculan solo cuando cambian las clases o un filtro superior:
+  // si fueran getters, cada ciclo de detección crearía objetos nuevos y los mat-select entrarían en un ciclo infinito.
+  maestros: OpcionFiltro<string>[] = [];
+  grados: OpcionFiltro<string>[] = [];
+  clasesFiltradas: ClaseResponse[] = [];
+  private firmaClases = '';
 
   get claseSeleccionada(): ClaseResponse | undefined {
     return this.clases.find(c => c.id === this.idClase);
   }
 
+  ngOnChanges(): void {
+    // El padre puede entregar un arreglo nuevo con las mismas clases en cada ciclo; solo se recalcula si cambió el contenido.
+    const firma = `${this.esAdmin}|` + this.clases.map(c => `${c.id}:${c.idMaestro}`).join(',');
+    if (firma === this.firmaClases) return;
+    this.firmaClases = firma;
+
+    this.maestros = this.opciones(this.clases, c => c.idMaestro ?? SIN_MAESTRO, c => c.maestroNombre ?? 'Sin maestro asignado');
+    if (this.idMaestro && !this.maestros.some(m => m.valor === this.idMaestro)) this.idMaestro = null;
+    this.recalcularGrados();
+
+    // Un maestro con un solo grado entra directo a elegir la clase.
+    if (!this.esAdmin && !this.claveGrado) this.autoSeleccionarGrado();
+  }
+
+  private opciones(clases: ClaseResponse[], valor: (c: ClaseResponse) => string, nombre: (c: ClaseResponse) => string): OpcionFiltro<string>[] {
+    const vistos = new Map<string, string>();
+    for (const c of clases) if (!vistos.has(valor(c))) vistos.set(valor(c), nombre(c));
+    return [...vistos].map(([v, n]) => ({ valor: v, nombre: n })).sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }
+
+  private get clasesDelMaestro(): ClaseResponse[] {
+    if (!this.esAdmin) return this.clases;
+    if (!this.idMaestro) return [];
+    return this.clases.filter(c => (c.idMaestro ?? SIN_MAESTRO) === this.idMaestro);
+  }
+
+  private recalcularGrados(): void {
+    this.grados = this.opciones(this.clasesDelMaestro, claveGradoDe, c => c.gradoNombre ?? c.nivelInglesNombre ?? 'Sin grado');
+    if (this.claveGrado && !this.grados.some(g => g.valor === this.claveGrado)) this.claveGrado = null;
+    this.recalcularClases();
+  }
+
+  private recalcularClases(): void {
+    this.clasesFiltradas = !this.claveGrado ? [] : this.clasesDelMaestro
+      .filter(c => claveGradoDe(c) === this.claveGrado)
+      .sort((a, b) => this.etiquetaClase(a).localeCompare(this.etiquetaClase(b)));
+  }
+
   etiquetaClase(c: ClaseResponse): string {
-    const grupo = `${c.gradoNombre ?? c.nivelInglesNombre ?? ''} ${c.seccion ?? ''}`.trim();
-    const base = grupo ? `${c.nombre} — ${grupo}` : c.nombre;
-    return this.esAdmin && c.maestroNombre ? `${base} (${c.maestroNombre})` : base;
+    return c.seccion ? `${c.nombre} — Sección ${c.seccion}` : c.nombre;
+  }
+
+  trackByValor(_: number, o: OpcionFiltro<string>): string { return o.valor; }
+  trackByClase(_: number, c: ClaseResponse): number { return c.id; }
+
+  private confirmarDescarte(): boolean {
+    return !this.hayCambios || confirm('Hay cambios sin guardar en el diario. ¿Descartarlos?');
+  }
+
+  /** Revierte el valor que el mat-select ya mostró cuando el usuario no quiso descartar cambios. */
+  private revertir<K extends 'idMaestro' | 'claveGrado' | 'idClase'>(campo: K): void {
+    const anterior = this[campo];
+    (this as any)[campo] = null;
+    setTimeout(() => (this as any)[campo] = anterior);
+  }
+
+  onMaestroChange(valor: string): void {
+    if (!this.confirmarDescarte()) { this.revertir('idMaestro'); return; }
+    this.idMaestro = valor;
+    this.claveGrado = null;
+    this.limpiarClase();
+    this.recalcularGrados();
+    this.autoSeleccionarGrado();
+  }
+
+  onGradoChange(valor: string): void {
+    if (!this.confirmarDescarte()) { this.revertir('claveGrado'); return; }
+    this.claveGrado = valor;
+    this.limpiarClase();
+    this.recalcularClases();
+    if (this.clasesFiltradas.length === 1) this.seleccionarClase(this.clasesFiltradas[0].id);
   }
 
   onClaseChange(nuevo: number): void {
-    if (this.hayCambios && !confirm('Hay cambios sin guardar en el diario. ¿Descartarlos?')) {
-      const anterior = this.idClase;
-      this.idClase = null;
-      setTimeout(() => this.idClase = anterior);
-      return;
-    }
-    this.idClase = nuevo;
+    if (!this.confirmarDescarte()) { this.revertir('idClase'); return; }
+    this.seleccionarClase(nuevo);
+  }
+
+  private autoSeleccionarGrado(): void {
+    if (this.grados.length === 1) this.onGradoChange(this.grados[0].valor);
+  }
+
+  private seleccionarClase(id: number): void {
+    this.idClase = id;
     this.cargar();
+  }
+
+  private limpiarClase(): void {
+    this.idClase = null;
+    this.idPeriodo = 0;
+    this.grupos = [];
+    this.hayCambios = false;
+  }
+
+  get gruposVisibles(): GrupoPeriodo[] {
+    return !this.idPeriodo ? this.grupos : this.grupos.filter(g => g.periodo.id === this.idPeriodo);
+  }
+
+  indiceGrupo(g: GrupoPeriodo): number {
+    return this.grupos.indexOf(g);
   }
 
   cargar(): void {
@@ -93,7 +201,11 @@ export class DiarioPedagogicoComponent {
     this.academicoService.listarPeriodos(clase.anioLectivo).subscribe({
       next: (periodos) => {
         this.academicoService.listarDiario(clase.id).subscribe({
-          next: (semanas) => { this.armarGrupos(periodos, semanas); this.cargando = false; },
+          next: (semanas) => {
+            this.armarGrupos(periodos, semanas);
+            this.idPeriodo = this.periodoDeHoy();
+            this.cargando = false;
+          },
           error: (err) => {
             this.cargando = false;
             this.notification.error(err?.error?.errores?.mensaje ?? 'No se pudo cargar el diario.');
@@ -102,6 +214,14 @@ export class DiarioPedagogicoComponent {
       },
       error: () => { this.cargando = false; },
     });
+  }
+
+  /** Período en curso, para abrir el diario directo en él; si hoy no cae en ninguno, se muestran todos. */
+  private periodoDeHoy(): number {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const actual = this.grupos.find(g => this.minPeriodo(g.periodo) <= hoy && hoy <= this.maxPeriodo(g.periodo));
+    return actual?.periodo.id ?? 0;
   }
 
   private armarGrupos(periodos: PeriodoResponse[], semanas: DiarioSemana[]): void {
@@ -262,6 +382,8 @@ export class DiarioPedagogicoComponent {
         ['Maestro:',     clase.maestroNombre ?? '—'],
         ['Año lectivo:', String(clase.anioLectivo)],
       ];
+      const periodo = this.grupos.find(g => g.periodo.id === this.idPeriodo)?.periodo;
+      if (periodo) info.push(['Período:', periodo.nombre]);
       doc.setFontSize(10);
       info.forEach(([label, valor]) => {
         doc.setFont('helvetica', 'bold');
@@ -275,7 +397,8 @@ export class DiarioPedagogicoComponent {
 
       // ── Tabla ──
       const body: any[] = [];
-      this.grupos.forEach((g, iGrupo) => {
+      this.gruposVisibles.forEach(g => {
+        const iGrupo = this.indiceGrupo(g);
         if (g.semanas.length === 0) return;
         body.push([{
           content: g.periodo.nombre.toUpperCase(),

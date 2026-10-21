@@ -123,6 +123,64 @@
           </mat-accordion>
         </mat-tab>
 
+        <!-- Diario pedagógico: temas de la semana -->
+        <mat-tab label="Esta semana">
+          <div class="diario-semana-nav">
+            <button mat-icon-button (click)="moverSemanaDiario(-1)" aria-label="Semana anterior">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <div class="diario-semana-texto">
+              <span class="diario-semana-fechas">{{ textoSemanaDiario }}</span>
+              <button mat-button color="primary" class="diario-hoy" *ngIf="!esSemanaActual" (click)="irSemanaActualDiario()">
+                Volver a esta semana
+              </button>
+              <span class="diario-semana-sub" *ngIf="esSemanaActual">Semana actual</span>
+            </div>
+            <button mat-icon-button (click)="moverSemanaDiario(1)" aria-label="Semana siguiente">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+
+          <div *ngIf="cargandoDiario" class="loading-row">
+            <mat-spinner diameter="28"></mat-spinner>
+          </div>
+
+          <div *ngIf="!cargandoDiario && diario.length === 0" class="notas-empty">
+            <mat-icon>info</mat-icon>
+            <p>No hay clases registradas para esta semana.</p>
+          </div>
+
+          <ng-container *ngIf="!cargandoDiario && diario.length > 0">
+            <p class="diario-resumen" *ngIf="clasesConTemas === 0">
+              Los maestros aún no han registrado los temas de esta semana.
+            </p>
+
+            <div class="diario-clases">
+              <div class="diario-clase-card" *ngFor="let clase of diarioOrdenado; trackBy: trackByClaseDiario"
+                   [class.sin-temas]="!tieneContenido(clase)">
+                <div class="diario-clase-header">
+                  <strong>{{ clase.claseNombre }}</strong>
+                  <span class="diario-clase-maestro" *ngIf="clase.maestroNombre">{{ clase.maestroNombre }}</span>
+                </div>
+
+                <ng-container *ngFor="let s of clase.semanas">
+                  <div class="diario-semana-meta">
+                    Semana {{ s.numeroSemana }} · {{ s.periodoNombre }}
+                    <span class="diario-repaso" *ngIf="s.esRepaso">Repaso</span>
+                  </div>
+                  <ul class="diario-temas" *ngIf="s.temas.length > 0">
+                    <li *ngFor="let t of s.temas">{{ t }}</li>
+                  </ul>
+                  <p class="diario-vacio" *ngIf="s.temas.length === 0 && s.esRepaso">Semana de repaso de los temas del parcial.</p>
+                  <p class="diario-vacio" *ngIf="s.temas.length === 0 && !s.esRepaso">Temas aún no registrados.</p>
+                </ng-container>
+
+                <p class="diario-vacio" *ngIf="clase.semanas.length === 0">Temas aún no registrados.</p>
+              </div>
+            </div>
+          </ng-container>
+        </mat-tab>
+
         <!-- Asistencia -->
         <mat-tab label="Asistencia">
           <div class="tab-toolbar asistencia-toolbar">

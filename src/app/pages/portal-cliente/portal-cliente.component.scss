@@ -445,3 +445,62 @@ $cream:  #FAF6F0;
     th:last-child, td:last-child { width: 84px; }
   }
 }
+
+// ── Diario pedagógico (Esta semana) ──────────────
+.diario-semana-nav {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 8px 6px;
+  margin: 16px 0 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+
+  .diario-semana-texto {
+    display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0;
+  }
+  .diario-semana-fechas { font-weight: 700; color: $guinda; font-size: 15px; }
+  .diario-semana-sub { font-size: 12px; color: #888; }
+  .diario-hoy { font-size: 12px; line-height: 24px; }
+}
+
+.diario-resumen {
+  color: #777; font-size: 13px; text-align: center; margin: 4px 0 12px;
+}
+
+.diario-clases {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  padding-bottom: 16px;
+}
+
+.diario-clase-card {
+  background: #fff;
+  border-radius: 12px;
+  border-left: 4px solid $gold;
+  padding: 12px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+  min-width: 0;
+
+  &.sin-temas { border-left-color: #ddd; }
+
+  .diario-clase-header {
+    display: flex; flex-direction: column; margin-bottom: 6px;
+    strong { color: $guinda; font-size: 15px; }
+  }
+  .diario-clase-maestro { font-size: 12px; color: #888; }
+
+  .diario-semana-meta {
+    font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: .3px;
+    display: flex; align-items: center; gap: 6px; margin-top: 4px;
+  }
+  .diario-repaso {
+    background: #ececf0; color: #555; border-radius: 10px; padding: 1px 8px;
+    text-transform: none; letter-spacing: 0; font-weight: 600;
+  }
+  .diario-temas {
+    margin: 6px 0 0; padding-left: 18px;
+    li { margin: 2px 0; overflow-wrap: anywhere; }
+  }
+  .diario-vacio { margin: 6px 0 0; color: #aaa; font-size: 13px; font-style: italic; }
+}

@@ -93,6 +93,22 @@ export interface PortalAsistenciaDto {
   horaMarca: string | null;
 }
 
+export interface PortalDiarioSemana {
+  numeroSemana:  number;
+  periodoNombre: string;
+  fechaDesde:    string;
+  fechaHasta:    string;
+  esRepaso:      boolean;
+  temas:         string[];
+}
+
+export interface PortalDiarioClase {
+  idClase:       number;
+  claseNombre:   string;
+  maestroNombre: string | null;
+  semanas:       PortalDiarioSemana[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class PortalClienteService {
   private base = `${environment.url}api/PortalCliente`;
@@ -153,6 +169,12 @@ export class PortalClienteService {
                     'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
   nombreMes(n: number): string { return this.MESES[n] ?? ''; }
+
+  /** Diario pedagógico del hijo para la semana que contiene `fecha` (yyyy-MM-dd). */
+  miDiario(identidad: string, fecha: string): Observable<PortalDiarioClase[]> {
+    const params = new HttpParams().set('identidad', identidad).set('fecha', fecha);
+    return this.http.get<PortalDiarioClase[]>(`${this.base}/mi-diario`, { params });
+  }
 
   formatLps(v: number): string {
     return 'L. ' + v.toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
