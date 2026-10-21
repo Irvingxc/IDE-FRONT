@@ -9,8 +9,10 @@ import { filter } from 'rxjs/operators';
  * despliegue sigue con el main.js viejo: al entrar a un módulo que aún no había cargado
  * pide un .js que ya no existe, Cloudflare responde con el index.html y el módulo falla.
  *
- * - Cada 5 minutos y al volver a la pestaña revisa si el index.html publicado apunta a otro
- *   main.<hash>.js. Si cambió, la siguiente navegación carga la página completa (versión nueva).
+ * - Cada 5 minutos y al volver a la pestaña revisa si el index.html publicado apunta a otros
+ *   runtime.<hash>.js / main.<hash>.js. Si cambió, la siguiente navegación carga la página
+ *   completa (versión nueva). Se mira también runtime porque un cambio solo en un módulo
+ *   perezoso (Académico, Portal, CxC...) no cambia main.js: solo el runtime, que trae el mapa de chunks.
  * - Si aun así falla la carga de un módulo (archivo viejo), recarga en la ruta pedida.
  */
 @Injectable({ providedIn: 'root' })
@@ -19,7 +21,7 @@ export class VersionService {
   private static readonly CADA_MS = 5 * 60 * 1000;
   private static readonly CLAVE_RECARGA = 'ide_recarga_version';
 
-  private readonly mainActual = VersionService.mainDe(document.documentElement.innerHTML);
+  private readonly versionActual = VersionService.versionDe(document.documentElement.innerHTML);
   private hayVersionNueva = false;
   private ultimaRevision = 0;
 
@@ -27,7 +29,7 @@ export class VersionService {
 
   iniciar(): void {
     // Sin hash (ng serve) no hay versiones que comparar.
-    if (!this.mainActual) return;
+    if (!this.versionActual) return;
 
     setInterval(() => this.revisar(), VersionService.CADA_MS);
     document.addEventListener('visibilitychange', () => {
@@ -57,8 +59,8 @@ export class VersionService {
     fetch('/?v=' + ahora, { cache: 'no-store' })
       .then(r => (r.ok ? r.text() : ''))
       .then(html => {
-        const publicado = VersionService.mainDe(html);
-        if (publicado && publicado !== this.mainActual) this.hayVersionNueva = true;
+        const publicado = VersionService.versionDe(html);
+        if (publicado && publicado !== this.versionActual) this.hayVersionNueva = true;
       })
       .catch(() => { /* sin red: se revisa en la próxima vuelta */ });
   }
@@ -73,8 +75,9 @@ export class VersionService {
     window.location.assign(url);
   }
 
-  /** Nombre del main.<hash>.js que referencia un index.html. */
-  private static mainDe(html: string): string | null {
-    return html.match(/main\.[a-f0-9]{8,}\.js/)?.[0] ?? null;
+  /** Firma de la versión: los runtime.<hash>.js y main.<hash>.js que referencia un index.html. */
+  private static versionDe(html: string): string | null {
+    const archivos = html.match(/(?:runtime|main)\.[a-f0-9]{8,}\.js/g);
+    return archivos ? [...new Set(archivos)].sort().join('|') : null;
   }
 }
