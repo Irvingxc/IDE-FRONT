@@ -41,7 +41,7 @@ export class MatriculasComponent implements OnInit {
   readonly ALUMNOS_PAGE_SIZE = 10;
 
   // ── Clientes ──
-  clientesColumns = ['id', 'nombre', 'telefono', 'email', 'acciones'];
+  clientesColumns = ['id', 'nombre', 'telefono', 'email', 'portal', 'acciones'];
   clientes: ClienteResponse[] = [];
   clientesLoading = false;
   totalClientes = 0;
@@ -217,11 +217,33 @@ export class MatriculasComponent implements OnInit {
     });
   }
 
+  /** Estado del padre en el Portal de Padres, para la columna "Portal". */
+  estadoPortal(c: ClienteResponse): 'activo' | 'invitado' | 'vencida' | 'sin' {
+    if (c.tienePortal) return 'activo';
+    if (!c.fechaUltimaInvitacion) return 'sin';
+    return c.venceUltimaInvitacion && new Date(c.venceUltimaInvitacion) > new Date() ? 'invitado' : 'vencida';
+  }
+
+  tituloInvitar(c: ClienteResponse): string {
+    if (c.tienePortal) return 'Ya tiene cuenta en el portal';
+    if (!c.correoElectronico) return 'Sin correo registrado';
+    return c.fechaUltimaInvitacion ? 'Reenviar invitación al portal (genera un enlace nuevo)' : 'Enviar invitación al portal';
+  }
+
   enviarAcceso(cliente: ClienteResponse): void {
+    if (cliente.fechaUltimaInvitacion && this.estadoPortal(cliente) === 'invitado' &&
+        !confirm(`Ya se le envió una invitación el ${new Date(cliente.fechaUltimaInvitacion).toLocaleString('es-HN')} y sigue vigente. ` +
+                 '¿Enviar una nueva? El enlace anterior dejará de funcionar.')) {
+      return;
+    }
     this.enviandoAcceso[cliente.id] = true;
     this.portalService.invitar(cliente.id).subscribe({
       next: (inv) => {
         this.enviandoAcceso[cliente.id] = false;
+        // Refleja la invitación en la fila sin recargar la lista (el enlace vence a las 48 h).
+        const ahora = new Date();
+        cliente.fechaUltimaInvitacion = ahora.toISOString();
+        cliente.venceUltimaInvitacion = new Date(ahora.getTime() + 48 * 3600 * 1000).toISOString();
         // El enlace también se copia al portapapeles por si hay que reenviarlo.
         const link = `${window.location.origin}/activar-cuenta/${inv.token}`;
         navigator.clipboard.writeText(link).catch(() => {});

@@ -43,6 +43,9 @@ export interface ClienteResponse {
   rtn: string;
   fechaCreacion: string;
   tienePortal: boolean;
+  /** Última invitación al portal (hora Honduras); null si nunca se invitó. */
+  fechaUltimaInvitacion?: string | null;
+  venceUltimaInvitacion?: string | null;
   totalRegistros: number;
   totalPaginas: number;
 }

@@ -207,6 +207,24 @@
             <td mat-cell *matCellDef="let row">{{ row.correoElectronico || '—' }}</td>
           </ng-container>
 
+          <ng-container matColumnDef="portal">
+            <th mat-header-cell *matHeaderCellDef>Portal</th>
+            <td mat-cell *matCellDef="let row" [ngSwitch]="estadoPortal(row)">
+              <span *ngSwitchCase="'activo'" class="portal-chip activo" title="El padre ya activó su cuenta">
+                <mat-icon>verified_user</mat-icon> Cuenta activa
+              </span>
+              <span *ngSwitchCase="'invitado'" class="portal-chip invitado"
+                    [title]="'Enlace vigente hasta ' + (row.venceUltimaInvitacion | date:'dd/MM/yyyy h:mm a')">
+                <mat-icon>mark_email_read</mat-icon> Invitado {{ row.fechaUltimaInvitacion | date:'dd/MM/yyyy' }}
+              </span>
+              <span *ngSwitchCase="'vencida'" class="portal-chip vencida"
+                    [title]="'El enlace venció el ' + (row.venceUltimaInvitacion | date:'dd/MM/yyyy h:mm a') + ' sin que activara la cuenta'">
+                <mat-icon>schedule</mat-icon> Invitación vencida ({{ row.fechaUltimaInvitacion | date:'dd/MM/yyyy' }})
+              </span>
+              <span *ngSwitchDefault class="portal-chip sin">Sin invitar</span>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let row">
@@ -220,10 +238,10 @@
                 <mat-icon>description</mat-icon>
               </button>
               <button mat-icon-button color="accent" *ngIf="puedeInvitarPortal"
-                      [title]="row.correoElectronico ? 'Enviar acceso al portal' : 'Sin correo registrado'"
-                      [disabled]="!row.correoElectronico || enviandoAcceso[row.id]"
+                      [title]="tituloInvitar(row)"
+                      [disabled]="!row.correoElectronico || row.tienePortal || enviandoAcceso[row.id]"
                       (click)="enviarAcceso(row)">
-                <mat-icon>send</mat-icon>
+                <mat-icon>{{ row.fechaUltimaInvitacion && !row.tienePortal ? 'forward_to_inbox' : 'send' }}</mat-icon>
               </button>
             </td>
           </ng-container>
