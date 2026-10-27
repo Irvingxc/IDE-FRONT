@@ -120,7 +120,7 @@ export class AppComponent implements OnInit, OnDestroy {
   onSignOut(): void {
     this.cancelarAvisoTimer();
     this.dialog.closeAll();
-    this.tokenService.clear();
+    this.tokenService.cerrarSesion();
     this.store.dispatch(new fromUser.SignOut());
     this.router.navigate(['/']);
   }

@@ -16,12 +16,15 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { MatTabsModule } from '@angular/material/tabs';
+
 import { BitacoraComponent } from './bitacora.component';
+import { SeguridadComponent } from './seguridad/seguridad.component';
 
 const routes: Routes = [{ path: '', component: BitacoraComponent }];
 
 @NgModule({
-  declarations: [BitacoraComponent],
+  declarations: [BitacoraComponent, SeguridadComponent],
   imports: [
     CommonModule,
     RouterModule.forChild(routes),
@@ -39,6 +42,7 @@ const routes: Routes = [{ path: '', component: BitacoraComponent }];
     MatProgressSpinnerModule,
     MatChipsModule,
     MatTooltipModule,
+    MatTabsModule,
   ],
   providers: FECHA_DD_MM_YYYY_PROVIDERS,
 })

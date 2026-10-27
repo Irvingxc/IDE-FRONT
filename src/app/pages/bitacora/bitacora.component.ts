@@ -23,6 +23,14 @@ export class BitacoraComponent implements OnInit {
 
   modulos = MODULOS;
 
+  /** La pestaña Seguridad (sesiones, bloqueos, rechazos) es solo para Administrador; el backend también lo exige. */
+  readonly esAdmin = (() => {
+    try {
+      const u = JSON.parse(localStorage.getItem('user_session') ?? 'null');
+      return (u?.roles ?? []).includes('Administrador');
+    } catch { return false; }
+  })();
+
   filtros: FormGroup;
 
   constructor(

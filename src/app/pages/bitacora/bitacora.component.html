@@ -8,6 +8,9 @@
     </div>
   </div>
 
+  <mat-tab-group animationDuration="150ms">
+  <mat-tab label="Actividad">
+
   <!-- Filtros -->
   <form [formGroup]="filtros" class="filtros-card" (ngSubmit)="buscar()">
     <div class="filtros-grid">
@@ -126,5 +129,15 @@
     </mat-paginator>
 
   </div>
+
+  </mat-tab>
+
+  <!-- Sesiones activas, cuentas bloqueadas y rechazos: solo Administrador -->
+  <mat-tab label="Seguridad" *ngIf="esAdmin">
+    <ng-template matTabContent>
+      <app-seguridad></app-seguridad>
+    </ng-template>
+  </mat-tab>
+  </mat-tab-group>
 
 </div>

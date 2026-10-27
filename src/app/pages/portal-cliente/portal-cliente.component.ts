@@ -103,7 +103,7 @@ export class PortalClienteComponent implements OnInit {
   }
 
   cerrarSesion(): void {
-    this.tokenService.clear();
+    this.tokenService.cerrarSesion();
     this.store.dispatch(new fromUser.SignOut());
     this.router.navigate(['/']);
   }

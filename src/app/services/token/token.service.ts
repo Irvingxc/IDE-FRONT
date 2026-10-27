@@ -43,6 +43,19 @@ export class TokenService {
     this.token$.next(token);
   }
 
+  /**
+   * Botón Salir: avisa al servidor que cierre la sesión (queda en bitácora y deja de
+   * figurar en Sesiones activas) y borra la sesión local. El aviso no bloquea la salida.
+   */
+  cerrarSesion(): void {
+    const token = this.getToken();
+    if (token && !this.expirado(token)) {
+      this.http.post(`${environment.url}api/Usuario/cerrar-sesion`, {},
+        { headers: { Authorization: `Bearer ${token}` } }).subscribe({ error: () => {} });
+    }
+    this.clear();
+  }
+
   /** Borra la sesion del almacenamiento local y difunde el cierre. */
   clear(): void {
     try {
