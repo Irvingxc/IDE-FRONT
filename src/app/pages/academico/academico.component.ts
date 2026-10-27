@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Store, select } from '@ngrx/store';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
 import { AcademicoService, PeriodoResponse, ClaseResponse, ConceptoPrincipal, Actividad, GuardarConceptoPrincipalItem, ActividadNombreClaseItem, AlumnoNotaActividad, GuardarNotaActividadItem } from '@app/services/academico/academico.service';
@@ -95,6 +95,24 @@ export class AcademicoComponent implements OnInit {
   estructuraNotas: ConceptoPrincipal[] = [];
   alumnosNotas: AlumnoNotaActividad[] = [];
   loadingAlumnosNotas = false;
+
+  // Filtro por nivel de inglés: solo cambia qué alumnos se ven. Al guardar se envía la lista completa.
+  private nivelPorAlumno = new Map<string, string>();   // idAlumno → clave del nivel ('n<id>' o SIN_NIVEL)
+  opcionesNivelNotas: { valor: string; nombre: string }[] = [];
+  filtroNivelNotas = '';                                 // '' = todos los niveles
+  alumnosNotasVisibles: AlumnoNotaActividad[] = [];
+  readonly SIN_NIVEL = 'sin';
+
+  /** En cualquier clase por grado, el nivel de inglés del alumno sirve para filtrar la grilla. */
+  get mostrarFiltroNivelNotas(): boolean {
+    return this.notasGradoTipo === 'grado';
+  }
+
+  aplicarFiltroNivelNotas(): void {
+    this.alumnosNotasVisibles = !this.filtroNivelNotas
+      ? this.alumnosNotas
+      : this.alumnosNotas.filter(a => (this.nivelPorAlumno.get(a.idAlumno) ?? this.SIN_NIVEL) === this.filtroNivelNotas);
+  }
   guardandoNotas = false;
   hayCambiosNotas = false;
   private nombresActividadOriginal: { [idActividad: number]: string } = {};
@@ -531,6 +549,10 @@ export class AcademicoComponent implements OnInit {
   onNotasSimpleFiltroChange(): void {
     this.estructuraNotas = [];
     this.alumnosNotas = [];
+    this.alumnosNotasVisibles = [];
+    this.nivelPorAlumno.clear();
+    this.opcionesNivelNotas = [];
+    this.filtroNivelNotas = '';
     this.nombresActividadOriginal = {};
     this.hayCambiosNotas = false;
     if (!this.notasSimpleIdClase || !this.notasSimpleIdPeriodo) return;
@@ -541,11 +563,23 @@ export class AcademicoComponent implements OnInit {
     this.loadingAlumnosNotas = true;
     forkJoin({
       estructura: this.academicoService.listarEstructuraClase(idClase, idPeriodo),
-      alumnos: this.academicoService.listarAlumnosNotasActividad(idClase, idPeriodo)
+      alumnos: this.academicoService.listarAlumnosNotasActividad(idClase, idPeriodo),
+      niveles: this.mostrarFiltroNivelNotas ? this.academicoService.nivelesInglesAlumnosClase(idClase, idPeriodo) : of([])
     }).subscribe({
-      next: ({ estructura, alumnos }) => {
+      next: ({ estructura, alumnos, niveles }) => {
         this.estructuraNotas = estructura;
         this.alumnosNotas = alumnos;
+
+        const nombres = new Map<string, string>();
+        for (const n of niveles) {
+          const clave = n.idNivelIngles != null ? `n${n.idNivelIngles}` : this.SIN_NIVEL;
+          this.nivelPorAlumno.set(n.idAlumno, clave);
+          nombres.set(clave, n.nivelNombre ?? 'Sin nivel asignado');
+        }
+        this.opcionesNivelNotas = [...nombres]
+          .map(([valor, nombre]) => ({ valor, nombre }))
+          .sort((a, b) => a.valor === this.SIN_NIVEL ? 1 : b.valor === this.SIN_NIVEL ? -1 : a.nombre.localeCompare(b.nombre));
+        this.aplicarFiltroNivelNotas();
         estructura.forEach(c => c.actividades.forEach(a => this.nombresActividadOriginal[a.id] = a.nombre));
         this.loadingAlumnosNotas = false;
       },

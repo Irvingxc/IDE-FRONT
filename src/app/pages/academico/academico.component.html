@@ -188,7 +188,7 @@
                    placeholder="Buscar maestro...">
             <mat-icon matSuffix>search</mat-icon>
             <mat-autocomplete #autoMaestroNotas="matAutocomplete">
-              <mat-option *ngFor="let m of maestrosFiltradosNotas; trackBy: trackByMaestro" [value]="m.nombre" (onSelectionChange)="onMaestroSeleccionadoNotas(m)">
+              <mat-option *ngFor="let m of maestrosFiltradosNotas; trackBy: trackByMaestro" [value]="m.nombre" (onSelectionChange)="$event.isUserInput && onMaestroSeleccionadoNotas(m)">
                 {{ m.nombre }}
               </mat-option>
             </mat-autocomplete>
@@ -205,7 +205,7 @@
                    [placeholder]="puedeElegirClaseNotas ? 'Buscar clase...' : 'Primero selecciona un maestro'">
             <mat-icon matSuffix>search</mat-icon>
             <mat-autocomplete #autoMateria="matAutocomplete">
-              <mat-option *ngFor="let nombre of materiasFiltradas" [value]="nombre" (onSelectionChange)="onMateriaSeleccionada(nombre)">
+              <mat-option *ngFor="let nombre of materiasFiltradas" [value]="nombre" (onSelectionChange)="$event.isUserInput && onMateriaSeleccionada(nombre)">
                 {{ nombre }}
               </mat-option>
             </mat-autocomplete>
@@ -222,7 +222,7 @@
                    [placeholder]="notasMateriaSeleccionada ? 'Buscar grado o nivel...' : 'Primero selecciona una clase'">
             <mat-icon matSuffix>search</mat-icon>
             <mat-autocomplete #autoGradoNotas="matAutocomplete">
-              <mat-option *ngFor="let g of gruposDeMateriaFiltrados; trackBy: trackByGrupo" [value]="g.nombre" (onSelectionChange)="onGrupoDeMateriaSeleccionado(g)">
+              <mat-option *ngFor="let g of gruposDeMateriaFiltrados; trackBy: trackByGrupo" [value]="g.nombre" (onSelectionChange)="$event.isUserInput && onGrupoDeMateriaSeleccionado(g)">
                 {{ g.nombre }}
               </mat-option>
             </mat-autocomplete>
@@ -239,7 +239,7 @@
                    [placeholder]="notasGradoId ? 'Buscar sección...' : 'Primero selecciona grado o nivel'">
             <mat-icon matSuffix>search</mat-icon>
             <mat-autocomplete #autoSeccionNotas="matAutocomplete">
-              <mat-option *ngFor="let s of seccionesDeClaseFiltradas" [value]="s" (onSelectionChange)="onSeccionDeClaseSeleccionada(s)">
+              <mat-option *ngFor="let s of seccionesDeClaseFiltradas" [value]="s" (onSelectionChange)="$event.isUserInput && onSeccionDeClaseSeleccionada(s)">
                 {{ s }}
               </mat-option>
             </mat-autocomplete>
@@ -256,10 +256,23 @@
                    [placeholder]="notasSeccion ? 'Buscar periodo...' : 'Primero selecciona una sección'">
             <mat-icon matSuffix>search</mat-icon>
             <mat-autocomplete #autoPeriodo="matAutocomplete">
-              <mat-option *ngFor="let p of periodosFiltrados" [value]="p.nombre" (onSelectionChange)="onPeriodoSeleccionadoNotas(p)">
+              <mat-option *ngFor="let p of periodosFiltrados" [value]="p.nombre" (onSelectionChange)="$event.isUserInput && onPeriodoSeleccionadoNotas(p)">
                 {{ p.nombre }}
               </mat-option>
             </mat-autocomplete>
+          </mat-form-field>
+
+          <!-- Clases por grado: filtrar a los alumnos por su nivel de inglés -->
+          <mat-form-field appearance="outline" class="filtro-ancho"
+                          *ngIf="mostrarFiltroNivelNotas && notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas">
+            <mat-label>Nivel de inglés</mat-label>
+            <mat-select [(ngModel)]="filtroNivelNotas" (ngModelChange)="aplicarFiltroNivelNotas()"
+                        [disabled]="opcionesNivelNotas.length === 0">
+              <mat-option value="">Todos los niveles</mat-option>
+              <mat-option *ngFor="let n of opcionesNivelNotas" [value]="n.valor">{{ n.nombre }}</mat-option>
+            </mat-select>
+            <mat-hint *ngIf="opcionesNivelNotas.length === 0">Los alumnos no tienen nivel asignado</mat-hint>
+            <mat-hint *ngIf="filtroNivelNotas">{{ alumnosNotasVisibles.length }} de {{ alumnosNotas.length }} alumnos</mat-hint>
           </mat-form-field>
         </div>
 
@@ -317,7 +330,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let a of alumnosNotas">
+              <tr *ngFor="let a of alumnosNotasVisibles">
                 <td class="col-nombre">
                   <span>{{ a.nombreCompleto }}</span>
                   <button type="button" class="btn-historial" title="Ver historial de cambios de notas"
@@ -332,6 +345,9 @@
               </tr>
               <tr *ngIf="alumnosNotas.length === 0">
                 <td [attr.colspan]="2 + actividadesPlanas.length" class="no-data-row"><span>No hay alumnos en el grado y sección de esta clase para el año del periodo.</span></td>
+              </tr>
+              <tr *ngIf="alumnosNotas.length > 0 && alumnosNotasVisibles.length === 0">
+                <td [attr.colspan]="2 + actividadesPlanas.length" class="no-data-row"><span>No hay alumnos de este nivel de inglés en la clase.</span></td>
               </tr>
             </tbody>
           </table>
@@ -387,7 +403,7 @@
                    placeholder="Buscar grado...">
             <mat-icon matSuffix>search</mat-icon>
             <mat-autocomplete #autoGrado="matAutocomplete">
-              <mat-option *ngFor="let g of gradosFiltrados" [value]="g.gradoNombre" (onSelectionChange)="onGradoSeleccionadoAutocomplete(g)">
+              <mat-option *ngFor="let g of gradosFiltrados" [value]="g.gradoNombre" (onSelectionChange)="$event.isUserInput && onGradoSeleccionadoAutocomplete(g)">
                 {{ g.gradoNombre }}
               </mat-option>
             </mat-autocomplete>
@@ -405,7 +421,7 @@
                    placeholder="Buscar nivel...">
             <mat-icon matSuffix>search</mat-icon>
             <mat-autocomplete #autoNivel="matAutocomplete">
-              <mat-option *ngFor="let n of nivelesFiltrados" [value]="n.nombre" (onSelectionChange)="onNivelSeleccionadoAutocomplete(n)">
+              <mat-option *ngFor="let n of nivelesFiltrados" [value]="n.nombre" (onSelectionChange)="$event.isUserInput && onNivelSeleccionadoAutocomplete(n)">
                 {{ n.nombre }}
               </mat-option>
             </mat-autocomplete>

@@ -71,7 +71,7 @@
         <mat-autocomplete #autoAlumno="matAutocomplete">
           <mat-option *ngFor="let a of alumnosSugeridos"
                       [value]="a.nombreCompleto"
-                      (onSelectionChange)="seleccionarAlumno(a)">
+                      (onSelectionChange)="$event.isUserInput && seleccionarAlumno(a)">
             <span class="opt-nombre">{{ a.nombreCompleto }}</span>
             <span class="opt-grado">{{ a.grado }}</span>
           </mat-option>

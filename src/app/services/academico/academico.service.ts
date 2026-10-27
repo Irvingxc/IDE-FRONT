@@ -255,6 +255,12 @@ export class AcademicoService {
     return this.http.get<HistorialNota[]>(`${this.base}/historial-notas`, { params });
   }
 
+  /** Nivel de inglés de cada alumno de la clase en el año del periodo (filtro de la grilla de notas). */
+  nivelesInglesAlumnosClase(idClase: number, idPeriodo: number): Observable<AlumnoNivelIngles[]> {
+    const params = new HttpParams().set('idClase', idClase).set('idPeriodo', idPeriodo);
+    return this.http.get<AlumnoNivelIngles[]>(`${this.base}/notas-actividad/niveles-ingles`, { params });
+  }
+
   listarDiario(idClase: number): Observable<DiarioSemana[]> {
     const params = new HttpParams().set('idClase', idClase);
     return this.http.get<DiarioSemana[]>(`${this.base}/diario`, { params });
@@ -264,6 +270,12 @@ export class AcademicoService {
     const params = new HttpParams().set('idClase', idClase);
     return this.http.put<DiarioSemana[]>(`${this.base}/diario`, semanas, { params });
   }
+}
+
+export interface AlumnoNivelIngles {
+  idAlumno:      string;
+  idNivelIngles: number | null;
+  nivelNombre:   string | null;
 }
 
 export interface DiarioSemana {
