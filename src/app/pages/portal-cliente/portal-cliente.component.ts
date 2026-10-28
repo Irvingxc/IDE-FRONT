@@ -12,6 +12,7 @@ import {
 import { TokenService } from '@app/services';
 import { MatDialog } from '@angular/material/dialog';
 import { CambiarPasswordDialogComponent } from '@app/components/cambiar-password-dialog/cambiar-password-dialog.component';
+import { dibujarEscalaDesempeno, nivelDesempeno, SIN_CALIFICAR, tieneNotas } from '@app/utils/nivel-desempeno';
 
 @Component({
   selector: 'app-portal-cliente',
@@ -31,6 +32,9 @@ export class PortalClienteComponent implements OnInit {
   anios: number[] = [];
 
   notas: PortalClaseNota[] = [];
+  // TEMPORAL: el detalle por concepto y actividad está oculto en el portal; se muestra
+  // solo Acumulativo y Examen. Para volver al formato anterior, poner en true.
+  readonly mostrarDetalleNotas = false;
   periodos: PortalPeriodo[] = [];
   periodoSeleccionadoId: number | null = null;
 
@@ -242,9 +246,28 @@ export class PortalClienteComponent implements OnInit {
         sumaActividades + (actividad.nota ?? 0), 0), 0);
   }
 
-  get promedioNotas(): number {
-    if (!this.notas.length) return 0;
-    return this.notas.reduce((s, c) => s + this.totalClase(c), 0) / this.notas.length;
+  /** Agrupa los conceptos de la clase: los que se llaman "examen" van a Examen; el resto, a Acumulativo. */
+  resumenClase(clase: PortalClaseNota): { nombre: string; nota: number; posible: number }[] {
+    const grupos = [
+      { nombre: 'Acumulativo', nota: 0, posible: 0 },
+      { nombre: 'Examen',      nota: 0, posible: 0 },
+    ];
+    for (const concepto of clase.conceptos) {
+      const nombre = concepto.nombre.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+      const grupo = grupos[nombre.includes('examen') ? 1 : 0];
+      for (const actividad of concepto.actividades) {
+        grupo.nota    += actividad.nota ?? 0;
+        grupo.posible += actividad.porcentaje;
+      }
+    }
+    return grupos.filter(g => g.posible > 0);
+  }
+
+  /** Promedio de las clases con al menos una nota; null si ninguna tiene notas. */
+  get promedioNotas(): number | null {
+    const calificadas = this.notas.filter(tieneNotas);
+    if (!calificadas.length) return null;
+    return calificadas.reduce((s, c) => s + this.totalClase(c), 0) / calificadas.length;
   }
 
   /**
@@ -306,35 +329,42 @@ export class PortalClienteComponent implements OnInit {
       });
 
       // ── Tabla resumen ───────────────────────────
-      const filas = this.notas.map(c => [
-        c.claseNombre,
-        c.maestroNombre || '—',
-        `${this.totalClase(c).toFixed(2)} / 100`,
-        this.totalClase(c) >= 70 ? 'Aprobado' : 'Reprobado',
-      ]);
+      const filas = this.notas.map(c => tieneNotas(c)
+        ? [c.claseNombre, c.maestroNombre || '—', `${this.totalClase(c).toFixed(2)} / 100`, nivelDesempeno(this.totalClase(c))]
+        : [c.claseNombre, c.maestroNombre || '—', '—', SIN_CALIFICAR]);
 
       autoTable(doc, {
         startY: y + 10,
-        head: [['Materia', 'Maestro', 'Nota', 'Estado']],
+        head: [['Materia', 'Maestro', 'Nota', 'Nivel de desempeño']],
         body: filas,
         styles:            { font: 'helvetica', fontSize: 9, cellPadding: 5, textColor: 40, lineColor: [230, 224, 216], lineWidth: 0.5 },
         headStyles:        { fillColor: GUINDA, textColor: 255, fontStyle: 'bold' },
         alternateRowStyles:{ fillColor: CREMA },
         columnStyles:      { 2: { halign: 'right' }, 3: { halign: 'center' } },
         margin:            { left: M, right: M },
+        didParseCell: (d: any) => {
+          if (d.section !== 'body' || d.column.index !== 3) return;
+          if (d.cell.raw === 'Inicial') { d.cell.styles.textColor = [198, 40, 40]; d.cell.styles.fontStyle = 'bold'; }
+          if (d.cell.raw === SIN_CALIFICAR) { d.cell.styles.textColor = 140; d.cell.styles.fontStyle = 'italic'; }
+        },
       });
 
       const finalY = (doc as any).lastAutoTable.finalY as number;
 
       // ── Promedio ────────────────────────────────
+      const promedio = this.promedioNotas;
       doc.setDrawColor(...GUINDA);
       doc.setLineWidth(1.5);
       doc.line(M, finalY + 14, pageW - M, finalY + 14);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(...GUINDA);
-      doc.text('Promedio del período:', pageW - M - 185, finalY + 33);
-      doc.text(`${this.promedioNotas.toFixed(2)} / 100`, pageW - M, finalY + 33, { align: 'right' });
+      doc.text('Promedio del período:', pageW - M - 260, finalY + 33);
+      doc.text(promedio === null ? SIN_CALIFICAR : `${promedio.toFixed(2)} / 100 · ${nivelDesempeno(promedio)}`,
+        pageW - M, finalY + 33, { align: 'right' });
+
+      // ── Escala de desempeño ─────────────────────
+      dibujarEscalaDesempeno(doc, autoTable, finalY + 62, M, GUINDA);
 
       // ── Pie ─────────────────────────────────────
       doc.setFont('helvetica', 'normal');

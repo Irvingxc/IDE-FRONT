@@ -1,0 +1,99 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>Mi asistencia</h2>
+      <span class="subtitulo" *ngIf="datos?.nombreCompleto">{{ datos?.nombreCompleto }}</span>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button mat-icon-button (click)="moverMes(-1)" aria-label="Mes anterior">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <mat-form-field appearance="outline" class="mes-select">
+      <mat-label>Mes</mat-label>
+      <mat-select [(value)]="mes" (selectionChange)="cargar()">
+        <mat-option *ngFor="let m of meses" [value]="m">{{ nombreMes(m) }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="anio-select">
+      <mat-label>Año</mat-label>
+      <mat-select [(value)]="anio" (selectionChange)="cargar()">
+        <mat-option *ngFor="let a of anios" [value]="a">{{ a }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <button mat-icon-button (click)="moverMes(1)" [disabled]="esMesActual" aria-label="Mes siguiente">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <div class="loading-bar" *ngIf="cargando">
+    <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+  </div>
+
+  <div class="aviso" *ngIf="!cargando && error">
+    <mat-icon>error_outline</mat-icon>
+    <p>No se pudo cargar la asistencia. Intente de nuevo.</p>
+  </div>
+
+  <div class="aviso" *ngIf="!cargando && datos && !datos.nombreCompleto">
+    <mat-icon>info</mat-icon>
+    <p>Su usuario no está ligado a un empleado. Pida a administración que lo vincule para ver sus marcas.</p>
+  </div>
+
+  <ng-container *ngIf="!cargando && datos?.nombreCompleto">
+    <div class="resumen">
+      <div class="resumen-item presente">
+        <span class="valor">{{ diasPresente }}</span>
+        <span class="etiqueta">Días presente</span>
+      </div>
+      <div class="resumen-item ausente">
+        <span class="valor">{{ diasAusente }}</span>
+        <span class="etiqueta">Ausencias</span>
+      </div>
+      <div class="resumen-item">
+        <span class="valor">{{ horasTotales | number:'1.0-1' }}</span>
+        <span class="etiqueta">Horas registradas</span>
+      </div>
+    </div>
+
+    <div class="aviso" *ngIf="datos?.dias?.length === 0">
+      <mat-icon>info</mat-icon>
+      <p>No hay días para mostrar en este mes.</p>
+    </div>
+
+    <div class="tabla-scroll" *ngIf="datos?.dias?.length">
+      <table class="tabla-asistencia">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th class="col-hora">Entrada</th>
+            <th class="col-hora">Salida</th>
+            <th class="col-num">Horas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of datos?.dias" [class.fila-no-laboral]="claseEstado(d) === 'no-laboral'">
+            <td>
+              <span class="dia-semana">{{ diaSemana(d) }}</span>
+              {{ fechaLocal(d) | date:'dd/MM' }}
+            </td>
+            <td>
+              <span class="estado-badge" [ngClass]="claseEstado(d)" [title]="d.feriado || ''">
+                {{ d.estado }}
+              </span>
+            </td>
+            <td class="col-hora">{{ d.horaEntrada || '—' }}</td>
+            <td class="col-hora">
+              <span *ngIf="d.horaSalida">{{ d.horaSalida }}</span>
+              <span *ngIf="!d.horaSalida && d.horaEntrada" class="sin-marca">Sin marca</span>
+              <span *ngIf="!d.horaSalida && !d.horaEntrada">—</span>
+            </td>
+            <td class="col-num">{{ d.duracion ? (d.duracion | number:'1.0-2') : '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+</div>

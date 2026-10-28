@@ -133,6 +133,12 @@ const routes: Routes = [
         loadChildren: () => import('./pages/reportes/reportes.module').then(m => m.ReportesModule)
       },
       {
+        path: 'mi-asistencia',
+        canLoad: [AuthGuard, ModuloGuard],
+        data: { modulo: 'MI_ASISTENCIA' },
+        loadChildren: () => import('./pages/mi-asistencia/mi-asistencia.module').then(m => m.MiAsistenciaModule)
+      },
+      {
         path: 'inmueble',
         canLoad: [AuthGuard],
         loadChildren: () => import('./pages/inmueble/inmueble.module').then(m => m.InmuebleModule)

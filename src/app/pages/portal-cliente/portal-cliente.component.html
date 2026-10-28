@@ -99,6 +99,28 @@
                 </mat-panel-description>
               </mat-expansion-panel-header>
 
+              <!-- TEMPORAL: resumen Acumulativo / Examen en lugar del detalle (ver mostrarDetalleNotas) -->
+              <div class="notas-concepto" *ngIf="!mostrarDetalleNotas">
+                <table class="notas-actividades-table">
+                  <thead>
+                    <tr>
+                      <th>Componente</th>
+                      <th>Nota</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let grupo of resumenClase(clase)">
+                      <td>{{ grupo.nombre }}</td>
+                      <td class="act-nota">
+                        {{ grupo.nota | number:'1.0-2' }}
+                        <span class="act-posible"> / {{ grupo.posible | number:'1.0-2' }}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <ng-container *ngIf="mostrarDetalleNotas">
               <div class="notas-concepto" *ngFor="let concepto of clase.conceptos">
                 <div class="notas-concepto-nombre">{{ concepto.nombre }}</div>
                 <table class="notas-actividades-table">
@@ -119,6 +141,7 @@
                   </tbody>
                 </table>
               </div>
+              </ng-container>
             </mat-expansion-panel>
           </mat-accordion>
         </mat-tab>

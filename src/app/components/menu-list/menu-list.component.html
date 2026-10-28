@@ -20,6 +20,10 @@
       <mat-icon>grade</mat-icon>
       <span class="navegacion-list-label">Académico</span>
     </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/mi-asistencia" *ngIf="tieneModulo('MI_ASISTENCIA')">
+      <mat-icon>schedule</mat-icon>
+      <span class="navegacion-list-label">Mi asistencia</span>
+    </a>
     <a mat-list-item (click)="closeMenu()" routerLink="/facturacion" *ngIf="tieneModulo('PAGOS')">
       <mat-icon>receipt_long</mat-icon>
       <span class="navegacion-list-label">Facturación SAR</span>

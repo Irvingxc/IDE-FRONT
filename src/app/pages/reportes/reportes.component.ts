@@ -4,6 +4,7 @@ import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.servi
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { FeriadosDialogComponent } from './feriados-dialog/feriados-dialog.component';
+import { dibujarEscalaDesempeno, nivelDesempeno, SIN_CALIFICAR, tieneNotas } from '@app/utils/nivel-desempeno';
 import {
   AcademicoService, PeriodoResponse, AlumnoGrado, ReporteNotaClase
 } from '@app/services/academico/academico.service';
@@ -204,9 +205,11 @@ export class ReportesComponent implements OnInit {
       s + c.actividades.reduce((sa, a) => sa + (a.nota ?? 0), 0), 0);
   }
 
-  get promedioNotas(): number {
-    if (!this.reporteNotas.length) return 0;
-    return this.reporteNotas.reduce((s, c) => s + this.totalClaseNotas(c), 0) / this.reporteNotas.length;
+  /** Promedio de las clases con al menos una nota; null si ninguna tiene notas. */
+  get promedioNotas(): number | null {
+    const calificadas = this.reporteNotas.filter(tieneNotas);
+    if (!calificadas.length) return null;
+    return calificadas.reduce((s, c) => s + this.totalClaseNotas(c), 0) / calificadas.length;
   }
 
   descargandoNotasPdf = false;
@@ -274,35 +277,42 @@ export class ReportesComponent implements OnInit {
       });
 
       // ── Tabla resumen ──
-      const filas = this.reporteNotas.map(c => [
-        c.claseNombre,
-        c.maestroNombre || '—',
-        `${this.totalClaseNotas(c).toFixed(2)} / 100`,
-        this.totalClaseNotas(c) >= 70 ? 'Aprobado' : 'Reprobado',
-      ]);
+      const filas = this.reporteNotas.map(c => tieneNotas(c)
+        ? [c.claseNombre, c.maestroNombre || '—', `${this.totalClaseNotas(c).toFixed(2)} / 100`, nivelDesempeno(this.totalClaseNotas(c))]
+        : [c.claseNombre, c.maestroNombre || '—', '—', SIN_CALIFICAR]);
 
       autoTable(doc, {
         startY: y + 10,
-        head: [['Materia', 'Maestro', 'Nota', 'Estado']],
+        head: [['Materia', 'Maestro', 'Nota', 'Nivel de desempeño']],
         body: filas,
         styles:            { font: 'helvetica', fontSize: 9, cellPadding: 5, textColor: 40, lineColor: [230, 224, 216], lineWidth: 0.5 },
         headStyles:        { fillColor: GUINDA, textColor: 255, fontStyle: 'bold' },
         alternateRowStyles:{ fillColor: CREMA },
         columnStyles:      { 2: { halign: 'right' }, 3: { halign: 'center' } },
         margin:            { left: M, right: M },
+        didParseCell: (d: any) => {
+          if (d.section !== 'body' || d.column.index !== 3) return;
+          if (d.cell.raw === 'Inicial') { d.cell.styles.textColor = [198, 40, 40]; d.cell.styles.fontStyle = 'bold'; }
+          if (d.cell.raw === SIN_CALIFICAR) { d.cell.styles.textColor = 140; d.cell.styles.fontStyle = 'italic'; }
+        },
       });
 
       const finalY = (doc as any).lastAutoTable.finalY as number;
 
       // ── Promedio ──
+      const promedio = this.promedioNotas;
       doc.setDrawColor(...GUINDA);
       doc.setLineWidth(1.5);
       doc.line(M, finalY + 14, pageW - M, finalY + 14);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(11);
       doc.setTextColor(...GUINDA);
-      doc.text('Promedio del período:', pageW - M - 185, finalY + 33);
-      doc.text(`${this.promedioNotas.toFixed(2)} / 100`, pageW - M, finalY + 33, { align: 'right' });
+      doc.text('Promedio del período:', pageW - M - 260, finalY + 33);
+      doc.text(promedio === null ? SIN_CALIFICAR : `${promedio.toFixed(2)} / 100 · ${nivelDesempeno(promedio)}`,
+        pageW - M, finalY + 33, { align: 'right' });
+
+      // ── Escala de desempeño ──
+      dibujarEscalaDesempeno(doc, autoTable, finalY + 62, M, GUINDA);
 
       // ── Pie ──
       doc.setFont('helvetica', 'normal');

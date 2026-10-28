@@ -43,6 +43,22 @@ export interface EmpleadoReporteMensualItem {
   horasExtra:          number;
 }
 
+export interface MiAsistenciaDia {
+  fecha:          string;
+  estado:         'Presente' | 'Ausente' | 'Feriado' | 'Fin de semana';
+  horaEntrada:    string | null;
+  horaSalida:     string | null;   // null si solo hubo una marca ese día
+  duracion:       number | null;
+  cantidadMarcas: number | null;
+  feriado:        string | null;
+}
+
+export interface MiAsistencia {
+  nombreCompleto: string | null;   // null si el usuario no está ligado a un empleado
+  codigoInterno:  string | null;
+  dias:           MiAsistenciaDia[];
+}
+
 export interface ReporteMensualParams {
   desde:             Date;
   hasta:             Date;
@@ -120,6 +136,11 @@ export class AsistenciaService {
       .set('horaSalida', p.horaSalida)
       .set('jornadaHoras', p.jornadaHoras);
     return this.http.get<EmpleadoReporteMensualItem[]>(`${this.base}/empleados/reporte-mensual`, { params });
+  }
+
+  getMiAsistencia(anio: number, mes: number): Observable<MiAsistencia> {
+    const params = new HttpParams().set('anio', anio).set('mes', mes);
+    return this.http.get<MiAsistencia>(`${this.base}/mi-asistencia`, { params });
   }
 
   // ── Feriados ──────────────────────────────────────────────
