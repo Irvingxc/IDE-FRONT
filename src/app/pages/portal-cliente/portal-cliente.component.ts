@@ -12,7 +12,7 @@ import {
 import { TokenService } from '@app/services';
 import { MatDialog } from '@angular/material/dialog';
 import { CambiarPasswordDialogComponent } from '@app/components/cambiar-password-dialog/cambiar-password-dialog.component';
-import { dibujarEscalaDesempeno, nivelDesempeno, SIN_CALIFICAR, tieneNotas } from '@app/utils/nivel-desempeno';
+import { nivelDesempeno, SIN_CALIFICAR, tieneNotas } from '@app/utils/nivel-desempeno';
 
 @Component({
   selector: 'app-portal-cliente',
@@ -362,9 +362,6 @@ export class PortalClienteComponent implements OnInit {
       doc.text('Promedio del período:', pageW - M - 260, finalY + 33);
       doc.text(promedio === null ? SIN_CALIFICAR : `${promedio.toFixed(2)} / 100 · ${nivelDesempeno(promedio)}`,
         pageW - M, finalY + 33, { align: 'right' });
-
-      // ── Escala de desempeño ─────────────────────
-      dibujarEscalaDesempeno(doc, autoTable, finalY + 62, M, GUINDA);
 
       // ── Pie ─────────────────────────────────────
       doc.setFont('helvetica', 'normal');

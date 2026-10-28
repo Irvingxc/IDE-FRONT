@@ -4,7 +4,7 @@ import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.servi
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { FeriadosDialogComponent } from './feriados-dialog/feriados-dialog.component';
-import { dibujarEscalaDesempeno, nivelDesempeno, SIN_CALIFICAR, tieneNotas } from '@app/utils/nivel-desempeno';
+import { nivelDesempeno, SIN_CALIFICAR, tieneNotas } from '@app/utils/nivel-desempeno';
 import {
   AcademicoService, PeriodoResponse, AlumnoGrado, ReporteNotaClase
 } from '@app/services/academico/academico.service';
@@ -310,9 +310,6 @@ export class ReportesComponent implements OnInit {
       doc.text('Promedio del período:', pageW - M - 260, finalY + 33);
       doc.text(promedio === null ? SIN_CALIFICAR : `${promedio.toFixed(2)} / 100 · ${nivelDesempeno(promedio)}`,
         pageW - M, finalY + 33, { align: 'right' });
-
-      // ── Escala de desempeño ──
-      dibujarEscalaDesempeno(doc, autoTable, finalY + 62, M, GUINDA);
 
       // ── Pie ──
       doc.setFont('helvetica', 'normal');
