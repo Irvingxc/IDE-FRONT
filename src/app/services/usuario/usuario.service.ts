@@ -61,11 +61,15 @@ export class UsuarioService {
   }
 
   crearRol(nombre: string): Observable<string> {
-    return this.http.post<string>(`${environment.url}api/Usuario/roles`, nombre);
+    return this.http.post<string>(`${environment.url}api/Usuario/roles`, JSON.stringify(nombre), {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   renombrarRol(nombreActual: string, nombreNuevo: string): Observable<string> {
-    return this.http.put<string>(`${environment.url}api/Usuario/roles/${encodeURIComponent(nombreActual)}`, nombreNuevo);
+    return this.http.put<string>(`${environment.url}api/Usuario/roles/${encodeURIComponent(nombreActual)}`, JSON.stringify(nombreNuevo), {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   eliminarRol(nombre: string): Observable<void> {

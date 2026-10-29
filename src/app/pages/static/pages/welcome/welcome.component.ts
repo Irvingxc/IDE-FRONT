@@ -16,7 +16,7 @@ interface AlertaPromocion {
 }
 
 /** Roles que ven la alerta de promoción. */
-const ROLES_ALERTA_PROMOCION = ['Administrador', 'Director', 'Secretaria'];
+const ROLES_ALERTA_PROMOCION = ['Administrador', 'Director', 'Confianza'];
 /** Roles que pueden promover (el backend lo exige). */
 const ROLES_PROMUEVEN = ['Administrador', 'Director'];
 /** Desde qué mes se avisa (0 = enero): octubre. */
