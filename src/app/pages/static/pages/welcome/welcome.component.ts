@@ -46,7 +46,7 @@ const ALL_MODULES: ModuleCard[] = [
   { icon: 'shopping_cart',   title: 'Compras / Entradas',     subtitle: 'Órdenes y proveedores',         status: 'Activo', color: '#9C27B0', route: '/compras',                 modulo: 'ENTRADAS'   },
   { icon: 'badge',           title: 'Empleados',              subtitle: 'Docentes y personal',           status: 'Activo', color: '#F44336', route: '/empleados',               modulo: 'EMPLEADOS'  },
   { icon: 'mail',            title: 'Correos',                subtitle: 'Correos y avisos a padres',     status: 'Activo', color: '#1565C0', route: '/correos',                 modulo: 'WHATSAPP'   },
-  { icon: 'grade',           title: 'Notas',                  subtitle: 'Períodos, materias y calificaciones', status: 'Nuevo', color: '#8E24AA', route: '/academico',         modulo: 'ACADEMICO'  },
+  { icon: 'grade',           title: 'Gestión académica',      subtitle: 'Períodos, materias y calificaciones', status: 'Nuevo', color: '#8E24AA', route: '/academico',         modulo: 'ACADEMICO'  },
   { icon: 'bar_chart',       title: 'Reportes',               subtitle: 'Estadísticas y libros',         status: 'Activo', color: '#607D8B', route: '/reportes',                modulo: 'REPORTES'   },
   { icon: 'account_balance', title: 'Contabilidad',           subtitle: 'Ingresos, egresos y balances',  status: 'Nuevo',  color: '#6B0F1A', route: '/contabilidad',            modulo: 'CONTABILIDAD'},
   { icon: 'account_balance_wallet', title: 'Cuentas por Cobrar', subtitle: 'Mensualidades y matrículas',    status: 'Activo', color: '#6B0F1A', route: '/cxc',                     modulo: 'CXC'         },

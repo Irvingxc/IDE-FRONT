@@ -7,7 +7,7 @@
     </div>
   </div>
 
-  <mat-tab-group>
+  <mat-tab-group (selectedTabChange)="onTabChange($event)">
 
     <!-- ═══ ASISTENCIA ═══ -->
     <mat-tab label="Asistencia">
@@ -444,6 +444,150 @@
             </div>
           </div>
         </div>
+
+      </div>
+    </mat-tab>
+
+    <!-- ═══ AVANCE DE NOTAS (por docente) ═══ -->
+    <mat-tab label="Avance de notas">
+      <div class="tab-content">
+
+        <div class="asistencia-filtros">
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Período</mat-label>
+            <mat-select [(ngModel)]="avanceIdPeriodo" (selectionChange)="cargarAvanceNotas()">
+              <mat-option *ngFor="let p of notasPeriodos" [value]="p.id">{{ p.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-md">
+            <mat-label>Docente</mat-label>
+            <mat-select [(ngModel)]="avanceMaestro" (selectionChange)="recalcularAvance()" [disabled]="cargandoAvance">
+              <mat-option value="">Todos</mat-option>
+              <mat-option *ngFor="let d of avanceDocentesOpciones" [value]="d.clave">{{ d.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field-sm">
+            <mat-label>Estado</mat-label>
+            <mat-select [(ngModel)]="avanceEstado" (selectionChange)="recalcularAvance()">
+              <mat-option value="">Todos</mat-option>
+              <mat-option value="completa">Completas</mat-option>
+              <mat-option value="proceso">En proceso</mat-option>
+              <mat-option value="sin">Sin notas</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-stroked-button (click)="cargarAvanceNotas()" [disabled]="avanceIdPeriodo == null || cargandoAvance">
+            <mat-icon>refresh</mat-icon> Actualizar
+          </button>
+
+          <button mat-flat-button color="primary"
+                  *ngIf="avanceDocentes.length > 0"
+                  [disabled]="exportandoAvance || cargandoAvance"
+                  (click)="exportarAvanceExcel()">
+            <mat-icon>{{ exportandoAvance ? 'hourglass_empty' : 'download' }}</mat-icon>
+            {{ exportandoAvance ? 'Generando…' : 'Exportar Excel' }}
+          </button>
+        </div>
+
+        <div *ngIf="cargandoAvance" class="loading-row">
+          <mat-icon class="spin-icon">sync</mat-icon>
+          <span>Cargando avance de notas...</span>
+        </div>
+
+        <div *ngIf="!cargandoAvance && avanceBuscado && avanceDocentes.length === 0" class="en-construccion">
+          <mat-icon>info</mat-icon>
+          <span>No hay clases que coincidan con los filtros en este período.</span>
+        </div>
+
+        <ng-container *ngIf="!cargandoAvance && avanceDocentes.length > 0">
+          <div class="resumen-chips resumen-chips--inline" *ngIf="avanceTotales as t">
+            <span class="chip chip-neutro">{{ t.clases }} clases</span>
+            <span class="chip chip-presente">{{ t.completas }} completas</span>
+            <span class="chip chip-proceso">{{ t.enProceso }} en proceso</span>
+            <span class="chip chip-ausente">{{ t.sinNotas }} sin notas</span>
+            <span class="chip chip-extra">Avance general {{ t.porcentaje }}%</span>
+          </div>
+
+          <div class="avance-docente" *ngFor="let d of avanceDocentes">
+            <div class="avance-docente-header">
+              <div>
+                <strong>{{ d.nombre }}</strong>
+                <span class="avance-docente-resumen">
+                  {{ d.clases.length }} {{ d.clases.length === 1 ? 'clase' : 'clases' }} ·
+                  {{ d.completas }} completas · {{ d.enProceso }} en proceso · {{ d.sinNotas }} sin notas
+                </span>
+              </div>
+              <span class="avance-pct" [ngClass]="'avance-' + (d.cargadas === 0 ? 'sin' : d.cargadas >= d.esperadas ? 'completa' : 'proceso')">
+                {{ porcentajeAvance(d.cargadas, d.esperadas) }}%
+              </span>
+            </div>
+
+            <div class="tabla-scroll">
+              <table class="avance-tabla">
+                <thead>
+                  <tr>
+                    <th>Clase</th>
+                    <th>Grado / Sección</th>
+                    <th class="num">Alumnos</th>
+                    <th class="num">Actividades</th>
+                    <th class="num">Notas cargadas</th>
+                    <th class="avance-col">% avance</th>
+                    <th>Última carga</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngFor="let c of d.clases">
+                    <tr class="avance-fila" (click)="toggleAvanceClase(c.idClase)">
+                      <td>
+                        {{ c.claseNombre }}
+                        <small class="opt-extra" *ngIf="!c.activo">(inactiva)</small>
+                      </td>
+                      <td>{{ grupoClase(c) }}</td>
+                      <td class="num">{{ c.alumnos }}</td>
+                      <td class="num">{{ c.actividades }}</td>
+                      <td class="num">{{ c.notasCargadas }} / {{ c.notasEsperadas }}</td>
+                      <td class="avance-col">
+                        <div class="avance-barra" [ngClass]="'avance-' + estadoAvance(c)">
+                          <div class="avance-barra-relleno" [style.width.%]="porcentajeAvance(c.notasCargadas, c.notasEsperadas)"></div>
+                        </div>
+                        <span class="avance-barra-texto">{{ porcentajeAvance(c.notasCargadas, c.notasEsperadas) }}%</span>
+                      </td>
+                      <td>{{ c.ultimaCarga ? (c.ultimaCarga | date:'dd/MM/yyyy h:mm a') : '—' }}</td>
+                      <td class="num">
+                        <mat-icon class="avance-expandir">{{ avanceAbiertas.has(c.idClase) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                      </td>
+                    </tr>
+                    <tr *ngIf="avanceAbiertas.has(c.idClase)" class="avance-detalle">
+                      <td colspan="8">
+                        <div *ngIf="c.detalleActividades.length === 0" class="opt-extra">
+                          La clase no tiene actividades configuradas para este período.
+                        </div>
+                        <table *ngIf="c.detalleActividades.length > 0" class="notas-actividades">
+                          <thead>
+                            <tr><th>Concepto</th><th>Actividad</th><th>Notas cargadas</th></tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let a of c.detalleActividades">
+                              <td>{{ a.conceptoNombre || '—' }}</td>
+                              <td>{{ a.actividadNombre }}</td>
+                              <td>
+                                <span [class.avance-falta]="a.notasCargadas < a.alumnos">{{ a.notasCargadas }} / {{ a.alumnos }}</span>
+                                <small class="opt-extra" *ngIf="a.notasCargadas < a.alumnos">· faltan {{ a.alumnos - a.notasCargadas }}</small>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </ng-container>
 
       </div>
     </mat-tab>

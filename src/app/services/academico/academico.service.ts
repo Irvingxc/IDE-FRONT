@@ -141,6 +141,31 @@ export interface ReporteNotaClase {
   conceptos:     ReporteNotaConcepto[];
 }
 
+export interface AvanceNotasActividad {
+  idActividad:     number;
+  actividadNombre: string;
+  conceptoNombre:  string | null;
+  alumnos:         number;
+  notasCargadas:   number;
+}
+
+export interface AvanceNotasClase {
+  idClase:            number;
+  claseNombre:        string;
+  idMaestro:          string | null;
+  maestroNombre:      string | null;
+  gradoNombre:        string | null;
+  seccion:            string | null;
+  nivelInglesNombre:  string | null;
+  activo:             boolean;
+  alumnos:            number;
+  actividades:        number;
+  notasEsperadas:     number;
+  notasCargadas:      number;
+  ultimaCarga:        string | null;
+  detalleActividades: AvanceNotasActividad[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class AcademicoService {
   private base = `${environment.url}api/Academico`;
@@ -245,6 +270,11 @@ export class AcademicoService {
   reporteNotasAlumno(identidad: string, idPeriodo: number): Observable<ReporteNotaClase[]> {
     const params = new HttpParams().set('identidad', identidad).set('idPeriodo', idPeriodo);
     return this.http.get<ReporteNotaClase[]>(`${this.base}/reporte-notas`, { params });
+  }
+
+  reporteAvanceNotas(idPeriodo: number): Observable<AvanceNotasClase[]> {
+    const params = new HttpParams().set('idPeriodo', idPeriodo);
+    return this.http.get<AvanceNotasClase[]>(`${this.base}/reporte-avance-notas`, { params });
   }
 
   historialNotasAlumno(idClase: number, idPeriodo: number, idAlumno: string): Observable<HistorialNota[]> {

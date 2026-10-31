@@ -198,3 +198,90 @@
   .act-nota .sin-calificar { color: #bbb; }
   .act-posible { color: #aaa; font-size: 12px; }
 }
+
+// ── Avance de carga de notas por docente ──
+.chip-proceso {
+  background: #fff8e1;
+  color: #b26a00;
+}
+
+.avance-docente {
+  border: 1px solid #e6e0d8;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.avance-docente-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #faf6f0;
+
+  strong { font-size: 15px; color: #6B0F1A; }
+  .avance-docente-resumen { display: block; font-size: 12px; color: #888; margin-top: 2px; }
+}
+
+.avance-pct {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+
+  &.avance-completa { background: #e8f5e9; color: #2e7d32; }
+  &.avance-proceso  { background: #fff8e1; color: #b26a00; }
+  &.avance-sin      { background: #fff3f3; color: #c62828; }
+}
+
+.avance-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    text-align: left;
+    font-weight: 600;
+    color: #999;
+    font-size: 11px;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+  td { padding: 8px 12px; border-top: 1px solid #f2efe9; }
+  .num { text-align: center; white-space: nowrap; }
+  .avance-col { min-width: 150px; white-space: nowrap; }
+}
+
+.avance-fila {
+  cursor: pointer;
+  &:hover { background: #fcfaf7; }
+}
+
+.avance-expandir { color: #999; vertical-align: middle; }
+
+.avance-barra {
+  display: inline-block;
+  vertical-align: middle;
+  width: 90px;
+  height: 8px;
+  border-radius: 999px;
+  background: #eee;
+  overflow: hidden;
+
+  .avance-barra-relleno { height: 100%; border-radius: 999px; }
+  &.avance-completa .avance-barra-relleno { background: #43a047; }
+  &.avance-proceso  .avance-barra-relleno { background: #f9a825; }
+  &.avance-sin      .avance-barra-relleno { background: #e53935; }
+}
+
+.avance-barra-texto { margin-left: 8px; font-weight: 600; color: #555; }
+
+.avance-detalle > td {
+  background: #fcfaf7;
+  padding: 8px 24px 12px;
+}
+
+.avance-falta { color: #c62828; font-weight: 600; }

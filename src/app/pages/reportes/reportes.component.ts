@@ -3,11 +3,25 @@ import { AsistenciaService, AsistenciaReporteItem, EmpleadoReporteItem, Empleado
 import { CatalogoService, GradoDto } from '@app/services/catalogo/catalogo.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTabChangeEvent } from '@angular/material/tabs';
 import { FeriadosDialogComponent } from './feriados-dialog/feriados-dialog.component';
 import { nivelDesempeno, SIN_CALIFICAR, tieneNotas } from '@app/utils/nivel-desempeno';
 import {
-  AcademicoService, PeriodoResponse, AlumnoGrado, ReporteNotaClase
+  AcademicoService, PeriodoResponse, AlumnoGrado, ReporteNotaClase, AvanceNotasClase
 } from '@app/services/academico/academico.service';
+
+type EstadoAvance = 'completa' | 'proceso' | 'sin';
+
+interface AvanceDocente {
+  clave:      string;
+  nombre:     string;
+  clases:     AvanceNotasClase[];
+  cargadas:   number;
+  esperadas:  number;
+  completas:  number;
+  enProceso:  number;
+  sinNotas:   number;
+}
 
 @Component({
   selector: 'app-reportes',
@@ -121,6 +135,80 @@ export class ReportesComponent implements OnInit {
         && this.notasIdPeriodo != null;
   }
 
+  // ── Avance de notas (por docente) ────────────────────────
+  avanceIdPeriodo: number | null = null;
+  avanceMaestro = '';                       // clave del docente; '' = todos
+  avanceEstado: '' | EstadoAvance = '';
+  avanceClases: AvanceNotasClase[] = [];
+  cargandoAvance = false;
+  avanceBuscado = false;
+  avanceAbiertas = new Set<number>();
+  exportandoAvance = false;
+
+  private claveDocente(c: AvanceNotasClase): string {
+    return c.idMaestro ?? '';
+  }
+
+  /** % de notas cargadas; las clases sin alumnos o sin actividades cuentan como 0. */
+  porcentajeAvance(cargadas: number, esperadas: number): number {
+    return esperadas > 0 ? Math.round((cargadas / esperadas) * 100) : 0;
+  }
+
+  estadoAvance(c: AvanceNotasClase): EstadoAvance {
+    if (c.notasCargadas === 0) return 'sin';
+    return c.notasEsperadas > 0 && c.notasCargadas >= c.notasEsperadas ? 'completa' : 'proceso';
+  }
+
+  grupoClase(c: AvanceNotasClase): string {
+    const partes = [c.gradoNombre, c.seccion ? `Sección ${c.seccion}` : null, c.nivelInglesNombre].filter(p => p);
+    return partes.join(' · ') || '—';
+  }
+
+  // Se calculan al cargar y al cambiar un filtro (no como getters: el template
+  // recibiría arreglos nuevos en cada detección de cambios y redibujaría todo).
+  avanceDocentesOpciones: { clave: string; nombre: string }[] = [];
+  avanceDocentes: AvanceDocente[] = [];
+  avanceTotales = { clases: 0, completas: 0, enProceso: 0, sinNotas: 0, porcentaje: 0 };
+
+  recalcularAvance(): void {
+    const mapa = new Map<string, string>();
+    this.avanceClases.forEach(c => mapa.set(this.claveDocente(c), c.maestroNombre || 'Sin docente asignado'));
+    this.avanceDocentesOpciones = Array.from(mapa, ([clave, nombre]) => ({ clave, nombre }))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+    const grupos = new Map<string, AvanceDocente>();
+    for (const c of this.avanceClases) {
+      const clave = this.claveDocente(c);
+      if (this.avanceMaestro && clave !== this.avanceMaestro) continue;
+      if (this.avanceEstado && this.estadoAvance(c) !== this.avanceEstado) continue;
+
+      let g = grupos.get(clave);
+      if (!g) {
+        g = { clave, nombre: c.maestroNombre || 'Sin docente asignado', clases: [],
+              cargadas: 0, esperadas: 0, completas: 0, enProceso: 0, sinNotas: 0 };
+        grupos.set(clave, g);
+      }
+      g.clases.push(c);
+      g.cargadas  += c.notasCargadas;
+      g.esperadas += c.notasEsperadas;
+      const e = this.estadoAvance(c);
+      if (e === 'completa') g.completas++;
+      else if (e === 'proceso') g.enProceso++;
+      else g.sinNotas++;
+    }
+    const docentes = Array.from(grupos.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+    this.avanceDocentes = docentes;
+
+    const suma = (f: (d: AvanceDocente) => number) => docentes.reduce((s, d) => s + f(d), 0);
+    this.avanceTotales = {
+      clases:     suma(d => d.clases.length),
+      completas:  suma(d => d.completas),
+      enProceso:  suma(d => d.enProceso),
+      sinNotas:   suma(d => d.sinNotas),
+      porcentaje: this.porcentajeAvance(suma(d => d.cargadas), suma(d => d.esperadas)),
+    };
+  }
+
   constructor(
     private asistenciaService: AsistenciaService,
     private catalogoService: CatalogoService,
@@ -138,7 +226,117 @@ export class ReportesComponent implements OnInit {
       this.notasPeriodos = p;
       const activo = p.find(x => x.activo);
       this.notasIdPeriodo = activo?.id ?? p[0]?.id ?? null;
+      this.avanceIdPeriodo = this.notasIdPeriodo;
     });
+  }
+
+  // ── Avance de notas ──
+
+  /** Se carga la primera vez que se abre la pestaña. */
+  onTabChange(e: MatTabChangeEvent): void {
+    if (e.tab.textLabel === 'Avance de notas' && !this.avanceBuscado) this.cargarAvanceNotas();
+  }
+
+  cargarAvanceNotas(): void {
+    if (this.avanceIdPeriodo == null) return;
+    this.cargandoAvance = true;
+    this.avanceBuscado = true;
+    this.avanceAbiertas.clear();
+    this.academicoService.reporteAvanceNotas(this.avanceIdPeriodo).subscribe({
+      next: (r) => {
+        this.avanceClases = r;
+        if (this.avanceMaestro && !r.some(c => this.claveDocente(c) === this.avanceMaestro)) this.avanceMaestro = '';
+        this.recalcularAvance();
+        this.cargandoAvance = false;
+      },
+      error: (err) => {
+        this.avanceClases = [];
+        this.recalcularAvance();
+        this.cargandoAvance = false;
+        this.snack.open(err.error?.errores?.mensaje ?? 'No se pudo cargar el avance de notas', '', { duration: 3000 });
+      }
+    });
+  }
+
+  toggleAvanceClase(idClase: number): void {
+    if (this.avanceAbiertas.has(idClase)) this.avanceAbiertas.delete(idClase);
+    else this.avanceAbiertas.add(idClase);
+  }
+
+  /** Excel con una fila por clase (respeta los filtros de docente y estado). */
+  async exportarAvanceExcel(): Promise<void> {
+    const docentes = this.avanceDocentes;
+    if (this.exportandoAvance || docentes.length === 0) return;
+    this.exportandoAvance = true;
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const libro = new ExcelJS.Workbook();
+      const hoja  = libro.addWorksheet('Avance de notas', { views: [{ state: 'frozen', ySplit: 5 }] });
+
+      const periodo = this.notasPeriodos.find(p => p.id === this.avanceIdPeriodo);
+      const hoy = new Date();
+      const fecha = hoy.toLocaleDateString('es-HN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const hora  = hoy.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
+      const estados: Record<string, string> = { '': 'Todos', completa: 'Completas', proceso: 'En proceso', sin: 'Sin notas' };
+      const docenteSel = this.avanceDocentesOpciones.find(d => d.clave === this.avanceMaestro)?.nombre;
+      const filtros = [`Docente: ${this.avanceMaestro ? docenteSel : 'Todos'}`, `Estado: ${estados[this.avanceEstado]}`].join('   ·   ');
+
+      const columnas = ['Docente', 'Clase', 'Grado / Sección', 'Alumnos', 'Actividades', 'Notas cargadas', 'Notas esperadas', '% avance', 'Estado', 'Última carga'];
+      const GUINDA = 'FF6B0F1A';
+
+      hoja.mergeCells(1, 1, 1, columnas.length);
+      hoja.getCell(1, 1).value = `Avance de carga de notas — ${periodo?.nombre ?? 'Período'}`;
+      hoja.getCell(1, 1).font  = { bold: true, size: 14, color: { argb: GUINDA } };
+
+      hoja.mergeCells(2, 1, 2, columnas.length);
+      hoja.getCell(2, 1).value = `Fecha del reporte: ${fecha} ${hora}`;
+      hoja.getCell(2, 1).font  = { italic: true, color: { argb: 'FF555555' } };
+
+      hoja.mergeCells(3, 1, 3, columnas.length);
+      hoja.getCell(3, 1).value = filtros;
+      hoja.getCell(3, 1).font  = { color: { argb: 'FF555555' } };
+
+      const encabezado = hoja.getRow(5);
+      encabezado.values = columnas;
+      encabezado.eachCell(c => {
+        c.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: GUINDA } };
+        c.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      });
+
+      const nombresEstado: Record<EstadoAvance, string> = { completa: 'Completa', proceso: 'En proceso', sin: 'Sin notas' };
+      docentes.forEach(d => d.clases.forEach(c => hoja.addRow([
+        d.nombre,
+        c.claseNombre,
+        this.grupoClase(c),
+        c.alumnos,
+        c.actividades,
+        c.notasCargadas,
+        c.notasEsperadas,
+        this.porcentajeAvance(c.notasCargadas, c.notasEsperadas) / 100,
+        nombresEstado[this.estadoAvance(c)],
+        c.ultimaCarga ? new Date(c.ultimaCarga).toLocaleString('es-HN', { dateStyle: 'short', timeStyle: 'short' }) : '—',
+      ])));
+
+      const anchos = [32, 26, 40, 10, 12, 14, 14, 11, 13, 18];
+      anchos.forEach((w, i) => hoja.getColumn(i + 1).width = w);
+      hoja.getColumn('H').numFmt = '0%';
+      ['D', 'E', 'F', 'G', 'H', 'I'].forEach(col => hoja.getColumn(col).alignment = { horizontal: 'center' });
+      hoja.autoFilter = { from: { row: 5, column: 1 }, to: { row: hoja.rowCount, column: columnas.length } };
+
+      const buffer = await libro.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `Avance de notas ${periodo?.nombre ?? ''} - ${fecha.replace(/\//g, '-')}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      this.snack.open('No se pudo generar el Excel', '', { duration: 4000 });
+    } finally {
+      this.exportandoAvance = false;
+    }
   }
 
   // ── Notas ──
