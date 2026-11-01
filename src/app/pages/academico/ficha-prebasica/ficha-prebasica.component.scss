@@ -1,0 +1,114 @@
+// Sin encapsulación (para ajustar <main>); todo lo demás va bajo .ficha-pb para no afectar otras páginas.
+// Las hojas y la impresión están en el componente compartido app-ficha-prebasica-hojas.
+
+// <main> tiene alto fijo; sin esto la barra y la lista "sticky" se van con el scroll al pasar ese alto.
+body.ficha-pb-abierta main { height: auto; }
+
+.ficha-pb {
+  padding: 16px 24px 48px;
+  color: #212121;
+
+  .spin-icon { animation: ficha-pb-girar 1s linear infinite; }
+
+  .ficha-pb-estado {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 32px 0;
+    color: #616161;
+  }
+  .ficha-pb-error { color: #c62828; }
+
+  // ── Barra superior ───────────────────────────────────────
+  // Debajo del encabezado de la app, que también es sticky (120 px)
+  .ficha-pb-barra {
+    position: sticky;
+    top: 120px;
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 24px;
+    padding: 12px 0;
+    margin-bottom: 12px;
+    background: #fafafa;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .ficha-pb-titulo {
+    display: flex;
+    flex-direction: column;
+    margin-right: auto;
+    h1 { margin: 0; font-size: 20px; font-weight: 500; }
+    span { color: #616161; font-size: 13px; }
+  }
+  .ficha-pb-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  // ── Lista de alumnos + editor ────────────────────────────
+  .ficha-pb-cuerpo {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .ficha-pb-lista {
+    position: sticky;
+    top: 216px;
+    flex: 0 0 260px;
+    max-height: calc(100vh - 236px);
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    padding: 8px;
+  }
+  .ficha-pb-buscar { width: 100%; }
+  .ficha-pb-alumno {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 8px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    text-align: left;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    &:hover { background: #f1f5ff; }
+    &.activo { background: #e3edff; font-weight: 500; }
+    .nombre { flex: 1; }
+    .avance {
+      font-size: 11px;
+      color: #9e9e9e;
+      &.completo { color: #2e7d32; font-weight: 500; }
+    }
+    .pendiente { font-size: 16px; width: 16px; height: 16px; color: #ef6c00; }
+  }
+
+  .ficha-pb-editor {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+  }
+  .ficha-pb-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    .espacio { flex: 1; }
+  }
+  .ficha-pb-ayuda {
+    margin: 4px 0 12px;
+    font-size: 12px;
+    color: #757575;
+  }
+}
+
+@keyframes ficha-pb-girar {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

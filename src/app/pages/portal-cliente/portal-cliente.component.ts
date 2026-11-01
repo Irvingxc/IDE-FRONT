@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { select } from '@ngrx/store';
@@ -7,8 +7,11 @@ import * as fromRoot from '@app/store';
 import * as fromUser from '@app/store/user';
 import {
   PortalClienteService, HijoDto, PortalFacturaDto, PortalCxcDto, PortalPeriodo, PortalClaseNota, PortalAsistenciaDto,
-  PortalDiarioClase
+  PortalDiarioClase, PortalFichaPrebasica
 } from '@app/services/portal-cliente/portal-cliente.service';
+import {
+  AreaFicha, EncabezadoFicha, agruparPorArea, descargarPdfHojasFicha
+} from '@app/shared/ficha-prebasica-hojas/ficha-prebasica-hojas.component';
 import { TokenService } from '@app/services';
 import { MatDialog } from '@angular/material/dialog';
 import { CambiarPasswordDialogComponent } from '@app/components/cambiar-password-dialog/cambiar-password-dialog.component';
@@ -51,6 +54,19 @@ export class PortalClienteComponent implements OnInit {
 
   diario: PortalDiarioClase[] = [];
   cargandoDiario = false;
+
+  // Prebásica: en lugar de Notas, la ficha de evaluación anual (solo lectura)
+  ficha: PortalFichaPrebasica | null = null;
+  areasFicha: AreaFicha[] = [];
+  encabezadoFicha: EncabezadoFicha | null = null;
+  tipoCentroFicha = new Set<string>();
+  cargandoFicha = false;
+  descargandoFicha = false;
+  errorFicha: string | null = null;
+  /** Las hojas miden 1056 px (carta): en pantallas angostas se reducen para que quepan. */
+  escalaFicha = 1;
+  @ViewChild('fichaWrap') fichaWrap?: ElementRef<HTMLElement>;
+  @ViewChild('fichaImpresion') fichaImpresion?: ElementRef<HTMLElement>;
 
   tabActiva = 0;
 
@@ -96,10 +112,17 @@ export class PortalClienteComponent implements OnInit {
 
   seleccionar(hijo: HijoDto): void {
     this.hijoSeleccionado = hijo;
+    this.ficha = null;
     this.cargarCxc();
     this.cargarNotas();
     this.cargarAsistencia();
     this.cargarDiario();
+    // La ficha (primera pestaña en prebásica) se pide solo cuando se ve: cada consulta queda en bitácora
+    if (this.tabActiva === 0) this.cargarFicha();
+  }
+
+  alCambiarTab(indice: number): void {
+    if (indice === 0) this.cargarFicha();
   }
 
   cambiarPassword(): void {
@@ -134,7 +157,7 @@ export class PortalClienteComponent implements OnInit {
   }
 
   cargarNotas(): void {
-    if (!this.hijoSeleccionado || !this.periodoSeleccionadoId) { this.notas = []; return; }
+    if (!this.hijoSeleccionado || !this.periodoSeleccionadoId || this.hijoSeleccionado.esPrebasica) { this.notas = []; return; }
     this.cargandoNotas = true;
     this.svc.misNotas(this.hijoSeleccionado.identidad, this.periodoSeleccionadoId).subscribe({
       next: (n) => { this.notas = n; this.cargandoNotas = false; },
@@ -379,6 +402,57 @@ export class PortalClienteComponent implements OnInit {
       }
     } finally {
       this.descargandoPdf = false;
+    }
+  }
+
+  // ── Ficha de evaluación de prebásica ──
+
+  cargarFicha(): void {
+    const hijo = this.hijoSeleccionado;
+    if (!hijo?.esPrebasica) return;
+    this.cargandoFicha = true;
+    this.errorFicha = null;
+    this.svc.miFichaPrebasica(hijo.identidad).subscribe({
+      next: (f) => {
+        if (this.hijoSeleccionado !== hijo) return;
+        this.ficha = f;
+        this.areasFicha = agruparPorArea(f.indicadores);
+        this.encabezadoFicha = {
+          anioLectivo: f.anioLectivo, gradoNombre: f.gradoNombre, seccion: f.seccion, maestroNombre: f.maestroNombre,
+        };
+        this.tipoCentroFicha = new Set((f.tipoCentro ?? '').split(',').filter(c => c));
+        this.cargandoFicha = false;
+        setTimeout(() => this.ajustarEscalaFicha());
+      },
+      error: (err) => {
+        this.ficha = null;
+        this.cargandoFicha = false;
+        this.errorFicha = err.error?.errores?.mensaje ?? 'No se pudo cargar la ficha de evaluación.';
+      }
+    });
+  }
+
+  @HostListener('window:resize')
+  ajustarEscalaFicha(): void {
+    const ancho = this.fichaWrap?.nativeElement.clientWidth;
+    if (ancho) this.escalaFicha = Math.min(1, ancho / 1056);
+  }
+
+  /** Descarga directamente el PDF de la ficha, con el formato oficial, y deja constancia en la bitácora. */
+  async descargarFicha(): Promise<void> {
+    if (this.descargandoFicha || !this.ficha || !this.hijoSeleccionado || !this.fichaImpresion) return;
+    const ficha = this.ficha;
+    const identidad = this.hijoSeleccionado.identidad;
+    const limpio = (s: string) => (s || '').trim().replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ');
+    this.descargandoFicha = true;
+    try {
+      await descargarPdfHojasFicha(this.fichaImpresion.nativeElement,
+        `FICHA DE EVALUACION ${limpio(ficha.nombreAlumno)} ${ficha.anioLectivo}.pdf`);
+      // Si falla el registro no se interrumpe al padre (el PDF ya se descargó)
+      this.svc.registrarDescargaFichaPrebasica(identidad, ficha.anioLectivo)
+        .subscribe({ error: () => { /* sin aviso al padre */ } });
+    } finally {
+      this.descargandoFicha = false;
     }
   }
 

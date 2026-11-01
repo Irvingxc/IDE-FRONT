@@ -1,0 +1,105 @@
+<div class="ficha-pb">
+
+  <div *ngIf="cargando" class="ficha-pb-estado">
+    <mat-icon class="spin-icon">sync</mat-icon>
+    <span>Cargando ficha de evaluación...</span>
+  </div>
+
+  <div *ngIf="!cargando && error" class="ficha-pb-estado ficha-pb-error">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+
+  <ng-container *ngIf="!cargando && !error && ficha">
+
+    <!-- ═══ Barra de acciones (no se imprime) ═══ -->
+    <div class="ficha-pb-barra">
+      <div class="ficha-pb-titulo">
+        <h1>Ficha de evaluación de Prebásica {{ ficha.anioLectivo }}</h1>
+        <span>{{ ficha.gradoNombre }} · Sección {{ ficha.seccion }}<ng-container *ngIf="ficha.maestroNombre"> · {{ ficha.maestroNombre }}</ng-container></span>
+      </div>
+
+      <div class="ficha-pb-acciones">
+        <button mat-stroked-button type="button" (click)="imprimir(false)" [disabled]="!alumnoActual"
+                title="Imprime o guarda como PDF la ficha de este alumno">
+          <mat-icon>print</mat-icon> Imprimir / PDF
+        </button>
+        <button mat-stroked-button type="button" (click)="imprimir(true)" [disabled]="!ficha.alumnos.length"
+                title="Imprime las fichas de todos los alumnos de la sección">
+          <mat-icon>print</mat-icon> Imprimir todos
+        </button>
+        <button mat-raised-button color="primary" type="button" (click)="guardar()" [disabled]="!hayCambios || guardando">
+          <mat-icon>save</mat-icon> {{ guardando ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="ficha.alumnos.length === 0" class="ficha-pb-estado">
+      <mat-icon>info</mat-icon>
+      <span>No hay alumnos en el grado y sección de esta clase para el año {{ ficha.anioLectivo }}.</span>
+    </div>
+
+    <div class="ficha-pb-cuerpo" *ngIf="ficha.alumnos.length > 0">
+
+      <!-- ═══ Lista de alumnos (no se imprime) ═══ -->
+      <aside class="ficha-pb-lista">
+        <mat-form-field appearance="outline" class="ficha-pb-buscar">
+          <mat-label>Buscar alumno</mat-label>
+          <input matInput [(ngModel)]="busquedaAlumno">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <button type="button" *ngFor="let x of alumnosFiltrados"
+                class="ficha-pb-alumno" [class.activo]="x.indice === indiceAlumno"
+                (click)="seleccionarAlumno(x.indice)">
+          <span class="nombre">{{ x.alumno.nombreCompleto }}</span>
+          <span class="avance" [class.completo]="marcados(x.alumno) === totalIndicadores">
+            {{ marcados(x.alumno) }}/{{ totalIndicadores }}
+          </span>
+          <mat-icon *ngIf="tienePendientes(x.alumno)" class="pendiente" title="Cambios sin guardar">edit</mat-icon>
+        </button>
+      </aside>
+
+      <!-- ═══ Ficha del alumno (editable) ═══ -->
+      <section class="ficha-pb-editor" *ngIf="alumnoActual as alumno">
+        <div class="ficha-pb-nav">
+          <button mat-icon-button type="button" (click)="anterior()" [disabled]="indiceAlumno === 0" title="Alumno anterior">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <span><strong>{{ alumno.nombreCompleto }}</strong> — {{ indiceAlumno + 1 }} de {{ ficha.alumnos.length }}
+            · {{ marcados(alumno) }} de {{ totalIndicadores }} indicadores marcados</span>
+          <button mat-icon-button type="button" (click)="siguiente()" [disabled]="indiceAlumno === ficha.alumnos.length - 1" title="Alumno siguiente">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <span class="espacio"></span>
+          <button mat-stroked-button type="button" (click)="limpiarAlumno()" [disabled]="marcados(alumno) === 0">
+            <mat-icon>backspace</mat-icon> Quitar marcas
+          </button>
+        </div>
+
+        <p class="ficha-pb-ayuda">
+          Haz clic en la casilla CNL, CP o CL de cada indicador (otro clic la quita). El clic en el encabezado de una
+          columna marca ese valor en los indicadores del área que siguen vacíos.
+        </p>
+
+        <app-ficha-prebasica-hojas
+          [areas]="areas" [encabezado]="ficha" [alumnoNombre]="alumno.nombreCompleto" [editable]="true"
+          [valoresMarcados]="leer(alumno).valores" [observaciones]="leer(alumno).observaciones"
+          [(nombreCentro)]="nombreCentro" [(municipio)]="municipio" [tipoCentro]="tipoCentro"
+          (nombreCentroChange)="marcarCentroModificado()" (municipioChange)="marcarCentroModificado()"
+          (marcar)="marcar($event.indicador, $event.valor)" (marcarArea)="marcarVaciosDelArea($event.area, $event.valor)"
+          (observacionesChange)="cambiarObservaciones($event)" (alternarTipoCentro)="alternarTipoCentro($event)">
+        </app-ficha-prebasica-hojas>
+      </section>
+    </div>
+
+    <!-- ═══ Hojas para imprimir ═══ -->
+    <div class="ficha-pb-impresion" #impresion>
+      <app-ficha-prebasica-hojas *ngFor="let a of alumnosImpresion; trackBy: trackByAlumno"
+        [areas]="areas" [encabezado]="ficha" [alumnoNombre]="a.nombreCompleto"
+        [valoresMarcados]="leer(a).valores" [observaciones]="leer(a).observaciones"
+        [nombreCentro]="nombreCentro" [municipio]="municipio" [tipoCentro]="tipoCentro">
+      </app-ficha-prebasica-hojas>
+    </div>
+
+  </ng-container>
+</div>

@@ -1,0 +1,118 @@
+<!-- Hoja 1: áreas de desarrollo -->
+<div class="ficha-pb-hoja hoja-areas">
+  <table class="ficha-pb-area" *ngFor="let area of areas">
+    <thead>
+      <tr>
+        <th class="th-area">{{ area.nombre | uppercase }}</th>
+        <th *ngFor="let v of valores" class="th-valor">
+          <button *ngIf="editable; else soloValor" type="button" (click)="marcarArea.emit({ area: area, valor: v })"
+                  [title]="'Marcar ' + v + ' en los indicadores vacíos de esta área'">{{ v }}</button>
+          <ng-template #soloValor>{{ v }}</ng-template>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let ind of area.indicadores">
+        <td class="td-indicador">{{ ind.texto }}</td>
+        <td *ngFor="let v of valores" class="td-valor" [class.marcado]="valorDe(ind) === v"
+            [class.editable]="editable" (click)="editable && marcar.emit({ indicador: ind, valor: v })">
+          <span *ngIf="valorDe(ind) === v">✓</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Hoja 2: portada, firmas e indicadores -->
+<div class="ficha-pb-hoja hoja-portada">
+
+  <div class="col-leyenda">
+    <h3>Indicadores de Evaluación</h3>
+    <p>CNL. Conducta No Lograda</p>
+    <p>CP. Conducta en Proceso</p>
+    <p>CL. Conducta Lograda</p>
+  </div>
+
+  <div class="col-firmas">
+    <h4>FIRMA DEL PADRE O ENCARGADO</h4>
+    <div class="linea-firma" *ngFor="let t of trimestresFirma">
+      <span>{{ t }} TRIMESTRE:</span><span class="linea"></span>
+    </div>
+
+    <div class="observaciones">
+      <span>OBSERVACIONES:</span>
+      <textarea *ngIf="editable; else obsTexto" rows="4" maxlength="1000"
+                [ngModel]="observaciones" (ngModelChange)="observacionesChange.emit($event)"
+                placeholder="Escribe aquí las observaciones del alumno"></textarea>
+      <ng-template #obsTexto><div class="obs-texto">{{ observaciones }}</div></ng-template>
+    </div>
+
+    <div class="firma">
+      <div class="firma-nombre">{{ encabezado?.maestroNombre }}</div>
+      <div class="linea"></div>
+      <span>Maestra de Sección</span>
+    </div>
+    <div class="firma">
+      <div class="firma-nombre">Saturnino Calix Euceda</div>
+      <div class="linea"></div>
+      <span>Director</span>
+    </div>
+    <div class="firma">
+      <div class="linea"></div>
+      <span>Director Municipal</span>
+    </div>
+  </div>
+
+  <div class="col-portada">
+    <div class="gobierno">
+      <strong>GOBIERNO DE LA REPÚBLICA DE HONDURAS</strong>
+      <span>SECRETARÍA DE EDUCACIÓN</span>
+    </div>
+    <div class="dependencia">
+      <strong>REPÚBLICA DE HONDURAS</strong>
+      <span>Secretaría de Educación</span>
+      <span>Coordinación Departamental de Educación Prebásica</span>
+    </div>
+
+    <h2>FICHA DE EVALUACIÓN {{ encabezado?.anioLectivo }}</h2>
+
+    <div class="logo"><img src="assets/logo.png" alt="Logo del centro educativo"></div>
+
+    <div class="campo-centro">
+      <span>Centro de Educación Prebásica</span>
+      <input *ngIf="editable; else centroTexto" class="linea-input centrado" [ngModel]="nombreCentro"
+             (ngModelChange)="nombreCentroChange.emit($event)" maxlength="200" placeholder="Nombre del centro">
+      <ng-template #centroTexto><div class="linea-texto centrado">{{ nombreCentro }}</div></ng-template>
+    </div>
+
+    <div class="fila-nivel">
+      Nivel: <u>{{ nivelCorto }}</u> Grado
+      <span class="seccion">Sección: <u>{{ encabezado?.seccion }}</u></span>
+    </div>
+
+    <div class="campo">
+      <span>Nombre del Alumno:</span>
+      <div class="linea-texto">{{ alumnoNombre }}</div>
+    </div>
+
+    <div class="campo en-linea">
+      <span>Municipio:</span>
+      <input *ngIf="editable; else municipioTexto" class="linea-input" [ngModel]="municipio"
+             (ngModelChange)="municipioChange.emit($event)" maxlength="100" placeholder="Municipio">
+      <ng-template #municipioTexto><div class="linea-texto">{{ municipio }}</div></ng-template>
+    </div>
+    <div class="campo en-linea">
+      <span>Departamento:</span>
+      <div class="linea-texto">El Paraíso</div>
+    </div>
+
+    <div class="tipos-centro">
+      <label *ngFor="let t of tiposCentro" [class.editable]="editable">
+        {{ t.nombre }}:
+        <span class="casilla" (click)="editable && alternarTipoCentro.emit(t.clave)">{{ tipoCentro.has(t.clave) ? '✓' : '' }}</span>
+      </label>
+    </div>
+
+    <div class="anio">AÑO: {{ encabezado?.anioLectivo }}</div>
+  </div>
+</div>

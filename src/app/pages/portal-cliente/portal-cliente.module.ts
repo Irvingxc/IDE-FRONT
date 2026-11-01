@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
+import { FichaPrebasicaHojasModule } from '@app/shared/ficha-prebasica-hojas/ficha-prebasica-hojas.module';
 import { PortalClienteComponent } from './portal-cliente.component';
 
 @NgModule({
@@ -20,7 +21,7 @@ import { PortalClienteComponent } from './portal-cliente.component';
     RouterModule.forChild([{ path: '', component: PortalClienteComponent }]),
     MatButtonModule, MatIconModule, MatTableModule, MatTabsModule,
     MatSelectModule, MatFormFieldModule, MatProgressSpinnerModule, MatExpansionModule,
-    MatMenuModule, MatDialogModule
+    MatMenuModule, MatDialogModule, FichaPrebasicaHojasModule
   ]
 })
 export class PortalClienteModule {}

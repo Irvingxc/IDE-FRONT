@@ -437,3 +437,18 @@
 
   &:hover .btn-historial { opacity: 1; }
 }
+
+.aviso-prebasica {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  background: #e8f0fe;
+  color: #1a3d7c;
+  font-size: 14px;
+
+  span { flex: 1; min-width: 240px; }
+}

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@src/environments/environment';
+import { FichaPrebasicaIndicador, ValorFichaPrebasica } from '@app/services/academico/academico.service';
 
 export interface InvitacionResponse {
   token:         string;
@@ -29,6 +30,22 @@ export interface HijoDto {
   grado:          string | null;
   estado:         string | null;
   foto:           string | null;
+  esPrebasica:    boolean;   // prebásica no lleva notas: se evalúa con la ficha anual
+}
+
+export interface PortalFichaPrebasica {
+  anioLectivo:       number;
+  gradoNombre:       string | null;
+  seccion:           string | null;
+  maestroNombre:     string | null;
+  nombreCentro:      string | null;
+  municipio:         string | null;
+  tipoCentro:        string | null;
+  nombreAlumno:      string;
+  observaciones:     string | null;
+  fechaModificacion: string | null;   // null = la maestra aún no la ha llenado
+  indicadores:       FichaPrebasicaIndicador[];
+  valores:           { [idIndicador: number]: ValorFichaPrebasica };
 }
 
 export interface PortalFacturaDto {
@@ -174,6 +191,17 @@ export class PortalClienteService {
   miDiario(identidad: string, fecha: string): Observable<PortalDiarioClase[]> {
     const params = new HttpParams().set('identidad', identidad).set('fecha', fecha);
     return this.http.get<PortalDiarioClase[]>(`${this.base}/mi-diario`, { params });
+  }
+
+  /** Ficha de evaluación de prebásica del hijo (sin año: la más reciente). Cada consulta queda en bitácora. */
+  miFichaPrebasica(identidad: string, anio?: number): Observable<PortalFichaPrebasica> {
+    let params = new HttpParams().set('identidad', identidad);
+    if (anio) params = params.set('anio', anio);
+    return this.http.get<PortalFichaPrebasica>(`${this.base}/mi-ficha-prebasica`, { params });
+  }
+
+  registrarDescargaFichaPrebasica(identidad: string, anio: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/descarga-ficha-prebasica`, { identidad, anio });
   }
 
   formatLps(v: number): string {

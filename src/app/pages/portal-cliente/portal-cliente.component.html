@@ -76,10 +76,55 @@
       </div>
 
       <!-- Tabs -->
-      <mat-tab-group [(selectedIndex)]="tabActiva" class="portal-tabs">
+      <mat-tab-group [(selectedIndex)]="tabActiva" (selectedIndexChange)="alCambiarTab($event)" class="portal-tabs">
+
+        <!-- Prebásica: ficha de evaluación anual en lugar de notas (solo lectura) -->
+        <mat-tab label="Ficha de evaluación" *ngIf="hijoSeleccionado.esPrebasica">
+          <div class="tab-toolbar ficha-toolbar" *ngIf="ficha && !cargandoFicha">
+            <span class="ficha-actualizada">
+              Ficha de evaluación {{ ficha.anioLectivo }}
+              <ng-container *ngIf="ficha.fechaModificacion; else fichaSinLlenar">
+                · actualizada el {{ ficha.fechaModificacion | date:'dd/MM/yyyy' }}
+              </ng-container>
+              <ng-template #fichaSinLlenar> · la maestra aún no la ha llenado</ng-template>
+            </span>
+            <button mat-flat-button class="btn-descargar-notas" [disabled]="descargandoFicha" (click)="descargarFicha()">
+              <mat-icon>{{ descargandoFicha ? 'hourglass_empty' : 'download' }}</mat-icon>
+              {{ descargandoFicha ? 'Generando…' : 'Descargar PDF' }}
+            </button>
+          </div>
+
+          <div *ngIf="cargandoFicha" class="loading-row">
+            <mat-spinner diameter="28"></mat-spinner>
+          </div>
+
+          <div *ngIf="!cargandoFicha && errorFicha" class="notas-empty">
+            <mat-icon>info</mat-icon>
+            <p>{{ errorFicha }}</p>
+          </div>
+
+          <div class="ficha-portal" #fichaWrap *ngIf="ficha && !cargandoFicha">
+            <div class="ficha-portal-zoom" [style.zoom]="escalaFicha">
+              <app-ficha-prebasica-hojas
+                [areas]="areasFicha" [encabezado]="encabezadoFicha" [alumnoNombre]="ficha.nombreAlumno"
+                [valoresMarcados]="ficha.valores" [observaciones]="ficha.observaciones ?? ''"
+                [nombreCentro]="ficha.nombreCentro ?? ''" [municipio]="ficha.municipio ?? ''" [tipoCentro]="tipoCentroFicha">
+              </app-ficha-prebasica-hojas>
+            </div>
+          </div>
+
+          <!-- Copia para imprimir / guardar como PDF (no se ve en pantalla) -->
+          <div class="ficha-pb-impresion" #fichaImpresion *ngIf="ficha">
+            <app-ficha-prebasica-hojas
+              [areas]="areasFicha" [encabezado]="encabezadoFicha" [alumnoNombre]="ficha.nombreAlumno"
+              [valoresMarcados]="ficha.valores" [observaciones]="ficha.observaciones ?? ''"
+              [nombreCentro]="ficha.nombreCentro ?? ''" [municipio]="ficha.municipio ?? ''" [tipoCentro]="tipoCentroFicha">
+            </app-ficha-prebasica-hojas>
+          </div>
+        </mat-tab>
 
         <!-- Notas (detalle por materia) -->
-        <mat-tab label="Notas">
+        <mat-tab label="Notas" *ngIf="!hijoSeleccionado.esPrebasica">
           <ng-container *ngTemplateOutlet="periodoToolbar"></ng-container>
           <ng-container *ngTemplateOutlet="notasEstados"></ng-container>
 

@@ -10,6 +10,7 @@ import { NivelInglesDialogComponent } from './nivel-ingles-dialog/nivel-ingles-d
 import { HistorialNotasDialogComponent } from './historial-notas-dialog/historial-notas-dialog.component';
 import { ImportarNotasDialogComponent } from './importar-notas-dialog/importar-notas-dialog.component';
 import { DiarioPedagogicoComponent } from './diario-pedagogico/diario-pedagogico.component';
+import { FichaPrebasicaComponent } from './ficha-prebasica/ficha-prebasica.component';
 
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
@@ -25,6 +26,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
+import { FichaPrebasicaHojasModule } from '@app/shared/ficha-prebasica-hojas/ficha-prebasica-hojas.module';
 
 @NgModule({
   declarations: [
@@ -35,6 +37,7 @@ import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
     HistorialNotasDialogComponent,
     ImportarNotasDialogComponent,
     DiarioPedagogicoComponent,
+    FichaPrebasicaComponent,
   ],
   imports: [
     CommonModule,
@@ -54,6 +57,7 @@ import { FECHA_DD_MM_YYYY_PROVIDERS } from '@app/utils/date-adapter';
     MatDatepickerModule,
     MatNativeDateModule,
     MatCheckboxModule,
+    FichaPrebasicaHojasModule,
   ],
   providers: FECHA_DD_MM_YYYY_PROVIDERS,
 })

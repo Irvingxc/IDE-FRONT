@@ -1,0 +1,306 @@
+// Sin encapsulación: las reglas de impresión tienen que alcanzar el <body>.
+// Los estilos de las hojas van bajo .ficha-pb-hoja porque al imprimir el contenedor se mueve al <body>.
+
+$azul-area: #1f6fff;
+$azul-texto: #0b1f4d;
+$borde: #222;
+
+app-ficha-prebasica-hojas { display: block; }
+
+// ── Hojas (formato carta horizontal) ─────────────────────
+.ficha-pb-hoja {
+  box-sizing: border-box;
+  width: 1056px;               // 11 in a 96 dpi
+  min-height: 816px;           // 8.5 in
+  margin: 0 0 20px;
+  padding: 36px 32px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .2);
+  font-family: 'Times New Roman', Times, serif;
+  color: #000;
+  text-align: left;
+  position: relative;
+  z-index: 0;                  // contexto propio: la marca de agua (z-index -1) queda sobre el fondo blanco y detrás del contenido
+
+  // Marca de agua: escudo de la Coordinación de Educación Prebásica, como en el formato oficial.
+  // La imagen ya viene aclarada y recortada en círculo: con opacity/transform la impresión la dibuja mal.
+  &::before {
+    content: '';
+    position: absolute;
+    top: calc(50% - 170px);
+    left: calc(50% - 170px);
+    width: 340px;
+    height: 340px;
+    background: url('/assets/coordinacion-marca.png') center / contain no-repeat;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  &.hoja-areas {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+  }
+
+  .ficha-pb-area {
+    flex: 1;
+    border-collapse: collapse;
+    font-size: 14px;
+    line-height: 1.15;
+
+    th, td { border: 1px solid $borde; }
+
+    .th-area {
+      background: $azul-area;
+      color: $azul-texto;
+      font-size: 13px;
+      font-weight: bold;
+      padding: 3px 6px;
+      text-align: center;
+    }
+    .th-valor {
+      background: $azul-area;
+      color: $azul-texto;
+      width: 34px;
+      padding: 0;
+      font-size: 12px;
+      text-align: center;
+      button {
+        width: 100%;
+        padding: 6px 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        font-weight: bold;
+        cursor: pointer;
+        &:hover { background: rgba(255, 255, 255, .3); }
+      }
+    }
+    .td-indicador { padding: 1px 4px; }
+    .td-valor {
+      width: 34px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      &.editable {
+        cursor: pointer;
+        &:hover { background: #e8f0ff; }
+      }
+      &.marcado { background: #d7e6ff; }
+    }
+
+    // La tercera área tiene más indicadores: letra más pequeña, como en el formato oficial
+    &:nth-child(3) { font-size: 12px; }
+  }
+
+  &.hoja-portada {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr 1.25fr;
+    gap: 28px;
+    font-size: 15px;
+
+    .linea { flex: 1; border-bottom: 1px solid #000; min-height: 18px; }
+  }
+
+  .col-leyenda {
+    padding-top: 150px;
+    h3 { font-size: 16px; margin: 0 0 24px; }
+    p { margin: 0 0 12px; }
+  }
+
+  .col-firmas {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    h4 { font-size: 13px; margin: 24px 0 8px; }
+    .linea-firma {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+    .observaciones {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 18px;
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+        font: inherit;
+        font-size: 14px;
+        padding: 6px;
+        border: 1px dashed #90a4ae;
+        background: #fffde7;
+        resize: vertical;
+      }
+      .obs-texto {
+        min-height: 72px;
+        white-space: pre-wrap;
+        font-size: 14px;
+        // Renglones como en la hoja impresa (tres gradientes simples: html2canvas no dibuja repeating-linear-gradient)
+        background:
+          linear-gradient(#000, #000) 0 23px / 100% 1px no-repeat,
+          linear-gradient(#000, #000) 0 47px / 100% 1px no-repeat,
+          linear-gradient(#000, #000) 0 71px / 100% 1px no-repeat;
+        line-height: 24px;
+      }
+    }
+    .firma {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 28px;
+      .firma-nombre { font-size: 13px; }
+      .linea { width: 90%; flex: none; }
+    }
+  }
+
+  .col-portada {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+
+    .gobierno {
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+      align-self: flex-end;
+      text-align: right;
+      span { font-weight: bold; }
+    }
+    .dependencia {
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+    }
+    h2 { font-size: 18px; margin: 18px 0 0; }
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 110px;
+      height: 110px;
+      border: 2px solid #000;
+      border-radius: 50%;
+      overflow: hidden;
+      // El logo es cuadrado con fondo: se recorta en círculo para que llene el marco
+      img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    }
+    .campo-centro, .campo {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .campo { text-align: left; }
+    .campo.en-linea {
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 6px;
+      > :last-child { flex: 1; }
+    }
+    .linea-texto, .linea-input {
+      min-height: 20px;
+      border: 0;
+      border-bottom: 1px solid #000;
+      font: inherit;
+      text-align: left;
+      &.centrado { text-align: center; }
+    }
+    .linea-input {
+      background: #fffde7;
+      padding: 0 4px;
+      outline: none;
+      &:focus { background: #fff8c4; }
+    }
+    .fila-nivel {
+      width: 100%;
+      text-align: left;
+      .seccion { margin-left: 24px; }
+    }
+    .tipos-centro {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px 14px;
+      font-size: 13px;
+      label { display: inline-flex; align-items: center; gap: 4px; }
+      label.editable .casilla { cursor: pointer; background: #fffde7; }
+      .casilla {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 14px;
+        height: 14px;
+        border: 1px solid #000;
+        font-size: 12px;
+        font-weight: bold;
+      }
+    }
+    .anio { margin-top: 8px; }
+  }
+}
+
+// Contenedor de las hojas a imprimir: no se ve en pantalla
+.ficha-pb-impresion { display: none; }
+
+// Mientras se toma la imagen de las hojas para el PDF descargable: se dibuja fuera de la pantalla, en tamaño carta
+.ficha-pb-impresion.ficha-pb-capturando {
+  display: block !important;
+  position: fixed;
+  top: 0;
+  left: -20000px;
+  width: 1056px;
+
+  .ficha-pb-hoja {
+    height: 816px;
+    margin: 0;
+    box-shadow: none;
+    overflow: hidden;
+  }
+  .ficha-pb-area .td-valor.marcado { background: none; }
+}
+
+// ── Impresión: solo las hojas, una página carta horizontal por hoja ─────────
+// Página con nombre para no cambiar la orientación de otras impresiones de la app.
+@page ficha-pb {
+  size: letter landscape;
+  margin: 8mm;
+}
+
+@media print {
+  html.ficha-pb-imprimiendo, body.ficha-pb-imprimiendo {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+
+  // Durante la impresión el contenedor está en el <body>: todo lo demás se oculta
+  body.ficha-pb-imprimiendo > *:not(.ficha-pb-impresion) { display: none !important; }
+  body.ficha-pb-imprimiendo > .ficha-pb-impresion { display: block !important; }
+
+  .ficha-pb-impresion .ficha-pb-hoja {
+    page: ficha-pb;
+    width: 100%;
+    min-height: 0;
+    height: 199mm;            // 215.9 mm - márgenes
+    margin: 0;
+    padding: 4mm 2mm;
+    box-shadow: none;
+    overflow: hidden;
+    break-after: page;
+    page-break-after: always;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+
+    .ficha-pb-area .td-valor.marcado { background: none; }
+  }
+  .ficha-pb-impresion app-ficha-prebasica-hojas:last-child .ficha-pb-hoja:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+}

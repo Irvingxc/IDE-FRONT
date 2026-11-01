@@ -300,6 +300,17 @@ export class AcademicoService {
     const params = new HttpParams().set('idClase', idClase);
     return this.http.put<DiarioSemana[]>(`${this.base}/diario`, semanas, { params });
   }
+
+  /** Ficha de evaluación de prebásica de la clase: indicadores, alumnos y lo marcado en el año. */
+  obtenerFichaPrebasica(idClase: number): Observable<FichaPrebasica> {
+    const params = new HttpParams().set('idClase', idClase);
+    return this.http.get<FichaPrebasica>(`${this.base}/ficha-prebasica`, { params });
+  }
+
+  guardarFichaPrebasica(idClase: number, dto: GuardarFichaPrebasica): Observable<FichaPrebasica> {
+    const params = new HttpParams().set('idClase', idClase);
+    return this.http.put<FichaPrebasica>(`${this.base}/ficha-prebasica`, dto, { params });
+  }
 }
 
 export interface AlumnoNivelIngles {
@@ -337,4 +348,48 @@ export interface HistorialNota {
   fecha:           string;
   usuarioId:       string | null;
   usuarioNombre:   string | null;
+}
+
+export type ValorFichaPrebasica = 'CNL' | 'CP' | 'CL';
+
+export interface FichaPrebasicaIndicador {
+  id:         number;
+  area:       number;
+  areaNombre: string;
+  orden:      number;
+  texto:      string;
+}
+
+/** La ficha es anual: una por alumno y año lectivo. */
+export interface FichaPrebasicaAlumno {
+  idAlumno:          string;
+  codigo:            number;
+  nombreCompleto:    string;
+  observaciones:     string | null;
+  fechaModificacion: string | null;   // null = aún sin ficha este año
+  valores:           { [idIndicador: number]: ValorFichaPrebasica };
+}
+
+export interface FichaPrebasica {
+  anioLectivo:   number;
+  gradoNombre:   string | null;
+  seccion:       string | null;
+  maestroNombre: string | null;
+  nombreCentro:  string | null;
+  municipio:     string | null;
+  tipoCentro:    string | null;   // claves separadas por coma (URBANO,RURAL,...)
+  indicadores:   FichaPrebasicaIndicador[];
+  alumnos:       FichaPrebasicaAlumno[];
+}
+
+export interface GuardarFichaPrebasica {
+  guardarCentro: boolean;
+  nombreCentro:  string | null;
+  municipio:     string | null;
+  tipoCentro:    string | null;
+  fichas: {
+    idAlumno:      string;
+    observaciones: string | null;
+    valores:       { [idIndicador: number]: ValorFichaPrebasica };
+  }[];
 }

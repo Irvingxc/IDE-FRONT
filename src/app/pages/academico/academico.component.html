@@ -245,7 +245,7 @@
             </mat-autocomplete>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="filtro-ancho">
+          <mat-form-field appearance="outline" class="filtro-ancho" *ngIf="!notasEsPrebasica">
             <mat-label>Periodo</mat-label>
             <input matInput
                    [(ngModel)]="periodoBusqueda"
@@ -276,82 +276,95 @@
           </mat-form-field>
         </div>
 
-        <div *ngIf="!notasSimpleIdClase || !notasSimpleIdPeriodo" class="no-data-row">
-          <span>{{ esAdmin ? 'Selecciona maestro, clase' : 'Selecciona clase' }}, grado, sección y periodo para ver los alumnos.</span>
-        </div>
-
-        <div *ngIf="loadingAlumnosNotas" class="loading-row">
-          <mat-icon class="spin-icon">sync</mat-icon>
-          <span>Cargando alumnos...</span>
-        </div>
-
-        <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && estructuraNotas.length === 0" class="no-data-row">
-          <span>Este grado/nivel no tiene conceptos de evaluación configurados. Ve a la pestaña "Parámetros de Evaluación" para configurarlos.</span>
-        </div>
-
-        <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && periodoNotasBloqueado" class="aviso-bloqueado">
-          <mat-icon>lock</mat-icon>
-          <span>Este periodo está bloqueado: las notas se muestran solo para consulta.</span>
-        </div>
-
-        <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && estructuraNotas.length > 0" class="plantilla-acciones">
-          <button mat-stroked-button type="button" (click)="descargarPlantillaNotas()" [disabled]="descargandoPlantilla"
-                  title="Descarga un Excel con los alumnos y las notas actuales para llenarlo">
-            <mat-icon>download</mat-icon> {{ descargandoPlantilla ? 'Descargando...' : 'Descargar plantilla Excel' }}
+        <!-- Prebásica: se evalúa con la ficha oficial, que se abre en otra pestaña -->
+        <div *ngIf="notasEsPrebasica" class="aviso-prebasica">
+          <mat-icon>assignment</mat-icon>
+          <span *ngIf="notasSimpleIdClase">Prebásica no lleva notas: se evalúa con la ficha de evaluación anual (CNL, CP, CL), que se abre en otra pestaña.</span>
+          <span *ngIf="!notasSimpleIdClase">Prebásica no lleva notas: selecciona la sección para abrir la ficha de evaluación.</span>
+          <button mat-raised-button color="primary" type="button" *ngIf="notasSimpleIdClase" (click)="abrirFichaPrebasica()">
+            <mat-icon>open_in_new</mat-icon> Abrir ficha de evaluación
           </button>
-          <ng-container *ngIf="!periodoNotasBloqueado">
-            <button mat-stroked-button type="button" (click)="archivoPlantilla.click()" [disabled]="importandoPlantilla"
-                    title="Sube la plantilla llena; verás los cambios antes de guardarlos">
-              <mat-icon>upload_file</mat-icon> {{ importandoPlantilla ? 'Leyendo archivo...' : 'Importar Excel' }}
-            </button>
-            <input #archivoPlantilla type="file" hidden
-                   accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                   (change)="importarPlantillaNotas(archivoPlantilla)">
-          </ng-container>
         </div>
 
-        <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && estructuraNotas.length > 0" class="notas-grid-wrapper">
-          <table class="notas-grid">
-            <thead>
-              <tr>
-                <th class="col-nombre" rowspan="2">Alumno</th>
-                <th *ngFor="let concepto of estructuraNotas" [attr.colspan]="concepto.actividades.length" class="th-concepto">
-                  {{ concepto.nombre }} ({{ sumaPorcentajes(concepto.actividades) }}%)
-                </th>
-                <th rowspan="2" class="col-total">Total del parcial</th>
-              </tr>
-              <tr>
-                <ng-container *ngFor="let concepto of estructuraNotas">
-                  <th *ngFor="let actividad of concepto.actividades" class="th-actividad">
-                    <input type="text" [(ngModel)]="actividad.nombre" (ngModelChange)="marcarCambioNotas()" maxlength="150" [disabled]="periodoNotasBloqueado" title="Puedes renombrar esta actividad, solo se aplica a tu clase">
-                    <span class="th-actividad-pct">{{ actividad.porcentaje }}%</span>
+        <ng-container *ngIf="!notasEsPrebasica">
+          <div *ngIf="!notasSimpleIdClase || !notasSimpleIdPeriodo" class="no-data-row">
+            <span>{{ esAdmin ? 'Selecciona maestro, clase' : 'Selecciona clase' }}, grado, sección y periodo para ver los alumnos.</span>
+          </div>
+
+          <div *ngIf="loadingAlumnosNotas" class="loading-row">
+            <mat-icon class="spin-icon">sync</mat-icon>
+            <span>Cargando alumnos...</span>
+          </div>
+
+          <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && estructuraNotas.length === 0" class="no-data-row">
+            <span>Este grado/nivel no tiene conceptos de evaluación configurados. Ve a la pestaña "Parámetros de Evaluación" para configurarlos.</span>
+          </div>
+
+          <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && periodoNotasBloqueado" class="aviso-bloqueado">
+            <mat-icon>lock</mat-icon>
+            <span>Este periodo está bloqueado: las notas se muestran solo para consulta.</span>
+          </div>
+
+          <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && estructuraNotas.length > 0" class="plantilla-acciones">
+            <button mat-stroked-button type="button" (click)="descargarPlantillaNotas()" [disabled]="descargandoPlantilla"
+                    title="Descarga un Excel con los alumnos y las notas actuales para llenarlo">
+              <mat-icon>download</mat-icon> {{ descargandoPlantilla ? 'Descargando...' : 'Descargar plantilla Excel' }}
+            </button>
+            <ng-container *ngIf="!periodoNotasBloqueado">
+              <button mat-stroked-button type="button" (click)="archivoPlantilla.click()" [disabled]="importandoPlantilla"
+                      title="Sube la plantilla llena; verás los cambios antes de guardarlos">
+                <mat-icon>upload_file</mat-icon> {{ importandoPlantilla ? 'Leyendo archivo...' : 'Importar Excel' }}
+              </button>
+              <input #archivoPlantilla type="file" hidden
+                     accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                     (change)="importarPlantillaNotas(archivoPlantilla)">
+            </ng-container>
+          </div>
+
+          <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && estructuraNotas.length > 0" class="notas-grid-wrapper">
+            <table class="notas-grid">
+              <thead>
+                <tr>
+                  <th class="col-nombre" rowspan="2">Alumno</th>
+                  <th *ngFor="let concepto of estructuraNotas" [attr.colspan]="concepto.actividades.length" class="th-concepto">
+                    {{ concepto.nombre }} ({{ sumaPorcentajes(concepto.actividades) }}%)
                   </th>
-                </ng-container>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let a of alumnosNotasVisibles">
-                <td class="col-nombre">
-                  <span>{{ a.nombreCompleto }}</span>
-                  <button type="button" class="btn-historial" title="Ver historial de cambios de notas"
-                          (click)="verHistorialNotas(a)">
-                    <mat-icon>history</mat-icon>
-                  </button>
-                </td>
-                <td *ngFor="let actividad of actividadesPlanas">
-                  <input type="number" min="0" [max]="actividad.porcentaje" step="0.01" [(ngModel)]="a.notas[actividad.id]" (ngModelChange)="marcarCambioNotas()" (keydown)="bloquearTeclaNoNumerica($event)" (paste)="bloquearPegadoNoNumerico($event)" [disabled]="periodoNotasBloqueado" [class.fuera-rango]="notaFueraDeRango(a.notas[actividad.id], actividad)" [title]="'Máximo ' + actividad.porcentaje + ' puntos'">
-                </td>
-                <td class="col-total">{{ totalAlumno(a) }}</td>
-              </tr>
-              <tr *ngIf="alumnosNotas.length === 0">
-                <td [attr.colspan]="2 + actividadesPlanas.length" class="no-data-row"><span>No hay alumnos en el grado y sección de esta clase para el año del periodo.</span></td>
-              </tr>
-              <tr *ngIf="alumnosNotas.length > 0 && alumnosNotasVisibles.length === 0">
-                <td [attr.colspan]="2 + actividadesPlanas.length" class="no-data-row"><span>No hay alumnos de este nivel de inglés en la clase.</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  <th rowspan="2" class="col-total">Total del parcial</th>
+                </tr>
+                <tr>
+                  <ng-container *ngFor="let concepto of estructuraNotas">
+                    <th *ngFor="let actividad of concepto.actividades" class="th-actividad">
+                      <input type="text" [(ngModel)]="actividad.nombre" (ngModelChange)="marcarCambioNotas()" maxlength="150" [disabled]="periodoNotasBloqueado" title="Puedes renombrar esta actividad, solo se aplica a tu clase">
+                      <span class="th-actividad-pct">{{ actividad.porcentaje }}%</span>
+                    </th>
+                  </ng-container>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let a of alumnosNotasVisibles">
+                  <td class="col-nombre">
+                    <span>{{ a.nombreCompleto }}</span>
+                    <button type="button" class="btn-historial" title="Ver historial de cambios de notas"
+                            (click)="verHistorialNotas(a)">
+                      <mat-icon>history</mat-icon>
+                    </button>
+                  </td>
+                  <td *ngFor="let actividad of actividadesPlanas">
+                    <input type="number" min="0" [max]="actividad.porcentaje" step="0.01" [(ngModel)]="a.notas[actividad.id]" (ngModelChange)="marcarCambioNotas()" (keydown)="bloquearTeclaNoNumerica($event)" (paste)="bloquearPegadoNoNumerico($event)" [disabled]="periodoNotasBloqueado" [class.fuera-rango]="notaFueraDeRango(a.notas[actividad.id], actividad)" [title]="'Máximo ' + actividad.porcentaje + ' puntos'">
+                  </td>
+                  <td class="col-total">{{ totalAlumno(a) }}</td>
+                </tr>
+                <tr *ngIf="alumnosNotas.length === 0">
+                  <td [attr.colspan]="2 + actividadesPlanas.length" class="no-data-row"><span>No hay alumnos en el grado y sección de esta clase para el año del periodo.</span></td>
+                </tr>
+                <tr *ngIf="alumnosNotas.length > 0 && alumnosNotasVisibles.length === 0">
+                  <td [attr.colspan]="2 + actividadesPlanas.length" class="no-data-row"><span>No hay alumnos de este nivel de inglés en la clase.</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </ng-container>
 
         <div class="cambios-flotante" *ngIf="hayCambiosNotas && !periodoNotasBloqueado">
           <mat-icon>edit_note</mat-icon>

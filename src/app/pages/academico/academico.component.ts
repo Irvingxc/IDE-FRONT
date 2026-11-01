@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Store, select } from '@ngrx/store';
 import { forkJoin, of } from 'rxjs';
@@ -340,6 +342,21 @@ export class AcademicoComponent implements OnInit {
     );
     this.notasSimpleIdClase = clase ? clase.id : null;
     this.onNotasSimpleFiltroChange();
+    if (this.notasEsPrebasica) this.abrirFichaPrebasica();
+  }
+
+  // ── Prebásica: no lleva notas, se evalúa con la ficha oficial (se abre en otra pestaña) ──
+  get notasEsPrebasica(): boolean {
+    return this.notasGradoTipo === 'grado'
+      && this.grados.find(g => g.idGrado === this.notasGradoId)?.nivel === 'Pre-Basica';
+  }
+
+  abrirFichaPrebasica(): void {
+    if (!this.notasSimpleIdClase) return;
+    const ruta = this.router.serializeUrl(
+      this.router.createUrlTree(['/academico/ficha-prebasica'], { queryParams: { idClase: this.notasSimpleIdClase } }));
+    const pestana = window.open(this.location.prepareExternalUrl(ruta), '_blank');
+    if (!pestana) this.notification.error('El navegador bloqueó la pestaña nueva. Usa el botón "Abrir ficha de evaluación".');
   }
 
   onPeriodoSeleccionadoNotas(periodo: PeriodoResponse): void {
@@ -427,7 +444,9 @@ export class AcademicoComponent implements OnInit {
     private catalogoService: CatalogoService,
     private notification: NotificationService,
     private dialog: MatDialog,
-    private store: Store<fromRoot.State>
+    private store: Store<fromRoot.State>,
+    private router: Router,
+    private location: Location
   ) {}
 
   ngOnInit(): void {
@@ -555,7 +574,7 @@ export class AcademicoComponent implements OnInit {
     this.filtroNivelNotas = '';
     this.nombresActividadOriginal = {};
     this.hayCambiosNotas = false;
-    if (!this.notasSimpleIdClase || !this.notasSimpleIdPeriodo) return;
+    if (!this.notasSimpleIdClase || !this.notasSimpleIdPeriodo || this.notasEsPrebasica) return;
 
     const idClase = this.notasSimpleIdClase;
     const idPeriodo = this.notasSimpleIdPeriodo;
