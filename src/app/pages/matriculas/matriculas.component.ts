@@ -38,7 +38,7 @@ export class MatriculasComponent implements OnInit {
 
   grados: GradoDto[] = [];
 
-  readonly ALUMNOS_PAGE_SIZE = 10;
+  readonly ALUMNOS_PAGE_SIZE = 50;
 
   // ── Clientes ──
   clientesColumns = ['id', 'nombre', 'telefono', 'email', 'portal', 'acciones'];
@@ -46,7 +46,7 @@ export class MatriculasComponent implements OnInit {
   clientesLoading = false;
   totalClientes = 0;
   paginaActual = 1;
-  readonly PAGE_SIZE = 10;
+  readonly PAGE_SIZE = 50;
   filtroNombreCliente = '';
 
   enviandoAcceso: { [id: number]: boolean } = {};
