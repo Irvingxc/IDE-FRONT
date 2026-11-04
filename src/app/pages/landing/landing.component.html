@@ -66,6 +66,10 @@
   </div>
 </section>
 
+<div class="poster-overlay" *ngIf="posterAbierto" (click)="posterAbierto = false">
+  <img src="assets/logo-panteras.jpeg" alt="IDE - La casa de nuestras Panteras">
+</div>
+
 <!-- ══════════════════════════════════════════════ STATS ══ -->
 <div class="stats-bar">
   <div class="stat-item">
@@ -123,20 +127,10 @@
           </div>
         </div>
       </div>
-      <div class="doble-deco">
-        <div class="deco-card deco-card--main">
-          <span class="material-icons deco-icon">school</span>
-          <span>Educación de calidad</span>
-        </div>
-        <div class="deco-card deco-card--sec">
-          <span class="material-icons deco-icon">translate</span>
-          <span>100% Bilingüe</span>
-        </div>
-        <div class="deco-card deco-card--ter">
-          <span class="material-icons deco-icon">emoji_events</span>
-          <span>Excelencia académica</span>
-        </div>
-        <div class="deco-circle"></div>
+      <div class="doble-poster">
+        <button type="button" class="poster-card" (click)="posterAbierto = true" title="Ver imagen completa">
+          <img src="assets/logo-panteras.jpeg" alt="IDE - La casa de nuestras Panteras" loading="lazy">
+        </button>
       </div>
     </div>
   </div>

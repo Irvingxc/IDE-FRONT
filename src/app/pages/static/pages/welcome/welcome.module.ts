@@ -6,6 +6,7 @@ import { WelcomeRoutingModule } from './welcome-routing.module';
 import { WelcomeComponent } from './welcome.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { FranjaPanterasModule } from '@app/shared/franja-panteras/franja-panteras.module';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
     WelcomeRoutingModule,
     MatCardModule,
     MatIconModule,
+    FranjaPanterasModule,
   ]
 })
 export class WelcomeModule { }

@@ -1,0 +1,133 @@
+$gold: #C9A227;
+
+/* Franja de bienvenida: versión horizontal armada con piezas del póster vertical (900×1600) */
+$poster: url('/assets/logo-panteras.jpeg');
+
+.franja {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 180px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(110deg, #3d070e 0%, #5a0c17 50%, #6e1020 100%);
+  box-shadow: 0 4px 16px rgba(107,15,26,0.25);
+
+  // El edificio del póster como fondo, desvanecido hacia la izquierda
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 0 30%;
+    background: $poster center 72% / 100% auto no-repeat;
+    opacity: 0.45;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 45%);
+    mask-image: linear-gradient(to right, transparent 0%, #000 45%);
+  }
+
+  .franja-texto {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 28px 32px;
+  }
+
+  .franja-lema {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: $gold;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .franja-sub {
+    margin: 6px 0 0;
+    color: rgba(255,255,255,0.75);
+    font-size: 14px;
+  }
+
+  // Escudo y lema recortados del póster, lado a lado (recortes calculados a 160 px de alto)
+  .franja-poster {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 28px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+    transition: transform 0.25s;
+
+    &:hover { transform: scale(1.03); }
+
+    .pieza {
+      display: block;
+      height: 160px;
+      background-image: $poster;
+      background-repeat: no-repeat;
+      // Bordes difuminados en los cuatro lados para que el recorte no se note
+      $fade-x: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent);
+      $fade-y: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+      -webkit-mask-image: $fade-x, $fade-y;
+      -webkit-mask-composite: source-in;
+      mask-image: $fade-x, $fade-y;
+      mask-composite: intersect;
+    }
+
+    // Escudo con laureles: x 270–630, y 120–430 del original
+    .escudo {
+      width: 186px;
+      background-size: 464px auto;
+      background-position: -139px -62px;
+    }
+
+    // "La casa de nuestras PANTERAS": x 60–850, y 500–930 del original
+    .lema {
+      width: 294px;
+      background-size: 335px auto;
+      background-position: -22px -186px;
+    }
+  }
+
+  @media (max-width: 1000px) {
+    .franja-poster .escudo { display: none; }
+  }
+
+  @media (max-width: 700px) {
+    height: auto;
+    &::before { display: none; }
+    .franja-poster { display: none; }
+    .franja-texto { padding: 22px 20px; }
+    h1 { font-size: 22px; }
+  }
+}
+
+.poster-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0,0,0,0.8);
+  cursor: zoom-out;
+
+  img {
+    max-height: 100%;
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+}

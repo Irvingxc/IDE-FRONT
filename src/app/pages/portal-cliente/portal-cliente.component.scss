@@ -59,6 +59,13 @@ $cream:  #FAF6F0;
   }
 }
 
+.portal-franja {
+  display: block;
+  margin: 20px 24px 0;
+
+  @media (max-width: 600px) { margin: 14px 14px 0; }
+}
+
 // ── Body ──────────────────────────────────────────
 .portal-body {
   display: grid;

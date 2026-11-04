@@ -12,6 +12,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
 import { FichaPrebasicaHojasModule } from '@app/shared/ficha-prebasica-hojas/ficha-prebasica-hojas.module';
+import { FranjaPanterasModule } from '@app/shared/franja-panteras/franja-panteras.module';
 import { PortalClienteComponent } from './portal-cliente.component';
 
 @NgModule({
@@ -21,7 +22,7 @@ import { PortalClienteComponent } from './portal-cliente.component';
     RouterModule.forChild([{ path: '', component: PortalClienteComponent }]),
     MatButtonModule, MatIconModule, MatTableModule, MatTabsModule,
     MatSelectModule, MatFormFieldModule, MatProgressSpinnerModule, MatExpansionModule,
-    MatMenuModule, MatDialogModule, FichaPrebasicaHojasModule
+    MatMenuModule, MatDialogModule, FichaPrebasicaHojasModule, FranjaPanterasModule
   ]
 })
 export class PortalClienteModule {}

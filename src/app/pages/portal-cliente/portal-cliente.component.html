@@ -28,6 +28,11 @@
     </div>
   </div>
 
+  <app-franja-panteras class="portal-franja"
+    [titulo]="'Bienvenido(a), ' + ((user$ | async)?.nombre || '')"
+    subtitulo="Portal de Padres de Familia">
+  </app-franja-panteras>
+
   <div class="portal-body" [class.sin-sidebar]="!cargandoHijos && hijos.length <= 1">
 
     <!-- Sidebar hijos: solo si hay mas de un hijo que elegir -->

@@ -16,6 +16,7 @@ export class LandingComponent implements OnInit, OnDestroy {
   private scrollListener = () => this.onContainerScroll();
 
   readonly year = new Date().getFullYear();
+  posterAbierto = false;
 
   readonly pilares = [
     {

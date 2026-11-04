@@ -8,23 +8,6 @@ $cream:  #FAF6F0;
   min-height: calc(100vh - 112px);
 }
 
-.welcome-header {
-  margin-bottom: 28px;
-
-  h1 {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 700;
-    color: $guinda;
-  }
-
-  .date-info {
-    margin: 4px 0 0;
-    color: #888;
-    font-size: 14px;
-  }
-}
-
 /* Stats */
 .stats-grid {
   display: grid;
@@ -205,4 +188,9 @@ $cream:  #FAF6F0;
     flex-wrap: wrap;
     .alerta-boton { width: 100%; justify-content: center; }
   }
+}
+
+app-franja-panteras {
+  display: block;
+  margin-bottom: 28px;
 }

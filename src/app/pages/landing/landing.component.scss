@@ -181,6 +181,14 @@ $sub     : #666;
   &:hover { border-color: rgba(255,255,255,.7); background: rgba(255,255,255,.07); }
 }
 
+.poster-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  @include flex-center; padding: 16px;
+  background: rgba(0,0,0,.85); cursor: zoom-out;
+
+  img { max-width: 100%; max-height: 100%; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,.5); }
+}
+
 .hero-scroll {
   position: absolute; bottom: 28px; left: 50%;
   transform: translateX(-50%);
@@ -307,29 +315,26 @@ $sub     : #666;
   }
 }
 
-.doble-deco {
-  position: relative; height: 380px;
+// Póster "La casa de nuestras Panteras" con un marco dorado desplazado detrás
+.doble-poster {
+  @include flex-center;
 
-  .deco-circle {
-    position: absolute; width: 300px; height: 300px;
-    border-radius: 50%; background: linear-gradient(135deg, rgba($guinda,.08), rgba($gold,.1));
-    border: 2px dashed rgba($guinda,.15);
-    top: 50%; left: 50%; transform: translate(-50%, -50%);
-  }
+  .poster-card {
+    position: relative;
+    width: min(100%, 340px); aspect-ratio: 9 / 16;
+    padding: 0; border: 0; border-radius: 16px;
+    background: $guinda; cursor: zoom-in;
+    box-shadow: 0 16px 40px rgba($guinda, .28);
+    transition: transform .25s, box-shadow .25s;
 
-  .deco-card {
-    position: absolute; display: flex; align-items: center; gap: 10px;
-    background: #fff; border-radius: 12px;
-    padding: 14px 18px;
-    box-shadow: 0 4px 20px rgba($guinda,.12);
-    font-size: 14px; font-weight: 600; color: $dark;
-    white-space: nowrap; z-index: 1;
+    &::before {
+      content: ''; position: absolute; inset: 0;
+      transform: translate(18px, 18px); z-index: -1;
+      border: 2px solid rgba($gold, .55); border-radius: 16px;
+    }
 
-    .deco-icon { color: $guinda; font-size: 22px; }
-
-    &--main { top: 10%;  left: 5%;  border-top: 3px solid $guinda; }
-    &--sec  { top: 40%;  right: 0%; border-top: 3px solid $gold; }
-    &--ter  { bottom: 8%;left: 15%; border-top: 3px solid $guinda2; }
+    img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+    &:hover { transform: translateY(-4px); box-shadow: 0 22px 50px rgba($guinda, .35); }
   }
 }
 
@@ -676,7 +681,7 @@ $sub     : #666;
 // ─── Responsive ───────────────────────────────────────────────
 @media (max-width: 960px) {
   .seccion-doble    { grid-template-columns: 1fr; }
-  .doble-deco       { display: none; }
+  .doble-poster .poster-card { width: min(78vw, 300px); margin-bottom: 18px; }
   .pilares-grid     { grid-template-columns: 1fr; }
   .bilingue-wrap    { grid-template-columns: 1fr; }
   .dif-grid         { grid-template-columns: repeat(2, 1fr); }

@@ -1,9 +1,9 @@
 <div class="dashboard">
 
-  <div class="welcome-header">
-    <h1>Bienvenido, {{ nombreUsuario$ | async }}</h1>
-    <p class="date-info">{{ currentDate }} · Año escolar {{ schoolYear }}</p>
-  </div>
+  <app-franja-panteras
+    [titulo]="'Bienvenido, ' + (nombreUsuario$ | async)"
+    [subtitulo]="currentDate + ' · Año escolar ' + schoolYear">
+  </app-franja-panteras>
 
   <div class="alerta-promocion" *ngIf="alertaPromocion as a" [ngClass]="a.nivel" role="alert">
     <mat-icon class="alerta-icono">{{ a.nivel === 'info' ? 'event' : 'warning_amber' }}</mat-icon>

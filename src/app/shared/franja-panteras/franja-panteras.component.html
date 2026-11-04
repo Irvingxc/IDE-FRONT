@@ -1,0 +1,16 @@
+<div class="franja">
+  <div class="franja-texto">
+    <span class="franja-lema">IDE Pride · Educación bilingüe de óptima calidad</span>
+    <h1>{{ titulo }}</h1>
+    <p class="franja-sub" *ngIf="subtitulo">{{ subtitulo }}</p>
+  </div>
+  <button type="button" class="franja-poster" (click)="posterAbierto = true"
+          title="Ver imagen completa" aria-label="Ver imagen completa: IDE, la casa de nuestras Panteras">
+    <span class="pieza escudo" aria-hidden="true"></span>
+    <span class="pieza lema" aria-hidden="true"></span>
+  </button>
+</div>
+
+<div class="poster-overlay" *ngIf="posterAbierto" (click)="posterAbierto = false">
+  <img src="assets/logo-panteras.jpeg" alt="IDE - La casa de nuestras Panteras">
+</div>
