@@ -102,7 +102,27 @@ mat-paginator {
   &.inactivo  { background: rgba(107,15,26,0.10);  color: $guinda; }
   &.descuento { background: rgba(25,118,210,0.12); color: #1565C0; }
   &.prematriculado { background: #e8f5e9; color: #2e7d32; }
+  &.ingles    { background: #ede7f6; color: #4527a0; white-space: nowrap; }
 }
+
+// ── Tabla de Estudiantes: estado como punto junto al código, tutor bajo el nombre ──
+.estado-punto {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: middle;
+  background: #bbb;
+
+  &.activo         { background: #2e7d32; }
+  &.inactivo       { background: $guinda; }
+  &.prematriculado { background: #C9A227; }
+}
+
+.alumno-nombre { font-weight: 500; }
+.alumno-tutor  { font-size: 12px; color: #888; margin-top: 2px; }
+.nowrap        { white-space: nowrap; }
 
 .text-muted { color: #bbb; font-size: 14px; }
 

@@ -224,9 +224,22 @@
                   <mat-error>Requerido</mat-error>
                 </mat-form-field>
 
+                <mat-form-field appearance="outline">
+                  <mat-label>Aldea o ciudad *</mat-label>
+                  <input matInput formControlName="aldeaCiudad" maxlength="150">
+                  <mat-error>{{ err(padreForm.get('aldeaCiudad')) }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Barrio, colonia o caserío *</mat-label>
+                  <input matInput formControlName="barrio" maxlength="150">
+                  <mat-error>{{ err(padreForm.get('barrio')) }}</mat-error>
+                </mat-form-field>
+
                 <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Dirección</mat-label>
-                  <textarea matInput formControlName="direccion" rows="2" maxlength="250"></textarea>
+                  <mat-label>Otras señas (opcional)</mat-label>
+                  <textarea matInput formControlName="direccion" rows="2" maxlength="250"
+                            placeholder="Ej.: casa color verde, frente a la iglesia"></textarea>
                   <mat-hint align="end">{{ padreForm.get('direccion')?.value?.length || 0 }} / 250</mat-hint>
                   <mat-error>{{ err(padreForm.get('direccion')) }}</mat-error>
                 </mat-form-field>
@@ -359,6 +372,16 @@
                 (comprobante y factura). Las mensualidades y otros cobros no cambian.
               </span>
             </div>
+
+            <div class="full-width matricula-gratis" [class.marcada]="alumnoForm.get('matriculaMedia')?.value">
+              <mat-checkbox formControlName="matriculaMedia" color="primary">
+                <strong>Matrícula 50%</strong>
+              </mat-checkbox>
+              <span class="matricula-gratis-ayuda">
+                Solo para el año {{ anioInicio || 'de esta matrícula' }}: la matrícula se cobra a la mitad
+                (comprobante y factura). No se combina con matrícula gratis.
+              </span>
+            </div>
           </div>
 
           <p class="section-label">Foto del estudiante</p>
@@ -455,29 +478,7 @@
             </mat-form-field>
           </div>
 
-          <p class="section-label">Ubicación</p>
-          <div class="form-grid">
-            <mat-form-field appearance="outline">
-              <mat-label>Departamento</mat-label>
-              <mat-select formControlName="departamento" (selectionChange)="onDepartamentoAlumnoChange($event.value)">
-                <mat-option *ngFor="let d of departamentos" [value]="d">{{ d }}</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Municipio</mat-label>
-              <mat-select formControlName="municipio">
-                <mat-option *ngFor="let m of municipiosAlumno" [value]="m">{{ m }}</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Dirección</mat-label>
-              <textarea matInput formControlName="direccion" rows="2" maxlength="250"></textarea>
-              <mat-hint align="end">{{ alumnoForm.get('direccion')?.value?.length || 0 }} / 250</mat-hint>
-              <mat-error>{{ err(alumnoForm.get('direccion')) }}</mat-error>
-            </mat-form-field>
-          </div>
+          <!-- La dirección se pide solo al padre / tutor (paso 1) -->
 
           <p class="section-label">Contacto</p>
           <div class="form-grid">

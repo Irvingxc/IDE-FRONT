@@ -133,8 +133,20 @@
       </div>
     </div>
 
+    <mat-form-field appearance="outline">
+      <mat-label>Aldea o ciudad</mat-label>
+      <input matInput formControlName="aldeaCiudad" maxlength="150">
+      <mat-error>{{ err(form.get('aldeaCiudad')) }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Barrio, colonia o caserío</mat-label>
+      <input matInput formControlName="barrio" maxlength="150">
+      <mat-error>{{ err(form.get('barrio')) }}</mat-error>
+    </mat-form-field>
+
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Dirección</mat-label>
+      <mat-label>Otras señas (opcional)</mat-label>
       <textarea matInput formControlName="direccion" rows="2" maxlength="250"></textarea>
       <mat-hint align="end">{{ form.get('direccion')?.value?.length || 0 }} / 250</mat-hint>
       <mat-error>{{ err(form.get('direccion')) }}</mat-error>

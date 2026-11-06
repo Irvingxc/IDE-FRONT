@@ -65,12 +65,22 @@
     </div>
 
     <div class="matricula-gratis" [class.marcada]="matriculaGratis">
-      <mat-checkbox [(ngModel)]="matriculaGratis" color="primary">
+      <mat-checkbox [(ngModel)]="matriculaGratis" (ngModelChange)="$event && (matriculaMedia = false)" color="primary">
         <strong>Matrícula gratis</strong>
       </mat-checkbox>
       <span class="matricula-gratis-ayuda">
         Solo para {{ data.anio }}: la matrícula se cobra en L. 0.00 (comprobante y factura).
         Las mensualidades y otros cobros no cambian.
+      </span>
+    </div>
+
+    <div class="matricula-gratis" [class.marcada]="matriculaMedia">
+      <mat-checkbox [(ngModel)]="matriculaMedia" (ngModelChange)="$event && (matriculaGratis = false)" color="primary">
+        <strong>Matrícula 50%</strong>
+      </mat-checkbox>
+      <span class="matricula-gratis-ayuda">
+        Solo para {{ data.anio }}: la matrícula se cobra a la mitad (comprobante y factura).
+        No se combina con matrícula gratis.
       </span>
     </div>
   </ng-container>

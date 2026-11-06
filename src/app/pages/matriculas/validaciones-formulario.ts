@@ -16,6 +16,9 @@ export const LIMITES = {
   telefono:        20,
   motivoDescuento: 150,
   ocupacion:       100,
+  /** Clientes.Barrio y Clientes.AldeaCiudad (SQL 059). */
+  barrio:          150,
+  aldeaCiudad:     150,
 };
 
 const LETRAS = 'A-Za-zÁÉÍÓÚÜÑáéíóúüñ';

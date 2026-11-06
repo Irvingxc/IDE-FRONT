@@ -91,16 +91,22 @@ export class EditClienteDialogComponent implements OnInit {
       rtn:                [this.data.rtn            || '', siCambia(this.data.rtn, Validators.pattern(/^\d{4}-\d{4}-\d{6}$/))],
       ocupacion:          ['', Validators.maxLength(LIMITES.ocupacion)],
       nivelEducativo:     [null],
+      // Dirección por partes (SQL 059). Opcional al editar: los clientes viejos no la tienen.
+      aldeaCiudad:        ['', Validators.maxLength(LIMITES.aldeaCiudad)],
+      barrio:             ['', Validators.maxLength(LIMITES.barrio)],
     });
     vincular(this.form, 'tipoIdentificacion', 'identidad');
     vincular(this.form, 'paisTelefono', 'telefono');
 
     this.clienteService.getFicha(this.data.id).subscribe({
       next: (ficha) => {
-        this.form.patchValue({ ocupacion: ficha.ocupacion ?? '', nivelEducativo: ficha.nivelEducativo });
+        this.form.patchValue({
+          ocupacion: ficha.ocupacion ?? '', nivelEducativo: ficha.nivelEducativo,
+          barrio: ficha.barrio ?? '', aldeaCiudad: ficha.aldeaCiudad ?? '',
+        });
         this.fichaCargada = true;
       },
-      error: () => this.notification.error('No se pudo cargar la ocupación y el nivel educativo')
+      error: () => this.notification.error('No se pudo cargar la ocupación, el nivel educativo y la dirección')
     });
   }
 
@@ -149,6 +155,8 @@ export class EditClienteDialogComponent implements OnInit {
         ? this.clienteService.guardarFicha(this.data.id, {
             ocupacion:      (f.ocupacion ?? '').trim().toUpperCase() || null,
             nivelEducativo: f.nivelEducativo || null,
+            barrio:         up(f.barrio) ?? null,
+            aldeaCiudad:    up(f.aldeaCiudad) ?? null,
           })
         : of(null))
     ).subscribe({

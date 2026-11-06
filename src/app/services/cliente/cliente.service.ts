@@ -87,6 +87,9 @@ export interface ContactoCorreo {
 export interface FichaCliente {
   ocupacion:      string | null;
   nivelEducativo: string | null;
+  /** Dirección por partes: barrio, colonia o caserío / aldea o ciudad. */
+  barrio?:        string | null;
+  aldeaCiudad?:   string | null;
 }
 
 @Injectable({ providedIn: 'root' })

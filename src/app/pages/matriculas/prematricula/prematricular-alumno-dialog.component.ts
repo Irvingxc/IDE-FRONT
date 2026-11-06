@@ -35,6 +35,7 @@ export class PrematricularAlumnoDialogComponent implements OnInit {
   secciones: string[] = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
   fechaInicio: Date;
   matriculaGratis = false;
+  matriculaMedia = false;   // matrícula al 50% (excluyente con gratis)
   guardando = false;
 
   constructor(
@@ -94,6 +95,7 @@ export class PrematricularAlumnoDialogComponent implements OnInit {
       seccion:           (this.seccion || 'A').toUpperCase(),
       fechaInicioClases: toLocalDateStr(this.fechaInicio),
       matriculaGratis:   this.matriculaGratis,
+      matriculaMedia:    this.matriculaMedia,
     }).subscribe({
       next: () => {
         this.notification.success(this.esReingreso(alumno)

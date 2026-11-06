@@ -26,7 +26,25 @@ import * as fromUser from '@app/store/user';
 export class MatriculasComponent implements OnInit {
 
   // ── Alumnos ──
-  alumnosColumns = ['codigo', 'nombre', 'grado', 'seccion', 'estado', 'descuento', 'tutor', 'acciones'];
+  alumnosColumns = ['codigo', 'nombre', 'grado', 'ingles', 'descuento', 'acciones'];
+
+  private static readonly NUM_GRADO: Record<string, string> = {
+    primer: '1°', primero: '1°', segundo: '2°', tercer: '3°', tercero: '3°', cuarto: '4°', quinto: '5°',
+    sexto: '6°', septimo: '7°', séptimo: '7°', octavo: '8°', noveno: '9°', decimo: '10°', décimo: '10°',
+    undecimo: '11°', undécimo: '11°', duodecimo: '12°', duodécimo: '12°',
+  };
+
+  /** "Segundo Grado de Educación Basica" + "A" → "2° Básica · A" (si no se reconoce, el nombre tal cual). */
+  gradoCorto(a: AlumnoResponse): string {
+    const nombre = (a.grado ?? '').trim();
+    const num = MatriculasComponent.NUM_GRADO[nombre.split(/\s+/)[0]?.toLowerCase() ?? ''];
+    const nivel = /pre-?\s?b[aá]sica/i.test(nombre) ? 'Prebásica'
+                : /b[aá]sica/i.test(nombre)         ? 'Básica'
+                : /media/i.test(nombre)             ? 'Media'
+                : null;
+    const grado = num && nivel ? `${num} ${nivel}` : (nombre || '—');
+    return a.seccion ? `${grado} · ${a.seccion}` : grado;
+  }
   alumnos: AlumnoResponse[] = [];
   alumnosLoading = false;
   totalAlumnos = 0;

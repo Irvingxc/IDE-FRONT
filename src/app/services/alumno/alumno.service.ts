@@ -69,6 +69,8 @@ export interface GuardarAlumnoDto {
   foto?:              string;
   /** Matrícula gratis solo para el año de esta matrícula. */
   matriculaGratis?:   boolean;
+  /** Matrícula al 50% ese año (no se combina con gratis). */
+  matriculaMedia?:    boolean;
 }
 
 export interface ActualizarAlumnoDto {

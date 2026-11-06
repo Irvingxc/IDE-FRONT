@@ -224,7 +224,9 @@ export class NuevaMatriculaComponent implements OnInit {
       lugarNacimiento:    ['', Validators.maxLength(LIMITES.lugarNacimiento)],
       departamento:       ['', Validators.required],
       municipio:          ['', Validators.required],
-      direccion:          ['', Validators.maxLength(LIMITES.direccion)],
+      aldeaCiudad:        ['', [Validators.required, Validators.maxLength(LIMITES.aldeaCiudad)]],
+      barrio:             ['', [Validators.required, Validators.maxLength(LIMITES.barrio)]],
+      direccion:          ['', Validators.maxLength(LIMITES.direccion)],   // otras señas (opcional)
       paisTelefono:       ['+504'],
       telefono:           ['', telefonoCompletoValidator()],
       correoElectronico:  ['', [Validators.required, correoValidator, Validators.maxLength(LIMITES.correo)]],
@@ -261,13 +263,13 @@ export class NuevaMatriculaComponent implements OnInit {
       descuento:          [null, [Validators.min(0), Validators.max(100)]],
       motivoDescuento:    ['', [Validators.maxLength(LIMITES.motivoDescuento), motivoDescuentoValidator()]],
       matriculaGratis:    [false],
+      matriculaMedia:     [false],   // matrícula al 50% (excluyente con gratis)
       nacionalidad:       [''],
       sexo:               [''],
       fechaNacimiento:    [null, fechaNacimientoValidator(25)],
       departamento:       [''],
       municipio:          [''],
       lugarNacimiento:    ['', Validators.maxLength(LIMITES.lugarNacimiento)],
-      direccion:          ['', Validators.maxLength(LIMITES.direccion)],
       telefono:           ['', [Validators.maxLength(LIMITES.telefono), telefonoLibreValidator]],
       correoElectronico:  ['', [correoValidator, Validators.maxLength(LIMITES.correo)]],
     });
@@ -277,6 +279,13 @@ export class NuevaMatriculaComponent implements OnInit {
     vincular(this.alumnoForm, 'segundoApellido', 'apellidos');
     vincular(this.alumnoForm, 'tipoIdentificacion', 'identidad');
     vincular(this.alumnoForm, 'descuento', 'motivoDescuento');
+    // Matrícula gratis y al 50% son excluyentes: marcar una desmarca la otra
+    this.alumnoForm.get('matriculaGratis')!.valueChanges.subscribe(v => {
+      if (v) this.alumnoForm.get('matriculaMedia')!.setValue(false, { emitEvent: false });
+    });
+    this.alumnoForm.get('matriculaMedia')!.valueChanges.subscribe(v => {
+      if (v) this.alumnoForm.get('matriculaGratis')!.setValue(false, { emitEvent: false });
+    });
   }
 
   /** Identidades de estudiante que ya existen (consultadas al salir del campo). */
@@ -442,11 +451,16 @@ export class NuevaMatriculaComponent implements OnInit {
     ];
 
     const p = this.padreForm.value;
-    const ocupacion = (p.ocupacion ?? '').trim().toUpperCase() || null;
-    if (idClienteNuevo && (ocupacion || p.nivelEducativo)) {
+    const may = (v: unknown) => texto(v).replace(/\s+/g, ' ').toUpperCase() || null;
+    const ocupacion   = may(p.ocupacion);
+    const barrio      = may(p.barrio);
+    const aldeaCiudad = may(p.aldeaCiudad);
+    if (idClienteNuevo && (ocupacion || p.nivelEducativo || barrio || aldeaCiudad)) {
       tareas.push(this.clienteService.guardarFicha(idClienteNuevo, {
         ocupacion,
         nivelEducativo: p.nivelEducativo || null,
+        barrio,
+        aldeaCiudad,
       }));
     }
 
@@ -523,13 +537,13 @@ export class NuevaMatriculaComponent implements OnInit {
         lugarNacimientoAlumno:     up(a.lugarNacimiento),
         departamentoAlumno:        a.departamento       || undefined,
         municipioAlumno:           a.municipio          || undefined,
-        direccionAlumno:           up(a.direccion),
         telefonoAlumno:            texto(a.telefono) || undefined,
         correoElectronicoAlumno:   texto(a.correoElectronico) || undefined,
         descuento:                 a.descuento          ?? undefined,
         motivoDescuento:           texto(a.motivoDescuento) || undefined,
         foto:                      this.fotoBase64      ?? undefined,
         matriculaGratis:           !!a.matriculaGratis,
+        matriculaMedia:            !!a.matriculaMedia,
       };
 
       this.matriculaService.guardarMatricula(dto).subscribe({
@@ -563,6 +577,7 @@ export class NuevaMatriculaComponent implements OnInit {
       motivoDescuento:    texto(a.motivoDescuento) || undefined,
       foto:               this.fotoBase64      ?? undefined,
       matriculaGratis:    !!a.matriculaGratis,
+      matriculaMedia:     !!a.matriculaMedia,
       nacionalidad:       a.nacionalidad       || undefined,
       sexo:               a.sexo               || undefined,
       fechaNacimiento:    a.fechaNacimiento
@@ -571,7 +586,6 @@ export class NuevaMatriculaComponent implements OnInit {
       lugarNacimiento:    up(a.lugarNacimiento),
       departamento:       a.departamento       || undefined,
       municipio:          a.municipio          || undefined,
-      direccion:          up(a.direccion),
       telefono:           texto(a.telefono) || undefined,
       correoElectronico:  texto(a.correoElectronico) || undefined,
     };
