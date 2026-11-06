@@ -452,3 +452,46 @@
 
   span { flex: 1; min-width: 240px; }
 }
+
+// ── Maestros de inglés por nivel (SQL 057) ──
+.maestros-nivel-celda {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: 12px;
+  color: #555;
+
+  mat-icon { font-size: 14px; width: 14px; height: 14px; color: #6B0F1A; }
+}
+
+.aviso-nivel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #e8f0fe;
+  color: #1a4b8c;
+  font-size: 13px;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; flex-shrink: 0; }
+}
+
+.notas-grid tr.fila-solo-lectura td {
+  background: #f6f6f6;
+  color: #777;
+}
+
+.a-cargo-de {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 6px;
+  font-size: 11px;
+  color: #888;
+  white-space: nowrap;
+
+  mat-icon { font-size: 13px; width: 13px; height: 13px; }
+}

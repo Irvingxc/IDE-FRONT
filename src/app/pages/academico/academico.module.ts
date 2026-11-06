@@ -9,6 +9,7 @@ import { ClaseDialogComponent } from './clase-dialog/clase-dialog.component';
 import { NivelInglesDialogComponent } from './nivel-ingles-dialog/nivel-ingles-dialog.component';
 import { HistorialNotasDialogComponent } from './historial-notas-dialog/historial-notas-dialog.component';
 import { ImportarNotasDialogComponent } from './importar-notas-dialog/importar-notas-dialog.component';
+import { MaestrosNivelDialogComponent } from './maestros-nivel-dialog/maestros-nivel-dialog.component';
 import { DiarioPedagogicoComponent } from './diario-pedagogico/diario-pedagogico.component';
 import { FichaPrebasicaComponent } from './ficha-prebasica/ficha-prebasica.component';
 
@@ -36,6 +37,7 @@ import { FichaPrebasicaHojasModule } from '@app/shared/ficha-prebasica-hojas/fic
     NivelInglesDialogComponent,
     HistorialNotasDialogComponent,
     ImportarNotasDialogComponent,
+    MaestrosNivelDialogComponent,
     DiarioPedagogicoComponent,
     FichaPrebasicaComponent,
   ],

@@ -1,0 +1,38 @@
+.subtitulo {
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.ayuda {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #555;
+}
+
+.cargando,
+.vacio {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 16px;
+  color: #666;
+  font-size: 13px;
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  .campo-nivel   { flex: 1 1 140px; }
+  .campo-maestro { flex: 2 1 220px; }
+}
+
+.spin-icon {
+  animation: girar 1s linear infinite;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}

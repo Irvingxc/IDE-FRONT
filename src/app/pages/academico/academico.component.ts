@@ -14,6 +14,7 @@ import { ClaseDialogComponent } from './clase-dialog/clase-dialog.component';
 import { NivelInglesDialogComponent } from './nivel-ingles-dialog/nivel-ingles-dialog.component';
 import { HistorialNotasDialogComponent } from './historial-notas-dialog/historial-notas-dialog.component';
 import { ImportarNotasDialogComponent } from './importar-notas-dialog/importar-notas-dialog.component';
+import { MaestrosNivelDialogComponent } from './maestros-nivel-dialog/maestros-nivel-dialog.component';
 
 interface ActividadRow {
   id:         number | null;
@@ -151,9 +152,53 @@ export class AcademicoComponent implements OnInit {
   soloMaestro = false;
   idUsuarioActual: string | null = null;
 
+  /** El maestro trabaja la clase como titular o como maestro de inglés de un nivel. */
+  private daLaClase(c: ClaseResponse, idMaestro: string | null): boolean {
+    return c.idMaestro === idMaestro || (c.maestrosNivel ?? []).some(m => m.idMaestro === idMaestro);
+  }
+
   get clasesDisponiblesNotas(): ClaseResponse[] {
     if (this.esAdmin) return this.clases;
+    return this.clases.filter(c => this.daLaClase(c, this.idUsuarioActual));
+  }
+
+  /** Diario pedagógico: solo el titular de la clase (o administración). */
+  get clasesDiario(): ClaseResponse[] {
+    if (this.esAdmin) return this.clases;
     return this.clases.filter(c => c.idMaestro === this.idUsuarioActual);
+  }
+
+  // ── Maestros de inglés por nivel en la clase seleccionada ──
+  // Alumnos que el usuario ve pero no puede modificar → maestro a cargo
+  private aCargoDeOtro = new Map<string, string>();
+
+  puedeEditarAlumno(a: AlumnoNotaActividad): boolean {
+    return !this.aCargoDeOtro.has(a.idAlumno);
+  }
+
+  maestroACargo(a: AlumnoNotaActividad): string | undefined {
+    return this.aCargoDeOtro.get(a.idAlumno);
+  }
+
+  get claseNotasSeleccionada(): ClaseResponse | undefined {
+    return this.clases.find(c => c.id === this.notasSimpleIdClase);
+  }
+
+  /** Niveles que el usuario tiene a cargo en la clase sin ser su titular. */
+  get nivelesPropiosEnClase(): string[] {
+    const c = this.claseNotasSeleccionada;
+    if (!c || this.esAdmin || c.idMaestro === this.idUsuarioActual) return [];
+    return (c.maestrosNivel ?? []).filter(m => m.idMaestro === this.idUsuarioActual).map(m => m.nivelNombre);
+  }
+
+  /** Renombrar actividades cambia la clase para todos: solo titular y administración. */
+  get puedeRenombrarActividades(): boolean {
+    const c = this.claseNotasSeleccionada;
+    return this.esAdmin || (!!c && c.idMaestro === this.idUsuarioActual);
+  }
+
+  maestrosNivelTexto(c: ClaseResponse): string {
+    return (c.maestrosNivel ?? []).map(m => `${m.nivelNombre}: ${m.maestroNombre ?? '—'}`).join(' · ');
   }
 
   // ── Buscadores en cascada (Maestro → Clase → Grado → Sección → Periodo) ──
@@ -176,6 +221,9 @@ export class AcademicoComponent implements OnInit {
     const vistos = new Map<string, MaestroOpcion>();
     this.clasesDisponiblesNotas.forEach(c => {
       vistos.set(c.idMaestro ?? '', { id: c.idMaestro, nombre: c.maestroNombre ?? 'Sin asignar' });
+      (c.maestrosNivel ?? []).forEach(m => {
+        if (!vistos.has(m.idMaestro)) vistos.set(m.idMaestro, { id: m.idMaestro, nombre: m.maestroNombre ?? 'Sin nombre' });
+      });
     });
     return Array.from(vistos.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
   }
@@ -194,15 +242,21 @@ export class AcademicoComponent implements OnInit {
     if (!this.esAdmin) return this.clasesDisponiblesNotas;
     if (!this.notasMaestroSeleccionado) return [];
     const idMaestro = this.notasMaestroSeleccionado.id;
-    return this.clasesDisponiblesNotas.filter(c => c.idMaestro === idMaestro);
+    return this.clasesDisponiblesNotas.filter(c => this.daLaClase(c, idMaestro));
   }
 
   get puedeElegirClaseNotas(): boolean {
     return !this.esAdmin || !!this.notasMaestroSeleccionado;
   }
 
+  /** Clase del grado o nivel elegido (el grado va primero en los filtros). */
+  private esDelGrupoNotas(c: ClaseResponse): boolean {
+    return this.notasGradoTipo === 'grado' ? c.idGrado === this.notasGradoId : c.idNivelIngles === this.notasGradoId;
+  }
+
   get materiasDisponibles(): string[] {
-    const nombres = this.clasesDelMaestroNotas.map(c => c.nombre);
+    if (!this.notasGradoId || !this.notasGradoTipo) return [];
+    const nombres = this.clasesDelMaestroNotas.filter(c => this.esDelGrupoNotas(c)).map(c => c.nombre);
     return Array.from(new Set(nombres)).sort((a, b) => a.localeCompare(b));
   }
 
@@ -215,10 +269,8 @@ export class AcademicoComponent implements OnInit {
   notasGradoTipo: 'grado' | 'nivel' | null = null;
 
   get gruposDeMateria(): GrupoClase[] {
-    if (!this.notasMateriaSeleccionada) return [];
     const vistos = new Map<string, GrupoClase>();
     this.clasesDelMaestroNotas
-      .filter(c => c.nombre === this.notasMateriaSeleccionada)
       .forEach(c => {
         if (c.idGrado != null && c.gradoNombre != null) {
           vistos.set('g' + c.idGrado, { tipo: 'grado', id: c.idGrado, nombre: c.gradoNombre });
@@ -242,8 +294,7 @@ export class AcademicoComponent implements OnInit {
   get seccionesDeClase(): string[] {
     if (!this.notasMateriaSeleccionada || !this.notasGradoId || !this.notasGradoTipo) return [];
     const secciones = this.clasesDelMaestroNotas
-      .filter(c => c.nombre === this.notasMateriaSeleccionada &&
-        (this.notasGradoTipo === 'grado' ? c.idGrado === this.notasGradoId : c.idNivelIngles === this.notasGradoId))
+      .filter(c => c.nombre === this.notasMateriaSeleccionada && this.esDelGrupoNotas(c))
       .map(c => c.seccion);
     return Array.from(new Set(secciones)).sort();
   }
@@ -309,9 +360,6 @@ export class AcademicoComponent implements OnInit {
     this.notasMateriaSeleccionada = nombre;
     this.notasMateriaBusqueda = nombre;
 
-    this.notasGradoId = null;
-    this.notasGradoTipo = null;
-    this.notasGradoBusqueda = '';
     this.notasSeccion = null;
     this.notasSeccionBusqueda = '';
 
@@ -324,6 +372,8 @@ export class AcademicoComponent implements OnInit {
     this.notasGradoTipo = grupo.tipo;
     this.notasGradoBusqueda = grupo.nombre;
 
+    this.notasMateriaSeleccionada = null;
+    this.notasMateriaBusqueda = '';
     this.notasSeccion = null;
     this.notasSeccionBusqueda = '';
 
@@ -336,9 +386,7 @@ export class AcademicoComponent implements OnInit {
     this.notasSeccionBusqueda = seccion;
 
     const clase = this.clasesDelMaestroNotas.find(c =>
-      c.nombre === this.notasMateriaSeleccionada &&
-      (this.notasGradoTipo === 'grado' ? c.idGrado === this.notasGradoId : c.idNivelIngles === this.notasGradoId) &&
-      c.seccion === seccion
+      c.nombre === this.notasMateriaSeleccionada && this.esDelGrupoNotas(c) && c.seccion === seccion
     );
     this.notasSimpleIdClase = clase ? clase.id : null;
     this.onNotasSimpleFiltroChange();
@@ -551,6 +599,14 @@ export class AcademicoComponent implements OnInit {
     ref.afterClosed().subscribe(ok => { if (ok) this.cargarClases(); });
   }
 
+  maestrosPorNivel(clase: ClaseResponse): void {
+    const ref = this.dialog.open(MaestrosNivelDialogComponent, {
+      width: '560px',
+      data: { clase }
+    });
+    ref.afterClosed().subscribe(ok => { if (ok) this.cargarClases(); });
+  }
+
   inactivarClase(clase: ClaseResponse): void {
     if (!confirm(`¿Inactivar la clase "${clase.nombre}"?`)) return;
     this.academicoService.inactivarClase(clase.id).subscribe({
@@ -570,6 +626,7 @@ export class AcademicoComponent implements OnInit {
     this.alumnosNotas = [];
     this.alumnosNotasVisibles = [];
     this.nivelPorAlumno.clear();
+    this.aCargoDeOtro.clear();
     this.opcionesNivelNotas = [];
     this.filtroNivelNotas = '';
     this.nombresActividadOriginal = {};
@@ -594,6 +651,7 @@ export class AcademicoComponent implements OnInit {
           const clave = n.idNivelIngles != null ? `n${n.idNivelIngles}` : this.SIN_NIVEL;
           this.nivelPorAlumno.set(n.idAlumno, clave);
           nombres.set(clave, n.nivelNombre ?? 'Sin nivel asignado');
+          if (n.editable === false) this.aCargoDeOtro.set(n.idAlumno, n.maestroNivelNombre ?? 'otro maestro');
         }
         this.opcionesNivelNotas = [...nombres]
           .map(([valor, nombre]) => ({ valor, nombre }))
@@ -625,12 +683,13 @@ export class AcademicoComponent implements OnInit {
       }
     }
 
-    const renombres: ActividadNombreClaseItem[] = this.actividadesPlanas
+    const renombres: ActividadNombreClaseItem[] = !this.puedeRenombrarActividades ? [] : this.actividadesPlanas
       .filter(a => this.nombresActividadOriginal[a.id] !== a.nombre)
       .map(a => ({ idActividad: a.id, nombre: a.nombre }));
 
+    // Solo los alumnos a cargo del usuario (los de un maestro de nivel se ven, no se envían)
     const notas: GuardarNotaActividadItem[] = [];
-    for (const alumno of this.alumnosNotas) {
+    for (const alumno of this.alumnosNotas.filter(a => this.puedeEditarAlumno(a))) {
       for (const a of this.actividadesPlanas) {
         notas.push({ idAlumno: alumno.idAlumno, idActividad: a.id, nota: alumno.notas[a.id] ?? null });
       }

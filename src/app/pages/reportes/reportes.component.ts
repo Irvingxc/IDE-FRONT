@@ -142,7 +142,7 @@ export class ReportesComponent implements OnInit {
   avanceClases: AvanceNotasClase[] = [];
   cargandoAvance = false;
   avanceBuscado = false;
-  avanceAbiertas = new Set<number>();
+  avanceAbiertas = new Set<string>();   // claveFilaAvance()
   exportandoAvance = false;
 
   private claveDocente(c: AvanceNotasClase): string {
@@ -160,7 +160,8 @@ export class ReportesComponent implements OnInit {
   }
 
   grupoClase(c: AvanceNotasClase): string {
-    const partes = [c.gradoNombre, c.seccion ? `Sección ${c.seccion}` : null, c.nivelInglesNombre].filter(p => p);
+    const partes = [c.gradoNombre, c.seccion ? `Sección ${c.seccion}` : null, c.nivelInglesNombre,
+                    c.nivelAsignadoNombre ? `Nivel ${c.nivelAsignadoNombre}` : null].filter(p => p);
     return partes.join(' · ') || '—';
   }
 
@@ -258,9 +259,15 @@ export class ReportesComponent implements OnInit {
     });
   }
 
-  toggleAvanceClase(idClase: number): void {
-    if (this.avanceAbiertas.has(idClase)) this.avanceAbiertas.delete(idClase);
-    else this.avanceAbiertas.add(idClase);
+  /** Una clase puede salir varias veces: titular y cada maestro de nivel de inglés (SQL 057). */
+  claveFilaAvance(c: AvanceNotasClase): string {
+    return `${c.idClase}-${c.idNivelAsignado ?? ""}`;
+  }
+
+  toggleAvanceClase(c: AvanceNotasClase): void {
+    const clave = this.claveFilaAvance(c);
+    if (this.avanceAbiertas.has(clave)) this.avanceAbiertas.delete(clave);
+    else this.avanceAbiertas.add(clave);
   }
 
   /** Excel con una fila por clase (respeta los filtros de docente y estado). */

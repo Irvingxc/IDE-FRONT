@@ -540,7 +540,7 @@
                 </thead>
                 <tbody>
                   <ng-container *ngFor="let c of d.clases">
-                    <tr class="avance-fila" (click)="toggleAvanceClase(c.idClase)">
+                    <tr class="avance-fila" (click)="toggleAvanceClase(c)">
                       <td>
                         {{ c.claseNombre }}
                         <small class="opt-extra" *ngIf="!c.activo">(inactiva)</small>
@@ -557,10 +557,10 @@
                       </td>
                       <td>{{ c.ultimaCarga ? (c.ultimaCarga | date:'dd/MM/yyyy h:mm a') : '—' }}</td>
                       <td class="num">
-                        <mat-icon class="avance-expandir">{{ avanceAbiertas.has(c.idClase) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                        <mat-icon class="avance-expandir">{{ avanceAbiertas.has(claveFilaAvance(c)) ? 'expand_less' : 'expand_more' }}</mat-icon>
                       </td>
                     </tr>
-                    <tr *ngIf="avanceAbiertas.has(c.idClase)" class="avance-detalle">
+                    <tr *ngIf="avanceAbiertas.has(claveFilaAvance(c))" class="avance-detalle">
                       <td colspan="8">
                         <div *ngIf="c.detalleActividades.length === 0" class="opt-extra">
                           La clase no tiene actividades configuradas para este período.

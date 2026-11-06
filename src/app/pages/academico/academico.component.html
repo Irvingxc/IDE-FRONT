@@ -148,6 +148,9 @@
             <td mat-cell *matCellDef="let row">
               <span *ngIf="row.maestroNombre">{{ row.maestroNombre }}</span>
               <span *ngIf="!row.maestroNombre" class="sin-maestro">Sin asignar</span>
+              <div *ngIf="row.maestrosNivel?.length" class="maestros-nivel-celda" title="Maestros de inglés por nivel">
+                <mat-icon>translate</mat-icon> {{ maestrosNivelTexto(row) }}
+              </div>
             </td>
           </ng-container>
 
@@ -155,6 +158,9 @@
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let row">
               <button mat-icon-button title="Editar" (click)="editarClase(row)"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button *ngIf="row.idGrado != null" title="Maestros de inglés por nivel" (click)="maestrosPorNivel(row)">
+                <mat-icon>translate</mat-icon>
+              </button>
               <button mat-icon-button color="warn" title="Inactivar" (click)="inactivarClase(row)">
                 <mat-icon>block</mat-icon>
               </button>
@@ -195,35 +201,35 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="filtro-ancho">
-            <mat-label>Clase</mat-label>
-            <input matInput
-                   [(ngModel)]="notasMateriaBusqueda"
-                   (focus)="onFocusMateria(); seleccionarTexto($event)"
-                   (click)="seleccionarTexto($event)"
-                   [matAutocomplete]="autoMateria"
-                   [disabled]="!puedeElegirClaseNotas"
-                   [placeholder]="puedeElegirClaseNotas ? 'Buscar clase...' : 'Primero selecciona un maestro'">
-            <mat-icon matSuffix>search</mat-icon>
-            <mat-autocomplete #autoMateria="matAutocomplete">
-              <mat-option *ngFor="let nombre of materiasFiltradas" [value]="nombre" (onSelectionChange)="$event.isUserInput && onMateriaSeleccionada(nombre)">
-                {{ nombre }}
-              </mat-option>
-            </mat-autocomplete>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="filtro-ancho">
             <mat-label>Grado / Nivel</mat-label>
             <input matInput
                    [(ngModel)]="notasGradoBusqueda"
                    (focus)="onFocusMateria(); seleccionarTexto($event)"
                    (click)="seleccionarTexto($event)"
                    [matAutocomplete]="autoGradoNotas"
-                   [disabled]="!notasMateriaSeleccionada"
-                   [placeholder]="notasMateriaSeleccionada ? 'Buscar grado o nivel...' : 'Primero selecciona una clase'">
+                   [disabled]="!puedeElegirClaseNotas"
+                   [placeholder]="puedeElegirClaseNotas ? 'Buscar grado o nivel...' : 'Primero selecciona un maestro'">
             <mat-icon matSuffix>search</mat-icon>
             <mat-autocomplete #autoGradoNotas="matAutocomplete">
               <mat-option *ngFor="let g of gruposDeMateriaFiltrados; trackBy: trackByGrupo" [value]="g.nombre" (onSelectionChange)="$event.isUserInput && onGrupoDeMateriaSeleccionado(g)">
                 {{ g.nombre }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-ancho">
+            <mat-label>Clase</mat-label>
+            <input matInput
+                   [(ngModel)]="notasMateriaBusqueda"
+                   (focus)="onFocusMateria(); seleccionarTexto($event)"
+                   (click)="seleccionarTexto($event)"
+                   [matAutocomplete]="autoMateria"
+                   [disabled]="!notasGradoId"
+                   [placeholder]="notasGradoId ? 'Buscar clase...' : 'Primero selecciona grado o nivel'">
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #autoMateria="matAutocomplete">
+              <mat-option *ngFor="let nombre of materiasFiltradas" [value]="nombre" (onSelectionChange)="$event.isUserInput && onMateriaSeleccionada(nombre)">
+                {{ nombre }}
               </mat-option>
             </mat-autocomplete>
           </mat-form-field>
@@ -235,8 +241,8 @@
                    (focus)="seleccionarTexto($event)"
                    (click)="seleccionarTexto($event)"
                    [matAutocomplete]="autoSeccionNotas"
-                   [disabled]="!notasGradoId"
-                   [placeholder]="notasGradoId ? 'Buscar sección...' : 'Primero selecciona grado o nivel'">
+                   [disabled]="!notasMateriaSeleccionada"
+                   [placeholder]="notasMateriaSeleccionada ? 'Buscar sección...' : 'Primero selecciona una clase'">
             <mat-icon matSuffix>search</mat-icon>
             <mat-autocomplete #autoSeccionNotas="matAutocomplete">
               <mat-option *ngFor="let s of seccionesDeClaseFiltradas" [value]="s" (onSelectionChange)="$event.isUserInput && onSeccionDeClaseSeleccionada(s)">
@@ -288,7 +294,7 @@
 
         <ng-container *ngIf="!notasEsPrebasica">
           <div *ngIf="!notasSimpleIdClase || !notasSimpleIdPeriodo" class="no-data-row">
-            <span>{{ esAdmin ? 'Selecciona maestro, clase' : 'Selecciona clase' }}, grado, sección y periodo para ver los alumnos.</span>
+            <span>{{ esAdmin ? 'Selecciona maestro, grado' : 'Selecciona grado' }}, clase, sección y periodo para ver los alumnos.</span>
           </div>
 
           <div *ngIf="loadingAlumnosNotas" class="loading-row">
@@ -303,6 +309,11 @@
           <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && periodoNotasBloqueado" class="aviso-bloqueado">
             <mat-icon>lock</mat-icon>
             <span>Este periodo está bloqueado: las notas se muestran solo para consulta.</span>
+          </div>
+
+          <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && nivelesPropiosEnClase.length > 0" class="aviso-nivel">
+            <mat-icon>translate</mat-icon>
+            <span>Usted ingresa las notas de los alumnos de nivel <strong>{{ nivelesPropiosEnClase.join(', ') }}</strong> en esta clase. El maestro titular es {{ claseNotasSeleccionada?.maestroNombre || '(sin asignar)' }}.</span>
           </div>
 
           <div *ngIf="notasSimpleIdClase && notasSimpleIdPeriodo && !loadingAlumnosNotas && estructuraNotas.length > 0" class="plantilla-acciones">
@@ -334,23 +345,26 @@
                 <tr>
                   <ng-container *ngFor="let concepto of estructuraNotas">
                     <th *ngFor="let actividad of concepto.actividades" class="th-actividad">
-                      <input type="text" [(ngModel)]="actividad.nombre" (ngModelChange)="marcarCambioNotas()" maxlength="150" [disabled]="periodoNotasBloqueado" title="Puedes renombrar esta actividad, solo se aplica a tu clase">
+                      <input type="text" [(ngModel)]="actividad.nombre" (ngModelChange)="marcarCambioNotas()" maxlength="150" [disabled]="periodoNotasBloqueado || !puedeRenombrarActividades" [title]="puedeRenombrarActividades ? 'Puedes renombrar esta actividad, solo se aplica a tu clase' : 'Solo el maestro titular de la clase puede renombrar actividades'">
                       <span class="th-actividad-pct">{{ actividad.porcentaje }}%</span>
                     </th>
                   </ng-container>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let a of alumnosNotasVisibles">
+                <tr *ngFor="let a of alumnosNotasVisibles" [class.fila-solo-lectura]="!puedeEditarAlumno(a)">
                   <td class="col-nombre">
                     <span>{{ a.nombreCompleto }}</span>
+                    <span *ngIf="!puedeEditarAlumno(a)" class="a-cargo-de" [title]="'Las notas de este alumno las ingresa ' + maestroACargo(a)">
+                      <mat-icon>lock</mat-icon> {{ maestroACargo(a) }}
+                    </span>
                     <button type="button" class="btn-historial" title="Ver historial de cambios de notas"
                             (click)="verHistorialNotas(a)">
                       <mat-icon>history</mat-icon>
                     </button>
                   </td>
                   <td *ngFor="let actividad of actividadesPlanas">
-                    <input type="number" min="0" [max]="actividad.porcentaje" step="0.01" [(ngModel)]="a.notas[actividad.id]" (ngModelChange)="marcarCambioNotas()" (keydown)="bloquearTeclaNoNumerica($event)" (paste)="bloquearPegadoNoNumerico($event)" [disabled]="periodoNotasBloqueado" [class.fuera-rango]="notaFueraDeRango(a.notas[actividad.id], actividad)" [title]="'Máximo ' + actividad.porcentaje + ' puntos'">
+                    <input type="number" min="0" [max]="actividad.porcentaje" step="0.01" [(ngModel)]="a.notas[actividad.id]" (ngModelChange)="marcarCambioNotas()" (keydown)="bloquearTeclaNoNumerica($event)" (paste)="bloquearPegadoNoNumerico($event)" [disabled]="periodoNotasBloqueado || !puedeEditarAlumno(a)" [class.fuera-rango]="notaFueraDeRango(a.notas[actividad.id], actividad)" [title]="'Máximo ' + actividad.porcentaje + ' puntos'">
                   </td>
                   <td class="col-total">{{ totalAlumno(a) }}</td>
                 </tr>
@@ -380,7 +394,7 @@
     <!-- ═══ DIARIO PEDAGÓGICO ═══ -->
     <mat-tab label="Diario pedagógico">
       <div class="tab-content">
-        <app-diario-pedagogico [clases]="clasesDisponiblesNotas" [esAdmin]="esAdmin"></app-diario-pedagogico>
+        <app-diario-pedagogico [clases]="clasesDiario" [esAdmin]="esAdmin"></app-diario-pedagogico>
       </div>
     </mat-tab>
 

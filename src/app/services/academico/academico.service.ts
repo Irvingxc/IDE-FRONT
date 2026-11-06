@@ -34,6 +34,21 @@ export interface ClaseResponse {
   anioLectivo:       number;
   activo:            boolean;
   fechaCreacion:     string;
+  /** Maestros de inglés por nivel dentro de la clase del grado. */
+  maestrosNivel:     MaestroNivelClase[];
+}
+
+export interface MaestroNivelClase {
+  idClase:       number;
+  idNivelIngles: number;
+  nivelNombre:   string;
+  idMaestro:     string;
+  maestroNombre: string | null;
+}
+
+export interface GuardarMaestroNivelItem {
+  idNivelIngles: number;
+  idMaestro:     string;
 }
 
 export interface GuardarClaseDto {
@@ -151,6 +166,9 @@ export interface AvanceNotasActividad {
 
 export interface AvanceNotasClase {
   idClase:            number;
+  /** Nivel de inglés del maestro de nivel de esta fila; null = titular de la clase. */
+  idNivelAsignado:     number | null;
+  nivelAsignadoNombre: string | null;
   claseNombre:        string;
   idMaestro:          string | null;
   maestroNombre:      string | null;
@@ -217,6 +235,15 @@ export class AcademicoService {
 
   inactivarClase(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/clases/${id}`);
+  }
+
+  listarMaestrosNivelClase(idClase: number): Observable<MaestroNivelClase[]> {
+    return this.http.get<MaestroNivelClase[]>(`${this.base}/clases/${idClase}/maestros-nivel`);
+  }
+
+  /** Reemplaza los maestros por nivel de la clase ([] = quitar todos). */
+  guardarMaestrosNivelClase(idClase: number, asignaciones: GuardarMaestroNivelItem[]): Observable<MaestroNivelClase[]> {
+    return this.http.put<MaestroNivelClase[]>(`${this.base}/clases/${idClase}/maestros-nivel`, asignaciones);
   }
 
   listarConceptosConActividades(idGrado: number | null, idNivelIngles: number | null): Observable<ConceptoPrincipal[]> {
@@ -317,6 +344,11 @@ export interface AlumnoNivelIngles {
   idAlumno:      string;
   idNivelIngles: number | null;
   nivelNombre:   string | null;
+  /** Maestro de inglés asignado al nivel del alumno en la clase. */
+  idMaestroNivel:     string | null;
+  maestroNivelNombre: string | null;
+  /** Si el usuario actual puede modificar las notas de este alumno. */
+  editable:           boolean;
 }
 
 export interface DiarioSemana {

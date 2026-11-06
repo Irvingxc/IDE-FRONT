@@ -1,0 +1,52 @@
+<h2 mat-dialog-title>
+  <mat-icon style="vertical-align:middle;color:#6B0F1A;margin-right:8px">translate</mat-icon>
+  Maestros por nivel de inglés
+</h2>
+
+<mat-dialog-content>
+  <p class="subtitulo">{{ titulo }}</p>
+  <p class="ayuda">
+    Cada maestro ingresa las notas de los alumnos de su nivel en esta clase. El titular
+    <strong>{{ data.clase.maestroNombre || '(sin asignar)' }}</strong> sigue viendo a todos, pero solo edita
+    a los alumnos de los niveles que no tengan maestro aquí. Las notas quedan en la clase del grado.
+  </p>
+
+  <div *ngIf="cargando" class="cargando">
+    <mat-icon class="spin-icon">sync</mat-icon> Cargando...
+  </div>
+
+  <ng-container *ngIf="!cargando">
+    <div class="fila" *ngFor="let f of filas; let i = index">
+      <mat-form-field appearance="outline" class="campo-nivel">
+        <mat-label>Nivel de inglés</mat-label>
+        <mat-select [(ngModel)]="f.idNivelIngles">
+          <mat-option *ngFor="let n of niveles" [value]="n.id" [disabled]="nivelUsadoEnOtraFila(n.id, f)">{{ n.nombre }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="campo-maestro">
+        <mat-label>Maestro</mat-label>
+        <mat-select [(ngModel)]="f.idMaestro">
+          <mat-option *ngFor="let m of maestros" [value]="m.id">{{ m.nombre }} {{ m.apellido }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-icon-button color="warn" type="button" title="Quitar" (click)="quitarFila(i)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+
+    <p *ngIf="filas.length === 0" class="vacio">Esta clase no tiene maestros por nivel: el titular ingresa las notas de todos.</p>
+
+    <button mat-stroked-button type="button" (click)="agregarFila()">
+      <mat-icon>add</mat-icon> Agregar nivel
+    </button>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="cerrar()" [disabled]="guardando">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()" [disabled]="guardando || cargando">
+    <mat-icon>save</mat-icon> Guardar
+  </button>
+</mat-dialog-actions>
