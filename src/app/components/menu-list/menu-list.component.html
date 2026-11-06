@@ -52,6 +52,10 @@
       <mat-icon>badge</mat-icon>
       <span class="navegacion-list-label">Empleados</span>
     </a>
+    <a mat-list-item (click)="closeMenu()" routerLink="/pruebas-aspirantes" *ngIf="tieneModulo('PRUEBAS_ASPIRANTES')">
+      <mat-icon>quiz</mat-icon>
+      <span class="navegacion-list-label">Pruebas de aspirantes</span>
+    </a>
     <a mat-list-item (click)="closeMenu()" routerLink="/catalogo" *ngIf="tieneModulo('EMPLEADOS')">
       <mat-icon>price_change</mat-icon>
       <span class="navegacion-list-label">Catálogo de Precios</span>

@@ -1,0 +1,63 @@
+<h2 mat-dialog-title>Hoja de respuestas</h2>
+
+<mat-dialog-content>
+  <div class="dp-cargando" *ngIf="cargando"><mat-spinner diameter="32"></mat-spinner></div>
+
+  <ng-container *ngIf="detalle as d">
+    <div class="dp-datos">
+      <div><span>Aspirante</span><strong>{{ d.prueba.nombre }}</strong></div>
+      <div><span>Sexo</span>{{ d.prueba.sexo === 'M' ? 'Masculino' : 'Femenino' }}</div>
+      <div><span>Edad</span>
+        <ng-container *ngIf="d.prueba.edadAnios != null; else guion">
+          {{ d.prueba.edadAnios }} años<ng-container *ngIf="d.prueba.edadMeses != null"> {{ d.prueba.edadMeses }} meses</ng-container>
+        </ng-container>
+      </div>
+      <div><span>Puesto</span>{{ d.prueba.puesto || '—' }}</div>
+      <div><span>Lugar / ciudad</span>{{ d.prueba.lugar || '—' }} / {{ d.prueba.ciudad || '—' }}</div>
+      <div><span>Código</span>{{ formatoCodigo(d.prueba.codigo) }}</div>
+      <div><span>Estado</span>{{ d.prueba.estado }}<ng-container *ngIf="d.prueba.motivoFin"> ({{ d.prueba.motivoFin }})</ng-container></div>
+      <div><span>Inicio</span>{{ (d.prueba.fechaInicio | date:'dd/MM/yyyy h:mm a') || '—' }}</div>
+      <div><span>Tiempo usado</span>
+        <ng-container *ngIf="minutosUsados() != null; else guion">{{ minutosUsados() }} de {{ d.prueba.minutosLimite }} min</ng-container>
+      </div>
+      <div><span>Creada por</span>{{ d.prueba.usuarioCreo || '—' }}</div>
+    </div>
+    <ng-template #guion>—</ng-template>
+
+    <div class="dp-resultado" *ngIf="d.prueba.estado === 'Terminada'">
+      <div><span>Punteo</span><strong>{{ d.prueba.aciertos }}</strong> / {{ d.prueba.numPreguntas }}</div>
+      <div><span>Errores</span><strong>{{ d.prueba.errores }}</strong></div>
+      <div><span>Sin responder</span><strong>{{ d.prueba.omitidas }}</strong></div>
+      <div><span>Percentil</span><strong>{{ d.prueba.percentil }}</strong></div>
+      <div class="dp-diag"><span>Diagnóstico</span><strong>{{ d.prueba.diagnostico }}</strong></div>
+    </div>
+    <p class="dp-aviso" *ngIf="d.prueba.estado !== 'Terminada'">
+      La prueba no ha terminado: el resultado aparece cuando el aspirante la envía o se acaba el tiempo.
+    </p>
+    <p class="dp-aviso dp-aviso-warn" *ngIf="d.prueba.salidasPestana > 0">
+      <mat-icon>warning_amber</mat-icon>
+      El aspirante salió de la pestaña de la prueba {{ d.prueba.salidasPestana }} vez/veces mientras la contestaba.
+    </p>
+
+    <div class="dp-hoja">
+      <div class="dp-fila" *ngFor="let r of d.respuestas" [ngClass]="'dp-' + estadoRespuesta(r)">
+        <span class="dp-num">{{ r.numero }}</span>
+        <span *ngFor="let l of r.opciones.split('')" class="dp-letra"
+              [class.dp-marcada]="l === r.respuesta" [class.dp-correcta]="l === r.correcta">{{ l }}</span>
+        <mat-icon class="dp-marca" *ngIf="estadoRespuesta(r) === 'ok'">check</mat-icon>
+        <mat-icon class="dp-marca" *ngIf="estadoRespuesta(r) === 'mal'">close</mat-icon>
+      </div>
+    </div>
+    <p class="dp-leyenda">
+      Letra rellena: lo que marcó el aspirante (verde correcta, roja incorrecta). Borde verde: respuesta correcta.
+      Baremo: Tabla 4, nivel profesional ({{ d.prueba.sexo === 'M' ? 'hombres' : 'mujeres' }}).
+    </p>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="imprimir()" [disabled]="!detalle">
+    <mat-icon>print</mat-icon> Imprimir
+  </button>
+  <button mat-flat-button color="primary" mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

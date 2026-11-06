@@ -42,7 +42,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.user$ = this.store.pipe(select(fromUser.getUser)) as Observable<fromUser.UserResponse>;
     this.isAuthorized$ = this.store.pipe(select(fromUser.getIsAuthorized)) as Observable<boolean>;
     const sinHeader = (url: string) =>
-      url === '/' || url.startsWith('/portal-cliente') || url.startsWith('/activar-cuenta');
+      url === '/' || url.startsWith('/portal-cliente') || url.startsWith('/activar-cuenta') ||
+      url === '/prueba' || url.startsWith('/prueba/');
 
     this.isLanding$ = this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),

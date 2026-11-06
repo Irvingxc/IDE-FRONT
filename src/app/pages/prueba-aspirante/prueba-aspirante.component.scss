@@ -1,0 +1,218 @@
+.pa-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.pa-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  .pa-logo { height: 48px; }
+  .pa-titulo { font-size: 20px; font-weight: 600; }
+}
+
+.pa-sub { color: #666; font-size: 14px; }
+
+.pa-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 16px;
+
+  h1 { margin: 0 0 4px; font-size: 22px; }
+  h2 { margin: 20px 0 8px; font-size: 17px; }
+}
+
+.pa-centro {
+  text-align: center;
+  max-width: 520px;
+  margin: 32px auto;
+
+  p { margin: 8px 0 16px; }
+}
+
+.pa-icono {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #1565c0;
+}
+.pa-icono-ok   { color: #2e7d32; }
+.pa-icono-warn { color: #e65100; }
+
+.pa-form-codigo {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: baseline;
+  flex-wrap: wrap;
+
+  mat-form-field { width: 220px; }
+}
+
+.pa-input-codigo {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 18px;
+}
+
+.pa-instrucciones {
+  padding-left: 20px;
+  li { margin-bottom: 8px; line-height: 1.45; }
+}
+
+.pa-nota {
+  background: #fff8e1;
+  border-left: 4px solid #ffb300;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.pa-acciones {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.pa-error {
+  color: #c62828;
+  margin: 8px 0;
+}
+
+.pa-cargando {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+/* Barra fija con reloj, avance y Terminar */
+.pa-barra {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+}
+
+.pa-reloj {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #1565c0;
+}
+.pa-reloj-poco { color: #c62828; }
+
+.pa-progreso {
+  flex: 1;
+  color: #444;
+  min-width: 160px;
+}
+
+.pa-guardado { color: #888; font-size: 13px; }
+.pa-guardado.ok { color: #2e7d32; }
+
+/* Hoja como la impresa: tres columnas (1-27, 28-54, 55-80), letra pequena arriba
+   y espacio punteado debajo; la marca se rellena en negro como con lapiz. */
+.pa-hoja-scroll { overflow-x: auto; }
+
+.pa-hoja {
+  min-width: 760px;
+  background: #fff;
+  border: 1px solid #bbb;
+  padding: 12px 16px;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #222;
+}
+
+.pa-fila {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 28px;
+}
+
+.pa-celda {
+  display: flex;
+  align-items: flex-end;
+  min-height: 40px;
+}
+
+.pa-num {
+  width: 30px;
+  font-size: 13px;
+  padding-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pa-opcion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30px;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  &:focus-visible { outline: 2px solid #1565c0; outline-offset: 1px; }
+  &:hover .pa-opcion-marca { border-color: #555; }
+}
+
+.pa-opcion-letra {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 11px;
+  line-height: 12px;
+  color: #333;
+}
+
+/* El espacio para marcar: dos lineas de puntos verticales, como en la hoja */
+.pa-opcion-marca {
+  box-sizing: border-box;
+  width: 10px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin-top: 2px;
+  border-left: 2px dotted #888;
+  border-right: 2px dotted #888;
+}
+
+.pa-opcion-sel .pa-opcion-marca {
+  background: #111;
+  border-color: #111;
+  border-style: solid;
+}
+
+.pa-franja {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 14px;
+  margin: 10px 0 8px;
+}
+
+.pa-codigo {
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  margin-top: 16px;
+}
+
+@media (max-width: 480px) {
+  .pa-page { padding: 8px; }
+  .pa-card { padding: 16px; }
+  .pa-reloj { font-size: 20px; }
+}

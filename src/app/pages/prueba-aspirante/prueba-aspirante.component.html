@@ -1,0 +1,140 @@
+<div class="pa-page">
+
+  <header class="pa-top">
+    <img src="/assets/logo.png" alt="" class="pa-logo">
+    <div>
+      <div class="pa-titulo">Hoja de respuestas</div>
+      <div class="pa-sub" *ngIf="prueba">{{ prueba.tipoNombre }}</div>
+    </div>
+  </header>
+
+  <!-- ── Pedir el código ── -->
+  <section class="pa-card pa-centro" *ngIf="!codigo">
+    <mat-icon class="pa-icono">quiz</mat-icon>
+    <h1>Prueba de evaluación</h1>
+    <p>Escribe el código que te dio el examinador.</p>
+    <form (ngSubmit)="abrirCodigo()" class="pa-form-codigo">
+      <mat-form-field appearance="outline">
+        <mat-label>Código</mat-label>
+        <input matInput name="codigo" [(ngModel)]="codigoIngresado" autocomplete="off"
+               placeholder="XXXX-XXXX" maxlength="12" class="pa-input-codigo" autofocus>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit">Abrir</button>
+    </form>
+    <p class="pa-error" *ngIf="mensajeError">{{ mensajeError }}</p>
+  </section>
+
+  <div class="pa-cargando" *ngIf="codigo && cargando && !prueba"><mat-spinner diameter="36"></mat-spinner></div>
+
+  <!-- ── Código inválido u otro error sin prueba ── -->
+  <section class="pa-card pa-centro" *ngIf="codigo && !cargando && !prueba">
+    <mat-icon class="pa-icono pa-icono-warn">error_outline</mat-icon>
+    <p>{{ mensajeError || 'No se pudo abrir la prueba.' }}</p>
+    <button mat-stroked-button (click)="cargar()"><mat-icon>refresh</mat-icon> Reintentar</button>
+  </section>
+
+  <ng-container *ngIf="prueba">
+
+    <!-- ── Pendiente: instrucciones ── -->
+    <section class="pa-card" *ngIf="prueba.estado === 'Pendiente'">
+      <h1>Hola, {{ prueba.nombre }}</h1>
+      <p class="pa-sub" *ngIf="prueba.puesto">Puesto: {{ prueba.puesto }}</p>
+
+      <h2>Instrucciones</h2>
+      <ol class="pa-instrucciones">
+        <li>Las preguntas están en el <strong>cuadernillo impreso</strong>. No escribas en el cuadernillo.</li>
+        <li>Aquí solo marcas la <strong>letra</strong> de la respuesta que elijas. Las preguntas impares usan
+          A&nbsp;B&nbsp;C&nbsp;D&nbsp;E y las pares F&nbsp;G&nbsp;H&nbsp;I&nbsp;J, igual que en el cuadernillo.</li>
+        <li>Para marcar, toca el espacio punteado debajo de la letra. Cada respuesta se guarda sola.
+          Para cambiarla, toca otro espacio; para borrarla, toca otra vez el mismo.</li>
+        <li>Tienes <strong>{{ prueba.minutosLimite }} minutos</strong> desde que presionas «Comenzar».
+          Al terminar el tiempo la prueba se envía sola con lo que hayas marcado.</li>
+        <li>Fíjate siempre que el número de la pregunta sea el mismo en el cuadernillo y aquí.</li>
+        <li>No cierres ni cambies de ventana durante la prueba.</li>
+      </ol>
+      <p class="pa-nota">Espera la indicación del examinador antes de comenzar.</p>
+
+      <div class="pa-acciones">
+        <button mat-flat-button color="primary" (click)="comenzar()" [disabled]="iniciando">
+          <mat-icon>play_arrow</mat-icon> Comenzar prueba
+        </button>
+      </div>
+      <p class="pa-error" *ngIf="mensajeError">{{ mensajeError }}</p>
+    </section>
+
+    <!-- ── En curso: hoja de respuestas ── -->
+    <ng-container *ngIf="prueba.estado === 'En curso'">
+      <div class="pa-barra">
+        <div class="pa-reloj" [class.pa-reloj-poco]="poco_tiempo">
+          <mat-icon>timer</mat-icon> {{ reloj_texto }}
+        </div>
+        <div class="pa-progreso">
+          {{ respondidas }} de {{ preguntas.length }} respondidas
+          <span class="pa-guardado" *ngIf="pendientes > 0">· guardando…</span>
+          <span class="pa-guardado ok" *ngIf="pendientes === 0 && respondidas > 0">· todo guardado</span>
+        </div>
+        <button mat-flat-button color="primary" (click)="terminar()" [disabled]="terminando || pendientes > 0">
+          <mat-icon>send</mat-icon> Terminar
+        </button>
+      </div>
+
+      <p class="pa-error" *ngIf="mensajeError">{{ mensajeError }}</p>
+
+      <!-- Hoja igual a la impresa: letra arriba, espacio para marcar debajo -->
+      <div class="pa-hoja-scroll">
+        <section class="pa-hoja">
+          <ng-container *ngTemplateOutlet="bloque; context: { filas: bloqueSuperior }"></ng-container>
+          <div class="pa-franja">
+            ASEGÚRESE QUE SUS MARCAS SEAN GRUESAS Y NEGRAS<br>
+            BORRE COMPLETAMENTE CUALQUIER RESPUESTA QUE DESEE CAMBIAR
+          </div>
+          <ng-container *ngTemplateOutlet="bloque; context: { filas: bloqueInferior }"></ng-container>
+        </section>
+      </div>
+
+      <ng-template #bloque let-filas="filas">
+        <div class="pa-fila" *ngFor="let fila of filas">
+          <div class="pa-celda" *ngFor="let p of fila">
+            <ng-container *ngIf="p">
+              <span class="pa-num">{{ p.numero }}</span>
+              <button type="button" *ngFor="let l of p.opciones" class="pa-opcion"
+                      [class.pa-opcion-sel]="p.respuesta === l"
+                      [attr.aria-pressed]="p.respuesta === l"
+                      [attr.aria-label]="'Pregunta ' + p.numero + ', letra ' + l"
+                      (click)="marcar(p, l)">
+                <span class="pa-opcion-letra">{{ l }}</span>
+                <span class="pa-opcion-marca"></span>
+              </button>
+            </ng-container>
+          </div>
+        </div>
+      </ng-template>
+
+      <div class="pa-acciones">
+        <button mat-flat-button color="primary" (click)="terminar()" [disabled]="terminando || pendientes > 0">
+          <mat-icon>send</mat-icon> Terminar y enviar
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- ── Terminada / no disponible ── -->
+    <section class="pa-card pa-centro" *ngIf="prueba.estado === 'Terminada'">
+      <mat-icon class="pa-icono pa-icono-ok">task_alt</mat-icon>
+      <h1 *ngIf="cierre !== 'tiempo'">Prueba enviada</h1>
+      <h1 *ngIf="cierre === 'tiempo'">Se terminó el tiempo</h1>
+      <p *ngIf="cierre === 'tiempo'">La prueba se envió con las respuestas que marcaste.</p>
+      <p>Gracias, {{ prueba.nombre }}. Entrega el cuadernillo al examinador.</p>
+      <button mat-stroked-button (click)="irAlLogin()"><mat-icon>login</mat-icon> Ir al inicio de sesión</button>
+    </section>
+
+    <section class="pa-card pa-centro" *ngIf="prueba.estado === 'Vencida' || prueba.estado === 'Anulada'">
+      <mat-icon class="pa-icono pa-icono-warn">event_busy</mat-icon>
+      <h1>Esta prueba ya no está disponible</h1>
+      <p *ngIf="prueba.estado === 'Vencida'">El código venció sin que se iniciara la prueba. Pide uno nuevo al examinador.</p>
+      <p *ngIf="prueba.estado === 'Anulada'">La prueba fue anulada. Consulta al examinador.</p>
+      <button mat-stroked-button (click)="irAlLogin()"><mat-icon>login</mat-icon> Ir al inicio de sesión</button>
+    </section>
+
+    <p class="pa-codigo">Código {{ formatoCodigo(prueba.codigo) }}</p>
+  </ng-container>
+</div>

@@ -52,6 +52,7 @@ const ALL_MODULES: ModuleCard[] = [
   { icon: 'account_balance_wallet', title: 'Cuentas por Cobrar', subtitle: 'Mensualidades y matrículas',    status: 'Activo', color: '#6B0F1A', route: '/cxc',                     modulo: 'CXC'         },
   { icon: 'history',         title: 'Bitácora',               subtitle: 'Registro de actividad',         status: 'Activo', color: '#37474F', route: '/bitacora',                modulo: 'BITACORA'    },
   { icon: 'schedule',        title: 'Mi asistencia',          subtitle: 'Mis horas de entrada y salida', status: 'Nuevo',  color: '#00796B', route: '/mi-asistencia',           modulo: 'MI_ASISTENCIA' },
+  { icon: 'quiz',            title: 'Pruebas de aspirantes',  subtitle: 'OTIS Gamma con hoja digital',   status: 'Nuevo',  color: '#5E35B1', route: '/pruebas-aspirantes',      modulo: 'PRUEBAS_ASPIRANTES' },
 ];
 
 @Component({

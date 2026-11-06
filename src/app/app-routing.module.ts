@@ -139,6 +139,17 @@ const routes: Routes = [
         loadChildren: () => import('./pages/mi-asistencia/mi-asistencia.module').then(m => m.MiAsistenciaModule)
       },
       {
+        path: 'pruebas-aspirantes',
+        canLoad: [AuthGuard, ModuloGuard],
+        data: { modulo: 'PRUEBAS_ASPIRANTES' },
+        loadChildren: () => import('./pages/pruebas-aspirantes/pruebas-aspirantes.module').then(m => m.PruebasAspirantesModule)
+      },
+      {
+        // Hoja de respuestas del aspirante: publica, se abre solo con el codigo de la prueba
+        path: 'prueba',
+        loadChildren: () => import('./pages/prueba-aspirante/prueba-aspirante.module').then(m => m.PruebaAspiranteModule)
+      },
+      {
         path: 'inmueble',
         canLoad: [AuthGuard],
         loadChildren: () => import('./pages/inmueble/inmueble.module').then(m => m.InmuebleModule)
